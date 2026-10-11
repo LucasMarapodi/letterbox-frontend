@@ -9,6 +9,7 @@ export function createMockCommunityService(options: { reviews?: Review[] } = {})
   const users: User[] = structuredClone(userFixtures);
   let sequence = 1;
   return {
+    async editReview() { throw new Error('Edição não implementada.'); },
     async getReview(id) {
       const review = reviews.find((item) => item.id === id);
       if (!review) return null;

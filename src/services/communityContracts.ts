@@ -11,4 +11,5 @@ export interface CommunityService {
   findOwnReview(gameId: Id, user: User): Promise<Review | null>;
   getOpinions(gameId: Id): Promise<GameOpinions>;
   getReview(id: Id): Promise<ReviewDetails | null>;
+  editReview(id: Id, text: string, user: User | null): Promise<Review>;
 }
