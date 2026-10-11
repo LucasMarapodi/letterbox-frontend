@@ -7,9 +7,17 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = structuredClone(userFixtures);
+  const comments: Comment[] = structuredClone(options.comments ?? [
+    { id: 'comment-1', reviewId: 'review-1', userId: 'user-2', text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
+  ]);
   let sequence = 1;
   return {
-    async getComments() { throw new Error('Comentários não implementados.'); },
+    async getComments(reviewId) {
+      return structuredClone(comments.filter((comment) => comment.reviewId === reviewId).map((comment) => {
+        const author = users.find((item) => item.id === comment.userId);
+        return { ...comment, author: { id: comment.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null } };
+      }));
+    },
     async editReview(id, text, user) {
       if (!user) throw new CommunityError('session-required');
       const review = reviews.find((item) => item.id === id);

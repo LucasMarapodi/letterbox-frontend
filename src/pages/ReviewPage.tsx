@@ -6,6 +6,7 @@ import { community } from '../services/community';
 import type { ReviewDetails } from '../services/communityContracts';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { EditReview } from './EditReview';
+import { CommentsSection } from './CommentsSection';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; review: ReviewDetails | null };
 function ReviewContent({ id }: { id: string }): ReactElement {
@@ -26,6 +27,7 @@ function ReviewContent({ id }: { id: string }): ReactElement {
     <p><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></p>
     <p className="review-text">{review.text}</p>
     <EditReview review={review} onSaved={(updated) => setState({ status: 'ready', review: updated })} />
+    <CommentsSection key={review.id} reviewId={review.id} />
   </article>;
 }
 export function ReviewPage(): ReactElement {

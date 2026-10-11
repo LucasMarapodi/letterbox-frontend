@@ -13,3 +13,6 @@ RED: 4 falhas esperadas e 125 testes verdes, commit a2460aa. GREEN: 129 testes, 
 
 ## US-18
 RED: 5 falhas esperadas e 131 testes verdes, commit 09ba8e3. GREEN: 136 testes, lint, tipos e build aprovados. Formulário compartilhado por publicação e edição; autoria no serviço, ID/quantidade/data de criação preservados, falha mantém rascunho. Matcher de valor corrigido durante GREEN.
+
+## US-19
+RED: 4 falhas esperadas e 136 testes verdes, commit 1fbdaf7. GREEN: 140 testes, lint, tipos e build aprovados. Lista pública plana por review com autor/texto/data, vazio e recuperação de erro.
