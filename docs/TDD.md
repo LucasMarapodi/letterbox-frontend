@@ -13,3 +13,9 @@ O sandbox travou o Vitest; validações são executadas com a autorização conc
 - Refatoração sem comportamento novo: o teste existente protege a página inicial.
 - `npm run check` — 1 teste aprovado; lint, tipos e build aprovados.
 - Organização e responsabilidades documentadas no README. Sem RED artificial, conforme exceção da US-02.
+
+## US-03
+- RED: `npm test` — 3 testes de tipos falharam: os contratos ausentes não rejeitavam exemplos inválidos (`@ts-expect-error` não utilizado).
+- Commit RED: `test(US-03): especifica contratos validos e invalidos do dominio`.
+- GREEN: `npm run check` — 4 testes aprovados (3 de tipos); lint, tipos e build aprovados.
+- Casos válidos com `satisfies`; casos inválidos documentados e rejeitados pelo TypeScript.
