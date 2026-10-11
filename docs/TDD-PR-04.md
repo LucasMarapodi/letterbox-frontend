@@ -22,3 +22,6 @@ RED: 7 falhas esperadas e 140 testes verdes, commit 3a2831b. GREEN: 147 testes, 
 
 ## US-15 — integração com média pública
 RED: 1 falha esperada e 147 testes verdes, commit 6ced071. GREEN: 148 testes, lint, tipos e build aprovados. Sucesso na nota recarrega opiniões; falha de envio é verificada e mantém a escolha.
+
+## Revisão final da fase
+148 testes aprovados, lint sem any, TypeScript estrito e build. Verificação visual local: login fictício Ana, acesso à review de Leo e comentário publicado na lista correta. Evidência visual fora do repositório: pr-04-review.png. Sem merge e sem publicação por ausência de remoto.
