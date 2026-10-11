@@ -13,6 +13,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   let sequence = 1;
   const favorites: Favorite[] = [];
   return {
+    async getFavorites() { throw new Error('US-24 pendente'); },
     async getFavorite(kind, targetId, user) {
       if (!user) throw new CommunityError('session-required');
       return structuredClone(favorites.find((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId) ?? null);
