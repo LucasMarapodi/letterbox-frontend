@@ -11,7 +11,7 @@ import type { GameQuery, GameSort } from '../services/contracts';
 
 type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; games: Game[] };
 
-export function HomePage({ authenticated = false, favorites }: { authenticated?: boolean; favorites?: ReactNode }): ReactElement {
+export function HomePage({ authenticated = false, favorites, feed }: { authenticated?: boolean; favorites?: ReactNode; feed?: ReactNode }): ReactElement {
   const [state, setState] = useState<CatalogState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [term, setTerm] = useState<string>('');
@@ -87,5 +87,6 @@ export function HomePage({ authenticated = false, favorites }: { authenticated?:
         : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />)}
     </section>
     {favorites}
+    {feed}
   </main>;
 }
