@@ -1,0 +1,44 @@
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { expect, test } from 'vitest';
+import { AppRoutes } from '../src/App';
+import { createApplicationServices } from '../src/services/runtime';
+import { createMockCommunityService } from '../src/mocks/communityService';
+import { userFixtures } from '../src/mocks/opinions';
+test('identidade arbitrária não autoriza comentário sem autenticação', async () => {
+  const service = createMockCommunityService();
+  await expect(service.comment('review-2', 'Forjado', userFixtures[0])).rejects.toMatchObject({ code: 'session-required' });
+  expect((await service.getComments('review-2')).some((comment) => comment.text === 'Forjado')).toBe(false);
+});
+test('credenciais autorizam e logout revoga comentário mesmo mantendo objeto de usuário', async () => {
+  const adapters = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const user = await adapters.auth.login({ email: 'ana@example.com', password: 'teste123' });
+  await expect(adapters.community.comment('review-2', 'Autorizado', user)).resolves.toMatchObject({ userId: user.id });
+  await expect(adapters.community.comment('review-1', 'Outro autor', userFixtures[1])).rejects.toMatchObject({ code: 'forbidden' });
+  adapters.auth.logout?.();
+  await expect(adapters.community.comment('review-2', 'Após sair', user)).rejects.toMatchObject({ code: 'session-required' });
+});
+test('comunidade usa leitura pública e editor existente com sessão revogada pelo botão sair', async () => {
+  const adapters = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const interaction = userEvent.setup();
+  render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes adapters={adapters} /></MemoryRouter>);
+  const cards = await within(screen.getByRole('region', { name: 'Reviews recentes' })).findAllByRole('article');
+  await interaction.click(within(cards[0]).getByRole('link', { name: 'Ler review' }));
+  expect(await screen.findByRole('link', { name: 'Entrar para continuar' })).toBeVisible();
+  expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();
+  await interaction.click(screen.getByRole('link', { name: 'Entrar' }));
+  await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'ana@example.com');
+  await interaction.type(screen.getByLabelText('Senha'), 'teste123');
+  await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  await interaction.click(await screen.findByRole('link', { name: 'Comunidade' }));
+  const recent = await within(screen.getByRole('region', { name: 'Reviews recentes' })).findAllByRole('article');
+  await interaction.click(within(recent[0]).getByRole('link', { name: 'Ler review' }));
+  await interaction.type(await screen.findByLabelText('Seu comentário'), 'Comentário da comunidade');
+  await interaction.click(screen.getByRole('button', { name: 'Publicar comentário' }));
+  expect(await screen.findByText('Comentário da comunidade')).toBeVisible();
+  const user = userFixtures[0];
+  await interaction.click(screen.getByRole('button', { name: 'Sair' }));
+  expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();
+  await expect(adapters.community.comment('review-2', 'Sessão encerrada', user)).rejects.toMatchObject({ code: 'session-required' });
+}, 15000);
