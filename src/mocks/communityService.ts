@@ -3,15 +3,16 @@ import { CommunityError } from '../services/communityContracts';
 import type { Rating, Review, User, Comment } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
-export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[] } = {}): CommunityService {
+export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[] } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
-  const users: User[] = structuredClone(userFixtures);
+  const users: User[] = structuredClone(options.users ?? userFixtures);
   const comments: Comment[] = structuredClone(options.comments ?? [
     { id: 'comment-1', reviewId: 'review-1', userId: 'user-2', text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
   ]);
   let sequence = 1;
   return {
+    async getProfile() { throw new Error('Perfil não implementado.'); },
     async getRating(gameId, user) {
       if (!user) throw new CommunityError('session-required');
       return structuredClone(ratings.find((rating) => rating.gameId === gameId && rating.userId === user.id) ?? null);
