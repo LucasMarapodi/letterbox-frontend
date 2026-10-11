@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { CommunityRecent } from './CommunityRecent';
+import { CommunityRankedReviews } from './CommunityRankedReviews';
 import { isRankingPeriod, type RankingPeriod } from '../services/communityContracts';
 
 type CommunityView = 'recent' | 'reviews' | 'games';
@@ -14,5 +15,6 @@ export function CommunityPage(): ReactElement {
     </nav>
     {view !== 'recent' && <div className="community-period"><label htmlFor="community-period">Período dos rankings</label><select id="community-period" value={period} onChange={(event) => { if (isRankingPeriod(event.target.value)) setPeriod(event.target.value); }}><option value="24h">24 horas</option><option value="7d">7 dias</option><option value="30d">30 dias</option></select></div>}
     {view === 'recent' && <CommunityRecent />}
+    {view === 'reviews' && <CommunityRankedReviews key={period} period={period} />}
   </main>;
 }

@@ -4,6 +4,7 @@ import type { Rating, Review, User, Comment, Favorite } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
 import type { MockUserStore } from './userStore';
+import { commentsInPeriod } from './commentWindow';
 export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore; clock?: () => Date } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
@@ -20,7 +21,13 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
   }
   return {
-    async getMostCommented() { throw new Error('US-35 pendente'); },
+    async getMostCommented(period) {
+      const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));
+      return structuredClone(reviews.map((review) => {
+        const activity = eligible.filter((comment) => comment.reviewId === review.id).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+        return { review: reviewDetails(review), commentCount: activity.length, lastCommentAt: activity[0]?.createdAt ?? '' };
+      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || a.review.id.localeCompare(b.review.id)));
+    },
     async getRecentReviews() {
       return structuredClone([...reviews].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id)).map(reviewDetails));
     },
