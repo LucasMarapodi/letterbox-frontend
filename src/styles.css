@@ -7,6 +7,8 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+.skip-link { position: fixed; top: 0.5rem; left: 0.5rem; transform: translateY(-200%); z-index: 110; padding: 0.75rem 1rem; border-radius: 1rem; background: #67daa3; color: #123427; }
+.skip-link:focus { transform: none; }
 header { padding: 1.25rem 2rem; background: #1d2230; border-bottom: 1px solid #394052; }
 nav { display: flex; flex-wrap: wrap; gap: 1.25rem; }
 main { max-width: 64rem; margin: 0 auto; padding: 2rem; }

@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
 import { HomePage } from './pages/HomePage';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { ProfilePage } from './pages/ProfilePage';
@@ -20,7 +20,9 @@ export interface AppRoutesProps { authService?: AuthService; }
 
 function ApplicationRoutes(): ReactElement {
   const { user, signOut } = useSession();
+  const contentRef = useRef<HTMLDivElement>(null);
   return <>
+    <a className="skip-link" href="#conteudo-principal" onClick={(event) => { event.preventDefault(); contentRef.current?.focus(); }}>Ir para o conteúdo principal</a>
     <header className="site-header">
       <div className="header-inner">
       <Link className="brand" to="/" aria-label="Game Reviews"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>Game Reviews</Link>
@@ -34,7 +36,7 @@ function ApplicationRoutes(): ReactElement {
       </div>
       </div>
     </header>
-    <Routes>
+    <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
       <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={user.id} /> : null} feed={user ? <FeedSection key={user.id} /> : null} />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
@@ -42,7 +44,7 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
-    </Routes>
+    </Routes></div>
   </>;
 }
 
