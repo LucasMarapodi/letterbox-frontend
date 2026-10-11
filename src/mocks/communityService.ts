@@ -12,6 +12,8 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   ]);
   let sequence = 1;
   return {
+    async getFavorite() { throw new Error('Favoritos não implementados.'); },
+    async setFavorite() { throw new Error('Favoritos não implementados.'); },
     async getProfile(id, sessionUser = null) {
       if (sessionUser?.id === id && !users.some((item) => item.id === id)) users.push(structuredClone(sessionUser));
       const user = users.find((item) => item.id === id);
