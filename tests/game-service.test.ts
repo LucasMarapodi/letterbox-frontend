@@ -58,3 +58,13 @@ test('instâncias padrão possuem fixtures independentes e determinísticas', as
 test('permite conjunto vazio explícito', async () => {
   await expect(createMockGameService({ games: [] }).list()).resolves.toEqual([]);
 });
+
+test('busca provisória filtra por trecho do nome sem diferenciar maiúsculas', async () => {
+  const first: Game = gameFixture();
+  const second: Game = { ...gameFixture(), id: 'game-2', title: 'Corrida' };
+  const service = createMockGameService({ games: [first, second] });
+  await expect(service.list({ term: '  AVENTURA  ' })).resolves.toEqual([first]);
+  await expect(service.list({ term: 'inexistente' })).resolves.toEqual([]);
+  await expect(service.list({ term: '' })).resolves.toEqual([first, second]);
+  await expect(service.list({ term: '   ' })).resolves.toEqual([first, second]);
+});
