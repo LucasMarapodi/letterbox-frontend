@@ -11,6 +11,7 @@ export class CommunityError extends Error {
   constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found' | 'self-follow' | 'duplicate-follow') { super(code); }
 }
 export interface CommunityService {
+  getFeed(user: User | null): Promise<ReviewDetails[]>;
   getConnections(profileId: Id): Promise<Connections>;
   isFollowing(targetId: Id, user: User | null): Promise<boolean>;
   setFollowing(targetId: Id, selected: boolean, user: User | null): Promise<void>;

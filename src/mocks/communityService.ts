@@ -15,6 +15,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   const favorites: Favorite[] = [];
   const follows: { followerId: string; followedId: string }[] = [];
   return {
+    async getFeed() { throw new Error('US-27 pendente'); },
     async getConnections(profileId) {
       return structuredClone({
         followers: users.filter((user) => follows.some((relation) => relation.followerId === user.id && relation.followedId === profileId)),
