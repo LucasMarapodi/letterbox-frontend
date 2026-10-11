@@ -34,7 +34,7 @@ test('usuário salva nota zero e logout remove controle', async () => {
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByLabelText('Usuário conectado');
   await interaction.click(screen.getByRole('link', { name: 'Início' }));
-  await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
+  await interaction.click(await screen.findByRole('link', { name: 'Jogo de exemplo' }));
   await interaction.click(await screen.findByRole('radio', { name: '0 estrelas' }));
   await interaction.click(screen.getByRole('button', { name: 'Salvar nota' }));
   expect(await screen.findByText('Nota 0 salva.')).toBeVisible();
@@ -86,7 +86,7 @@ test('reabrir jogo recupera cinco estrelas e reenviar mantém a nota', async () 
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByLabelText('Usuário conectado');
-  await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
+  await interaction.click(await screen.findByRole('link', { name: 'Jogo de exemplo' }));
   expect(await screen.findByRole('radio', { name: '5 estrelas' })).toBeChecked();
   await interaction.click(screen.getByRole('link', { name: 'Início' }));
   await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));

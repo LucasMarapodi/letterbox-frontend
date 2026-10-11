@@ -1,8 +1,9 @@
-import { useId, useRef, useState, type ReactElement, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type ReactElement, type FormEvent } from 'react';
 import { useSession } from '../session/SessionProvider';
 import { RequireSession } from '../session/RequireSession';
 import { community } from '../services/community';
 import { Button } from '../components/Button';
+import { ErrorState, LoadingState } from '../components/Feedback';
 
 interface RatingFormProps { gameId: string; onSaved?: () => void; }
 function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
@@ -13,14 +14,25 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
   const [failed, setFailed] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
   const sending = useRef(false);
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let active = true;
+    if (user) void community.getRating(gameId, user).then((rating) => {
+      if (active) { setValue(String(rating?.value ?? 0)); setLoadState('ready'); }
+    }, () => { if (active) setLoadState('error'); });
+    return () => { active = false; };
+  }, [gameId, user, attempt]);
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    if (!user || sending.current) return;
+    if (!user || sending.current || loadState !== 'ready') return;
     sending.current = true; setPending(true); setMessage(''); setFailed(false);
     try { const rating = await community.rate(gameId, Number(value), user); setMessage(`Nota ${rating.value} salva.`); onSaved?.(); }
     catch { setFailed(true); setMessage('Não foi possível salvar a nota. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }
+  if (loadState === 'loading') return <LoadingState message="Carregando sua nota…" />;
+  if (loadState === 'error') return <ErrorState message="Não foi possível carregar sua nota." onRetry={() => { setLoadState('loading'); setAttempt((value) => value + 1); }} />;
   return <form onSubmit={submit} aria-label="Avaliar jogo" className="review-card">
     <fieldset className="star-field" disabled={pending}>
       <legend>Sua nota</legend>
@@ -36,5 +48,5 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
 }
 export function RatingForm(props: RatingFormProps): ReactElement {
   const { user } = useSession();
-  return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={user?.id} {...props} /></RequireSession></section>;
+  return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={`${user?.id}-${props.gameId}`} {...props} /></RequireSession></section>;
 }

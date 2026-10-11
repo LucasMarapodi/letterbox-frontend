@@ -34,3 +34,6 @@ RED: 3 falhas esperadas e 147 testes verdes, commit 87ede01. GREEN: 150 testes, 
 
 ## Ajuste solicitado — dashboard autenticada e menu
 RED: 1 falha esperada e 150 testes verdes, commit b8e5274. GREEN: 151 testes, lint, tipos e build aprovados. Sessão substitui introdução e convite de cadastro por título compacto; logout restaura apresentação para visitantes. Cabeçalho agrupa avatar/nome/logout em controle discreto. Visual conferido no navegador.
+
+## Correção — recuperar nota salva
+RED: 3 falhas esperadas e 152 testes verdes, commit 2678ca6. GREEN: 155 testes, lint, tipos e build aprovados. Serviço consulta nota por usuário/jogo com retorno isolado, incluindo zero. Controle consulta antes de permitir salvar; erro bloqueia envio e oferece nova tentativa. Teste percorre login, jogo, Home e reabertura, salvando novamente cinco estrelas sem alterar seleção. Espera do redirecionamento ajustada no teste durante GREEN.

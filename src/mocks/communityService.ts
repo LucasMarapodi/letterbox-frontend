@@ -12,7 +12,10 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   ]);
   let sequence = 1;
   return {
-    async getRating() { return null; },
+    async getRating(gameId, user) {
+      if (!user) throw new CommunityError('session-required');
+      return structuredClone(ratings.find((rating) => rating.gameId === gameId && rating.userId === user.id) ?? null);
+    },
     async comment(reviewId, text, user) {
       if (!user) throw new CommunityError('session-required');
       if (!reviews.some((review) => review.id === reviewId)) throw new CommunityError('not-found');

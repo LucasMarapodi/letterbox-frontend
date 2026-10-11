@@ -12,3 +12,5 @@ Cadastro: nome, e-mail e senha são provisórios. E-mail exige formato básico e
 
 RequireSession protege conteúdo e ações da interface e oferece o caminho /login a visitantes. Não existe rota de notificações. Na US-28, o sino será oculto para visitantes; o modal terá dados exclusivos da sessão atual e deverá fechar e descartar dados no logout ou troca de conta. Logout remove a sessão e revoga imediatamente o acesso. As ações das próximas US deverão reutilizar a proteção e os testes de visitante, autenticado e logout.
 
+
+Logout invalida solicitações de login anteriores. Respostas invalidadas não iniciam sessão nem redirecionam; uma nova tentativa de login permanece permitida.
