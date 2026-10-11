@@ -43,25 +43,33 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   const game: Game | null = state.game;
   if (!game) return <EmptyState message="Jogo não encontrado." />;
   return <section className="game-information" aria-labelledby="game-title">
+    <aside className="game-poster" aria-label="Capa do jogo">
+      <GameCover title={game.title} src={game.coverUrl} className="details-cover" />
+    </aside>
+    <div className="game-overview">
     <h2 id="game-title">{game.title}</h2>
-    <GameCover title={game.title} src={game.coverUrl} className="details-cover" />
     <p>{game.summary.trim() || 'Descrição indisponível.'}</p>
     <dl>
       <dt>Gêneros</dt><dd>{game.genres.length ? game.genres.join(', ') : 'Gêneros não informados.'}</dd>
       <dt>Plataformas</dt><dd>{game.platforms.length ? game.platforms.join(', ') : 'Plataformas não informadas.'}</dd>
       <dt>Lançamento</dt><dd>{releaseLabel(game.releaseDate)}</dd>
     </dl>
+    </div>
+    <aside className="game-actions" aria-label="Avaliar e publicar">
     <RatingForm gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
     <PublishReview gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
+    </aside>
+    <div className="game-discussion">
     <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
+    </div>
   </section>;
 }
 
 export function GameDetailsPage(): ReactElement {
   const id: Id | undefined = useOpaqueRouteId('gameId');
-  return <main>
-    <h1>Detalhes do jogo</h1>
-    <p>ID do jogo: {id}</p>
+  return <main className="game-details-page">
+    <h1 className="game-page-label">Detalhes do jogo</h1>
+    <p className="game-id">ID do jogo: {id}</p>
     {id ? <GameDetailsContent key={id} id={id} /> : <EmptyState message="Jogo não encontrado." />}
   </main>;
 }

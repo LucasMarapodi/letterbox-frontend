@@ -28,3 +28,6 @@ RED: 1 falha esperada e 147 testes verdes, commit 6ced071. GREEN: 148 testes, li
 
 ## Ajuste solicitado — login e cabeçalho
 RED: 2 falhas esperadas e 147 testes verdes, commit 5c0844f. GREEN: 149 testes, lint, tipos e build aprovados. Login redireciona à dashboard sem mensagem intermediária. Cabeçalho autenticado exibe avatar/nome/Sair e oculta Entrar/Criar conta; logout restaura links.
+
+## Ajuste solicitado — jogo lateralizado e estrelas
+RED: 3 falhas esperadas e 147 testes verdes, commit 87ede01. GREEN: 150 testes, lint, tipos e build aprovados. Capa, descrição e ações em colunas responsivas; avaliação por radios nativos em estrelas, opção zero, navegação por setas e preservação da escolha em falha. Verificação visual desktop a 1280px e seleção por teclado no navegador; viewport restaurado.

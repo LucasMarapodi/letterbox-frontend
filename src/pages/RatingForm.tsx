@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactElement, type FormEvent } from 'react';
+import { useId, useRef, useState, type ReactElement, type FormEvent } from 'react';
 import { useSession } from '../session/SessionProvider';
 import { RequireSession } from '../session/RequireSession';
 import { community } from '../services/community';
@@ -7,6 +7,7 @@ import { Button } from '../components/Button';
 interface RatingFormProps { gameId: string; onSaved?: () => void; }
 function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
   const { user } = useSession();
+  const groupId = useId();
   const [value, setValue] = useState<string>('0');
   const [message, setMessage] = useState<string>('');
   const [failed, setFailed] = useState<boolean>(false);
@@ -21,8 +22,14 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
     finally { sending.current = false; setPending(false); }
   }
   return <form onSubmit={submit} aria-label="Avaliar jogo" className="review-card">
-    <label htmlFor="rating-value">Sua nota</label>{' '}
-    <select id="rating-value" value={value} disabled={pending} onChange={(event) => setValue(event.target.value)}>{[0, 1, 2, 3, 4, 5].map((note) => <option key={note} value={note}>{note}</option>)}</select>{' '}
+    <fieldset className="star-field" disabled={pending}>
+      <legend>Sua nota</legend>
+      <div className="star-options">{[0, 1, 2, 3, 4, 5].map((note) => <label key={note} className={`star-option ${note > 0 && note <= Number(value) ? 'is-filled' : ''} ${note === 0 ? 'zero-option' : ''}`}>
+        <input type="radio" name={groupId} value={note} checked={value === String(note)} aria-label={`${note} ${note === 1 ? 'estrela' : 'estrelas'}`} onChange={(event) => setValue(event.target.value)} />
+        <span aria-hidden="true">{note === 0 ? '0' : '★'}</span>
+      </label>)}</div>
+      <p className="rating-selection" aria-live="polite">{value} de 5 estrelas</p>
+    </fieldset>
     <Button type="submit" disabled={pending}>{pending ? 'Salvando…' : 'Salvar nota'}</Button>
     {message && <p role={failed ? 'alert' : 'status'}>{message}</p>}
   </form>;
