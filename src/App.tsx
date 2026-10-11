@@ -4,10 +4,14 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { GameDetailsPage } from './pages/GameDetailsPage';
 import type { AuthService } from './services/authContracts';
+import { authService as defaultAuthService } from './services/auth';
+import { SessionProvider, useSession } from './session/SessionProvider';
+import { LoginPage } from './pages/LoginPage';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
-export function AppRoutes(_props: AppRoutesProps): ReactElement {
+function ApplicationRoutes(): ReactElement {
+  const { user } = useSession();
   return <>
     <header>
       <nav aria-label="Navegação principal">
@@ -16,18 +20,23 @@ export function AppRoutes(_props: AppRoutesProps): ReactElement {
         <Link to="/cadastro">Criar conta</Link>{' '}
         <Link to="/notificacoes">Notificações</Link>
       </nav>
+      {user && <span aria-label="Usuário conectado">{user.displayName}</span>}
     </header>
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<PlaceholderPage title="Review" parameter="reviewId" parameterLabel="ID da review" />} />
       <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
-      <Route path="/login" element={<PlaceholderPage title="Entrar" />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<PlaceholderPage title="Criar conta" />} />
       <Route path="/notificacoes" element={<PlaceholderPage title="Notificações" />} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
     </Routes>
   </>;
+}
+
+export function AppRoutes({ authService = defaultAuthService }: AppRoutesProps): ReactElement {
+  return <SessionProvider service={authService}><ApplicationRoutes /></SessionProvider>;
 }
 
 export default function App(): ReactElement {
