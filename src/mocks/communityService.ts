@@ -12,7 +12,15 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   ]);
   let sequence = 1;
   return {
-    async getProfile() { throw new Error('Perfil não implementado.'); },
+    async getProfile(id, sessionUser = null) {
+      if (sessionUser?.id === id && !users.some((item) => item.id === id)) users.push(structuredClone(sessionUser));
+      const user = users.find((item) => item.id === id);
+      if (!user) return null;
+      return structuredClone({ user, reviews: reviews.filter((review) => review.userId === id).map((review) => {
+        const game = gameFixtures.find((item) => item.id === review.gameId);
+        return { ...review, author: { id: user.id, displayName: user.displayName, avatarUrl: user.avatarUrl }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
+      }) });
+    },
     async getRating(gameId, user) {
       if (!user) throw new CommunityError('session-required');
       return structuredClone(ratings.find((rating) => rating.gameId === gameId && rating.userId === user.id) ?? null);

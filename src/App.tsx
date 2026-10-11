@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { HomePage } from './pages/HomePage';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
-import { PlaceholderPage } from './pages/PlaceholderPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { GameDetailsPage } from './pages/GameDetailsPage';
 import type { AuthService } from './services/authContracts';
 import { authService as defaultAuthService } from './services/auth';
@@ -33,7 +33,7 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/" element={<HomePage authenticated={Boolean(user)} />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
-      <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
+      <Route path="/perfil/:userId" element={<ProfilePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
