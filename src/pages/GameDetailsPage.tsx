@@ -6,6 +6,7 @@ import { services } from '../services';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
 import { GameCover } from '../components/GameCover';
+import { RatingForm } from './RatingForm';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
 interface GameDetailsContentProps { id: Id; }
@@ -48,6 +49,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
       <dt>Plataformas</dt><dd>{game.platforms.length ? game.platforms.join(', ') : 'Plataformas não informadas.'}</dd>
       <dt>Lançamento</dt><dd>{releaseLabel(game.releaseDate)}</dd>
     </dl>
+    <RatingForm gameId={id} />
     <GameOpinionsSection key={id} gameId={id} />
   </section>;
 }
