@@ -12,7 +12,16 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   ]);
   let sequence = 1;
   return {
-    async comment() { throw new Error('Envio de comentário não implementado.'); },
+    async comment(reviewId, text, user) {
+      if (!user) throw new CommunityError('session-required');
+      if (!reviews.some((review) => review.id === reviewId)) throw new CommunityError('not-found');
+      if (!text.trim()) throw new CommunityError('empty-text');
+      while (comments.some((comment) => comment.id === `mock-comment-${sequence}`)) sequence++;
+      const comment: Comment = { id: `mock-comment-${sequence++}`, reviewId, userId: user.id, text: text.trim(), createdAt: new Date().toISOString() };
+      comments.push(comment);
+      if (!users.some((item) => item.id === user.id)) users.push(structuredClone(user));
+      return structuredClone(comment);
+    },
     async getComments(reviewId) {
       return structuredClone(comments.filter((comment) => comment.reviewId === reviewId).map((comment) => {
         const author = users.find((item) => item.id === comment.userId);

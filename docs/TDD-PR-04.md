@@ -16,3 +16,6 @@ RED: 5 falhas esperadas e 131 testes verdes, commit 09ba8e3. GREEN: 136 testes, 
 
 ## US-19
 RED: 4 falhas esperadas e 136 testes verdes, commit 1fbdaf7. GREEN: 140 testes, lint, tipos e build aprovados. Lista pública plana por review com autor/texto/data, vazio e recuperação de erro.
+
+## US-20
+RED: 7 falhas esperadas e 140 testes verdes, commit 3a2831b. GREEN: 147 testes, lint, tipos e build aprovados. Publicação de comentários em review alheia, validação, falha preserva texto, bloqueio síncrono de duplo envio e logout remove formulário. Comentar a própria review permanece pendente; nenhum fluxo de publicação própria foi antecipado.
