@@ -13,7 +13,17 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   let sequence = 1;
   const favorites: Favorite[] = [];
   return {
-    async getFavorites() { throw new Error('US-24 pendente'); },
+    async getFavorites(user) {
+      if (!user) throw new CommunityError('session-required');
+      const own = favorites.filter((favorite) => favorite.userId === user.id);
+      const games = gameFixtures.filter((game) => own.some((favorite) => favorite.targetType === 'game' && favorite.targetId === game.id));
+      const savedReviews = reviews.filter((review) => own.some((favorite) => favorite.targetType === 'review' && favorite.targetId === review.id)).map((review) => {
+        const author = users.find((item) => item.id === review.userId);
+        const game = gameFixtures.find((item) => item.id === review.gameId);
+        return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
+      });
+      return structuredClone({ games, reviews: savedReviews });
+    },
     async getFavorite(kind, targetId, user) {
       if (!user) throw new CommunityError('session-required');
       return structuredClone(favorites.find((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId) ?? null);

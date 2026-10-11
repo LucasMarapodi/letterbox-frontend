@@ -7,6 +7,7 @@ import type { PublicProfile } from '../services/communityContracts';
 import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { useSession } from '../session/SessionProvider';
+import { FavoritesSections } from '../components/FavoritesSections';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: string }): ReactElement {
@@ -34,6 +35,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
         <Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review de {review.game.title}</Link>
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}
     </section>
+    {user?.id === id && <FavoritesSections key={user.id} />}
   </>;
 }
 export function ProfilePage(): ReactElement {

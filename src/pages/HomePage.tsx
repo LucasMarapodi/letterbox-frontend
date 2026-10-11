@@ -1,4 +1,4 @@
-import type { FormEvent, ReactElement } from 'react';
+import type { FormEvent, ReactElement, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { Game } from '../models';
@@ -11,7 +11,7 @@ import type { GameQuery, GameSort } from '../services/contracts';
 
 type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; games: Game[] };
 
-export function HomePage({ authenticated = false }: { authenticated?: boolean }): ReactElement {
+export function HomePage({ authenticated = false, favorites }: { authenticated?: boolean; favorites?: ReactNode }): ReactElement {
   const [state, setState] = useState<CatalogState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [term, setTerm] = useState<string>('');
@@ -86,5 +86,6 @@ export function HomePage({ authenticated = false }: { authenticated?: boolean })
         ? <div className="game-grid">{state.games.map((game) => <GameCard key={game.id} game={game} />)}</div>
         : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />)}
     </section>
+    {favorites}
   </main>;
 }

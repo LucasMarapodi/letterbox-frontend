@@ -11,6 +11,8 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { Avatar } from './components/Avatar';
+import { FavoritesSections } from './components/FavoritesSections';
+import { encodeRouteId } from './routing/encodeRouteId';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
@@ -25,12 +27,12 @@ function ApplicationRoutes(): ReactElement {
         <Link to="/">Início</Link>{' '}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
-      {user && <div className="session-menu"><div className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></div><button className="logout-button" type="button" onClick={signOut}>Sair <span aria-hidden="true">↗</span></button></div>}
+      {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" onClick={signOut}>Sair <span aria-hidden="true">↗</span></button></div>}
       </div>
       </div>
     </header>
     <Routes>
-      <Route path="/" element={<HomePage authenticated={Boolean(user)} />} />
+      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={user.id} /> : null} />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
       <Route path="/perfil/:userId" element={<ProfilePage />} />
