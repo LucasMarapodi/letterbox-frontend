@@ -9,8 +9,9 @@ import type { User } from '../src/models';
 import { deferred } from './fixtures';
 
 const user: User = { id: 'user-1', displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };
-function renderLogin(authService: AuthService): void {
-  render(<MemoryRouter initialEntries={['/login']}><AppRoutes authService={authService} /></MemoryRouter>);
+function renderLogin(authService: Pick<AuthService, 'login'>): void {
+  const service: AuthService = { ...authService, async register() { throw new Error('Cadastro não esperado no teste de login.'); } };
+  render(<MemoryRouter initialEntries={['/login']}><AppRoutes authService={service} /></MemoryRouter>);
 }
 async function fillLogin(): Promise<void> {
   const interaction = userEvent.setup();

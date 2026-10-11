@@ -8,6 +8,7 @@ export interface MockAuthOptions { accounts?: MockAccount[]; error?: Error; }
 export function createMockAuthService(options: MockAuthOptions = {}): AuthService {
   const accounts: MockAccount[] = structuredClone(options.accounts ?? accountFixtures);
   return {
+    async register() { throw new Error('Cadastro não implementado.'); },
     async login(credentials): Promise<User> {
       if (options.error) throw options.error;
       const email: string = credentials.email.trim().toLowerCase();
