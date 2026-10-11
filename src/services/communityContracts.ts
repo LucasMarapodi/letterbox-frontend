@@ -1,6 +1,7 @@
-import type { Id, Rating, User, Review } from '../models';
+import type { Id, Rating, User, Review, Comment } from '../models';
 import type { GameOpinions, PublicReview } from './contracts';
 export interface ReviewDetails extends PublicReview { game: { id: Id; title: string }; }
+export interface PublicComment extends Comment { author: Pick<User, 'id' | 'displayName' | 'avatarUrl'>; }
 
 export class CommunityError extends Error {
   constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found') { super(code); }
@@ -12,4 +13,5 @@ export interface CommunityService {
   getOpinions(gameId: Id): Promise<GameOpinions>;
   getReview(id: Id): Promise<ReviewDetails | null>;
   editReview(id: Id, text: string, user: User | null): Promise<Review>;
+  getComments(reviewId: Id): Promise<PublicComment[]>;
 }

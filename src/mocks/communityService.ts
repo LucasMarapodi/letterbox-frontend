@@ -1,14 +1,15 @@
 import type { CommunityService } from '../services/communityContracts';
 import { CommunityError } from '../services/communityContracts';
-import type { Rating, Review, User } from '../models';
+import type { Rating, Review, User, Comment } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
-export function createMockCommunityService(options: { reviews?: Review[] } = {}): CommunityService {
+export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[] } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = structuredClone(userFixtures);
   let sequence = 1;
   return {
+    async getComments() { throw new Error('Comentários não implementados.'); },
     async editReview(id, text, user) {
       if (!user) throw new CommunityError('session-required');
       const review = reviews.find((item) => item.id === id);
