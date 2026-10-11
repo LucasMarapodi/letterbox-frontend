@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { HomePage } from './pages/HomePage';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { GameDetailsPage } from './pages/GameDetailsPage';
 
 export function AppRoutes(): ReactElement {
   return <>
@@ -15,7 +16,7 @@ export function AppRoutes(): ReactElement {
     </header>
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/jogos/:gameId" element={<PlaceholderPage title="Detalhes do jogo" parameter="gameId" parameterLabel="ID do jogo" />} />
+      <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<PlaceholderPage title="Review" parameter="reviewId" parameterLabel="ID da review" />} />
       <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
       <Route path="/login" element={<PlaceholderPage title="Entrar" />} />

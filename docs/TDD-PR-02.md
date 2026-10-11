@@ -16,3 +16,8 @@ Branch `feat/pr-02-catalogo-publico`, criada diretamente de `feat/us-01-a-06-fun
 - RED: `npm run check` — 4 falhas: seletor/ordenação ausentes e requisições sem sort; 53 testes verdes.
 - Commit RED: `test(US-09): especifica ordenacao mantendo busca e dados originais`.
 - GREEN: `npm run check` — 57 testes aprovados; lint, tipos e build aprovados.
+
+## US-10
+- RED: `npm run check` — 7 testes falharam pela ausência de dados, carregamento, mensagem de inexistência e consulta pelo ID; 57 testes anteriores verdes.
+- Commit RED: `test(US-10): especifica detalhes publicos ausencia erro e consulta por ID`.
+- GREEN: `npm run check` — 64 testes aprovados; lint, tipos e build aprovados.
