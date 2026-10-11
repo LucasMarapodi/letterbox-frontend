@@ -21,3 +21,8 @@ Branch `feat/pr-03-autenticacao-mockada`, derivada da PR-02 no commit `f952f24`.
 
 ## Revisão US-14 — acesso sem rota de notificações
 Proteção de ações existente revalidada sem alteração funcional: visitante recebe link de login, usuário autenticado executa ação e logout remove a ação e restabelece o caminho de login. Testes independem de notificações. Não há RED artificial para comportamento já implementado. Verificação completa: 106 testes, lint, tipos e build aprovados. Sino, modal e descarte de dados no logout/troca de conta permanecem para US-28.
+
+## Dashboard — ajuste visual solicitado
+- RED: 1 falha esperada e 106 testes verdes; commit cd63b97.
+- GREEN: 107 testes, lint, tipos e build aprovados.
+- Layout escuro centralizado, marca no topo, introdução com acesso ao cadastro, busca compacta, bordas arredondadas e adaptação para telas pequenas. CSS sem dependências adicionais. Visual conferido no navegador.

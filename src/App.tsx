@@ -15,7 +15,9 @@ export interface AppRoutesProps { authService?: AuthService; }
 function ApplicationRoutes(): ReactElement {
   const { user, signOut } = useSession();
   return <>
-    <header>
+    <header className="site-header">
+      <div className="header-inner">
+      <Link className="brand" to="/" aria-label="Game Reviews"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>Game Reviews</Link>
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
         <Link to="/login">Entrar</Link>{' '}
@@ -23,6 +25,7 @@ function ApplicationRoutes(): ReactElement {
       </nav>
       {user && <span aria-label="Usuário conectado">{user.displayName}</span>}
       {user && <button type="button" onClick={signOut}>Sair</button>}
+      </div>
     </header>
     <Routes>
       <Route path="/" element={<HomePage />} />
