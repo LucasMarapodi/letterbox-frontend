@@ -13,3 +13,6 @@ RED: 5 falhas esperadas e 167 testes verdes, commit 36875e2. GREEN: 172 testes, 
 
 ## US-24
 RED: 6 falhas esperadas e 172 testes verdes, commit f61efd5. GREEN: 178 testes, lint, tipos e build aprovados. Listas separadas na Home e próprio perfil, destinos corretos, vazio, erro com recuperação, remoção na próxima consulta e descarte de resposta após logout. Perfil de terceiros não consulta favoritos.
+
+## Regressão — perfil público após cadastro
+RED: 2 falhas esperadas e 178 testes verdes; commit 3dce3fc antes da correção. GREEN: 180 testes, lint, tipos e build aprovados. Registro público compartilhado na composição dos mocks, atualizado imediatamente no cadastro. Testes cobrem consulta sem sessão/atividade do autor, tela pública com serviços da aplicação, clonagem, cadastro duplicado e isolamento entre instâncias.
