@@ -1,4 +1,5 @@
 import { useState, type ReactElement } from 'react';
+import { CommunityRecent } from './CommunityRecent';
 
 type CommunityView = 'recent' | 'reviews' | 'games';
 export function CommunityPage(): ReactElement {
@@ -9,5 +10,6 @@ export function CommunityPage(): ReactElement {
       <button type="button" aria-pressed={view === 'reviews'} onClick={() => setView('reviews')}>Mais comentadas</button>
       <button type="button" aria-pressed={view === 'games'} onClick={() => setView('games')}>Jogos em discussão</button>
     </nav>
+    {view === 'recent' && <CommunityRecent />}
   </main>;
 }

@@ -1,4 +1,4 @@
-import type { CommunityService } from '../services/communityContracts';
+import type { CommunityService, ReviewDetails } from '../services/communityContracts';
 import { CommunityError } from '../services/communityContracts';
 import type { Rating, Review, User, Comment, Favorite } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
@@ -14,8 +14,15 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   let sequence = 1;
   const favorites: Favorite[] = [];
   const follows: { followerId: string; followedId: string }[] = [];
+  function reviewDetails(review: Review): ReviewDetails {
+    const author = users.find((item) => item.id === review.userId);
+    const game = gameFixtures.find((item) => item.id === review.gameId);
+    return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
+  }
   return {
-    async getRecentReviews() { throw new Error('US-33 pendente'); },
+    async getRecentReviews() {
+      return structuredClone([...reviews].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id)).map(reviewDetails));
+    },
     async getFeed(user) {
       if (!user) throw new CommunityError('session-required');
       const followed = new Set(follows.filter((relation) => relation.followerId === user.id).map((relation) => relation.followedId));
