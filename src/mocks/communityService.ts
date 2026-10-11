@@ -21,6 +21,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
   }
   return {
+    async getGamesInDiscussion() { throw new Error('US-36 pendente'); },
     async getMostCommented(period) {
       const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));
       return structuredClone(reviews.map((review) => {
