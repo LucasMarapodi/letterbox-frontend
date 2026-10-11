@@ -22,3 +22,7 @@ Pendentes: incrementos das estrelas, relação entre nota e texto, campos de cad
 `src/services/index.ts` centraliza a seleção. `createServices({ games: outraImplementacao })` permite fornecer outro adaptador com o mesmo contrato. Nenhuma tela importa fixtures ou factories mockados, regra verificada pelo lint. As operações de escrita e os demais serviços serão ampliados apenas nas US correspondentes.
 
 Cada factory clona as entradas e cada leitura retorna uma cópia independente, inclusive listas de gêneros e plataformas. Os jogos padrão são fictícios; a modelagem desta fase não exigiu dúvidas sobre campos da IGDB nem consulta a dados externos.
+
+## Busca provisória — PR-02
+
+`GameService.list(query?: GameQuery)` recebe `term` opcional. O mock procura trecho do nome sem diferenciar maiúsculas e ignora espaços nas extremidades; termo vazio restaura todos os jogos. A Home envia o termo ao submeter o formulário (Enter ou botão), sem debounce nem rede real. Essas escolhas são provisórias e não constituem regras da API definitiva.
