@@ -8,6 +8,7 @@ import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { useSession } from '../session/SessionProvider';
 import { FavoritesSections } from '../components/FavoritesSections';
+import { FollowButton } from '../components/FollowButton';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: string }): ReactElement {
@@ -27,6 +28,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
     <section className="profile-overview" aria-label="Informações do perfil">
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
       <div><h2>{profile.user.displayName}</h2><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
+      <FollowButton targetId={id} name={profile.user.displayName} />
     </section>
     <section aria-label="Reviews do usuário"><h2>Reviews</h2>
       {profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
