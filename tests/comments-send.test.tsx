@@ -11,17 +11,17 @@ import { deferred } from './fixtures';
 const author: User = { id: 'user-1', displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
 afterEach(() => vi.restoreAllMocks());
 test('comentário em review alheia aparece somente na review correta', async () => {
-  const service = createMockCommunityService({ comments: [] });
+  const service = createMockCommunityService({ comments: [], sessionStore: { user: author } });
   const comment = await service.comment('review-2', ' Uma boa review ', author);
   expect(comment).toMatchObject({ text: 'Uma boa review', reviewId: 'review-2', userId: author.id });
   expect((await service.getComments('review-2'))[0].author.displayName).toBe('Ana');
   expect(await service.getComments('review-1')).toEqual([]);
 });
 test.each(['', '   '])('serviço rejeita comentário vazio %s', async (text) => {
-  await expect(createMockCommunityService().comment('review-2', text, author)).rejects.toMatchObject({ code: 'empty-text' });
+  await expect(createMockCommunityService({ sessionStore: { user: author } }).comment('review-2', text, author)).rejects.toMatchObject({ code: 'empty-text' });
 });
 test('serviço exige sessão e review existente', async () => {
-  const service = createMockCommunityService();
+  const service = createMockCommunityService({ sessionStore: { user: author } });
   await expect(service.comment('review-2', 'Texto', null)).rejects.toMatchObject({ code: 'session-required' });
   await expect(service.comment('ausente', 'Texto', author)).rejects.toMatchObject({ code: 'not-found' });
 });

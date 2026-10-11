@@ -3,9 +3,9 @@ import { CommunityError } from '../services/communityContracts';
 import type { Rating, Review, User, Comment, Favorite } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
-import type { MockUserStore } from './userStore';
+import type { MockUserStore, MockSessionStore } from './userStore';
 import { commentsInPeriod } from './commentWindow';
-export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore; clock?: () => Date } = {}): CommunityService {
+export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore; sessionStore?: MockSessionStore; clock?: () => Date } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = options.userStore?.users ?? structuredClone(options.users ?? userFixtures);
@@ -110,13 +110,15 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       return structuredClone(ratings.find((rating) => rating.gameId === gameId && rating.userId === user.id) ?? null);
     },
     async comment(reviewId, text, user) {
-      if (!user) throw new CommunityError('session-required');
+      const authenticated = options.sessionStore?.user;
+      if (!authenticated || !user) throw new CommunityError('session-required');
+      if (authenticated.id !== user.id) throw new CommunityError('forbidden');
       if (!reviews.some((review) => review.id === reviewId)) throw new CommunityError('not-found');
       if (!text.trim()) throw new CommunityError('empty-text');
       while (comments.some((comment) => comment.id === `mock-comment-${sequence}`)) sequence++;
-      const comment: Comment = { id: `mock-comment-${sequence++}`, reviewId, userId: user.id, text: text.trim(), createdAt: new Date().toISOString() };
+      const comment: Comment = { id: `mock-comment-${sequence++}`, reviewId, userId: authenticated.id, text: text.trim(), createdAt: (options.clock?.() ?? new Date()).toISOString() };
       comments.push(comment);
-      if (!users.some((item) => item.id === user.id)) users.push(structuredClone(user));
+      if (!users.some((item) => item.id === authenticated.id)) users.push(structuredClone(authenticated));
       return structuredClone(comment);
     },
     async getComments(reviewId) {

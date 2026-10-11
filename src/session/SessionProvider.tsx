@@ -21,7 +21,7 @@ export function SessionProvider({ children, service }: SessionProviderProps): Re
     setUser(result);
     return result;
   }
-  function signOut(): void { requestVersion.current++; setUser(null); }
+  function signOut(): void { requestVersion.current++; service.logout?.(); setUser(null); }
   const value: SessionContextValue = { user, signIn, signOut, authService: service };
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
