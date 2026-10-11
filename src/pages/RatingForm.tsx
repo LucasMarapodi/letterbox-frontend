@@ -4,7 +4,8 @@ import { RequireSession } from '../session/RequireSession';
 import { community } from '../services/community';
 import { Button } from '../components/Button';
 
-function RatingControl({ gameId }: { gameId: string }): ReactElement {
+interface RatingFormProps { gameId: string; onSaved?: () => void; }
+function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
   const { user } = useSession();
   const [value, setValue] = useState<string>('0');
   const [message, setMessage] = useState<string>('');
@@ -15,7 +16,7 @@ function RatingControl({ gameId }: { gameId: string }): ReactElement {
     event.preventDefault();
     if (!user || sending.current) return;
     sending.current = true; setPending(true); setMessage(''); setFailed(false);
-    try { const rating = await community.rate(gameId, Number(value), user); setMessage(`Nota ${rating.value} salva.`); }
+    try { const rating = await community.rate(gameId, Number(value), user); setMessage(`Nota ${rating.value} salva.`); onSaved?.(); }
     catch { setFailed(true); setMessage('Não foi possível salvar a nota. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }
@@ -26,7 +27,7 @@ function RatingControl({ gameId }: { gameId: string }): ReactElement {
     {message && <p role={failed ? 'alert' : 'status'}>{message}</p>}
   </form>;
 }
-export function RatingForm({ gameId }: { gameId: string }): ReactElement {
+export function RatingForm(props: RatingFormProps): ReactElement {
   const { user } = useSession();
-  return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={user?.id} gameId={gameId} /></RequireSession></section>;
+  return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={user?.id} {...props} /></RequireSession></section>;
 }

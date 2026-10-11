@@ -51,7 +51,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
       <dt>Plataformas</dt><dd>{game.platforms.length ? game.platforms.join(', ') : 'Plataformas não informadas.'}</dd>
       <dt>Lançamento</dt><dd>{releaseLabel(game.releaseDate)}</dd>
     </dl>
-    <RatingForm gameId={id} />
+    <RatingForm gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
     <PublishReview gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
     <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
   </section>;
