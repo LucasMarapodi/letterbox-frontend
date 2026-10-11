@@ -7,12 +7,14 @@ export type FavoriteKind = 'game' | 'review';
 export interface FavoriteLists { games: Game[]; reviews: ReviewDetails[]; }
 export interface Connections { followers: User[]; following: User[]; }
 export type RankingPeriod = '24h' | '7d' | '30d';
+export interface RankedReview { review: ReviewDetails; commentCount: number; lastCommentAt: string; }
 export function isRankingPeriod(value: unknown): value is RankingPeriod { return value === '24h' || value === '7d' || value === '30d'; }
 
 export class CommunityError extends Error {
   constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found' | 'self-follow' | 'duplicate-follow') { super(code); }
 }
 export interface CommunityService {
+  getMostCommented(period: RankingPeriod): Promise<RankedReview[]>;
   getRecentReviews(): Promise<ReviewDetails[]>;
   getFeed(user: User | null): Promise<ReviewDetails[]>;
   getConnections(profileId: Id): Promise<Connections>;

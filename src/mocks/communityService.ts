@@ -4,7 +4,7 @@ import type { Rating, Review, User, Comment, Favorite } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
 import type { MockUserStore } from './userStore';
-export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore } = {}): CommunityService {
+export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore; clock?: () => Date } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = options.userStore?.users ?? structuredClone(options.users ?? userFixtures);
@@ -20,6 +20,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
   }
   return {
+    async getMostCommented() { throw new Error('US-35 pendente'); },
     async getRecentReviews() {
       return structuredClone([...reviews].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id)).map(reviewDetails));
     },
