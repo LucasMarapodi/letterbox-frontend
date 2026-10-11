@@ -35,7 +35,7 @@ test('usuário salva nota zero e logout remove controle', async () => {
   await screen.findByLabelText('Usuário conectado');
   await interaction.click(screen.getByRole('link', { name: 'Início' }));
   await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
-  await interaction.selectOptions(await screen.findByLabelText('Sua nota'), '0');
+  await interaction.click(await screen.findByRole('radio', { name: '0 estrelas' }));
   await interaction.click(screen.getByRole('button', { name: 'Salvar nota' }));
   expect(await screen.findByText('Nota 0 salva.')).toBeVisible();
   expect(await screen.findByText('Nota média: 2,5 de 5')).toBeVisible();
@@ -51,8 +51,19 @@ test('falha de nota é apresentada e mantém a escolha', async () => {
   const interaction = userEvent.setup();
   render(<MemoryRouter><SessionProvider service={{ async login() { return ana; }, async register() { return ana; } }}><RatingExample /></SessionProvider></MemoryRouter>);
   await interaction.click(screen.getByRole('button', { name: 'Iniciar sessão' }));
-  await interaction.selectOptions(await screen.findByLabelText('Sua nota'), '5');
+  await interaction.click(await screen.findByRole('radio', { name: '5 estrelas' }));
   await interaction.click(screen.getByRole('button', { name: 'Salvar nota' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível salvar a nota. Tente novamente.');
-  expect(screen.getByLabelText('Sua nota')).toHaveValue('5');
+  expect(screen.getByRole('radio', { name: '5 estrelas' })).toBeChecked();
+});
+test('estrelas permitem seleção por teclado e envio da nota escolhida', async () => {
+  const save = vi.spyOn(community, 'rate').mockResolvedValue({ id: 'rating-new', gameId: 'game-1', userId: ana.id, value: 3 });
+  const interaction = userEvent.setup();
+  render(<MemoryRouter><SessionProvider service={{ async login() { return ana; }, async register() { return ana; } }}><RatingExample /></SessionProvider></MemoryRouter>);
+  await interaction.click(screen.getByRole('button', { name: 'Iniciar sessão' }));
+  await interaction.click(await screen.findByRole('radio', { name: '2 estrelas' }));
+  await interaction.keyboard('{ArrowRight}');
+  expect(screen.getByRole('radio', { name: '3 estrelas' })).toBeChecked();
+  await interaction.click(screen.getByRole('button', { name: 'Salvar nota' }));
+  expect(save).toHaveBeenCalledWith('game-1', 3, ana);
 });
