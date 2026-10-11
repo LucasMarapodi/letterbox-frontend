@@ -34,8 +34,8 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 
 ## Rotas provisórias
 
-`/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login`, `/cadastro` e `/notificacoes`.
-Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Review e perfil permanecem provisórios; notificações exige sessão e aguarda implementação de conteúdo na US-28. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
+`/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
+Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Review e perfil permanecem provisórios. Notificações será acessado pelo sino e modal na US-28, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 
@@ -60,3 +60,4 @@ Evidências de TDD: `docs/TDD-PR-02.md`. Descrição local da PR: `docs/PR-02.md
 Login, cadastro sem login automático, sessão em memória e logout. Notificações usa `RequireSession`, proteção reutilizável para ações das próximas US. Conteúdo público continua acessível a visitantes.
 
 Credenciais fictícias: `ana@example.com` / `teste123`. Decisões e limitações em `docs/AUTH.md`; evidências em `docs/TDD-PR-03.md`; descrição para revisão em `docs/PR-03.md`.
+

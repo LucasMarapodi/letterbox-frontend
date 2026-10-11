@@ -25,8 +25,8 @@ test('login inicia sessão e logout preserva navegação pública', async () => 
   expect(screen.getByRole('heading', { name: 'Jogos' })).toBeVisible();
 });
 function ActionExample({ action }: { action: () => void }): React.ReactElement {
-  const { signIn } = useSession();
-  return <><button onClick={() => { void signIn({ email: 'ana@example.com', password: 'teste123' }); }}>Iniciar sessão</button><RequireSession><button onClick={action}>Ação restrita</button></RequireSession></>;
+  const { signIn, signOut } = useSession();
+  return <><button onClick={() => { void signIn({ email: 'ana@example.com', password: 'teste123' }); }}>Iniciar sessão</button><button onClick={signOut}>Encerrar sessão</button><RequireSession><button onClick={action}>Ação restrita</button></RequireSession></>;
 }
 test('proteção reutilizável impede ação visitante e libera ação autenticada', async () => {
   const action = vi.fn<() => void>();
@@ -34,7 +34,12 @@ test('proteção reutilizável impede ação visitante e libera ação autentica
   render(<MemoryRouter><SessionProvider service={service()}><ActionExample action={action} /></SessionProvider></MemoryRouter>);
   expect(screen.queryByRole('button', { name: 'Ação restrita' })).not.toBeInTheDocument();
   expect(action).not.toHaveBeenCalled();
+  expect(screen.getByRole('link', { name: 'Entrar para continuar' })).toHaveAttribute('href', '/login');
   await interaction.click(screen.getByRole('button', { name: 'Iniciar sessão' }));
   await interaction.click(await screen.findByRole('button', { name: 'Ação restrita' }));
+  expect(action).toHaveBeenCalledTimes(1);
+  await interaction.click(screen.getByRole('button', { name: 'Encerrar sessão' }));
+  expect(screen.queryByRole('button', { name: 'Ação restrita' })).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Entrar para continuar' })).toBeVisible();
   expect(action).toHaveBeenCalledTimes(1);
 });

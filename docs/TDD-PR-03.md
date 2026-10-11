@@ -18,3 +18,6 @@ Branch `feat/pr-03-autenticacao-mockada`, derivada da PR-02 no commit `f952f24`.
 ## Revisão US-05 — notificações sem página
 - RED: 2 falhas esperadas e 104 testes verdes; commit fb8dd3a.
 - GREEN: 106 testes, lint, tipos e build aprovados. Rota e link removidos; testes antigos de acesso ajustados ao novo escopo.
+
+## Revisão US-14 — acesso sem rota de notificações
+Proteção de ações existente revalidada sem alteração funcional: visitante recebe link de login, usuário autenticado executa ação e logout remove a ação e restabelece o caminho de login. Testes independem de notificações. Não há RED artificial para comportamento já implementado. Verificação completa: 106 testes, lint, tipos e build aprovados. Sino, modal e descarte de dados no logout/troca de conta permanecem para US-28.

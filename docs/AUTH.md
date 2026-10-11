@@ -10,4 +10,5 @@ E-mails dos mocks são comparados ignorando espaços externos e caixa; senhas s�
 
 Cadastro: nome, e-mail e senha são provisórios. E-mail exige formato básico e unicidade sem diferenciar caixa/espaços externos. Não há política de senha nem login automático. ID e username são gerados apenas para preencher o modelo mock; contas ficam na memória da instância.
 
-RequireSession protege conteúdo e ações da interface e oferece o caminho /login a visitantes. Notificações usa essa proteção; o conteúdo será implementado na US-28. Logout remove a sessão e revoga imediatamente o acesso. As ações das próximas US deverão reutilizar a proteção e os testes de visitante, autenticado e logout.
+RequireSession protege conteúdo e ações da interface e oferece o caminho /login a visitantes. Não existe rota de notificações. Na US-28, o sino será oculto para visitantes; o modal terá dados exclusivos da sessão atual e deverá fechar e descartar dados no logout ou troca de conta. Logout remove a sessão e revoga imediatamente o acesso. As ações das próximas US deverão reutilizar a proteção e os testes de visitante, autenticado e logout.
+
