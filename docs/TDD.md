@@ -8,3 +8,8 @@ O sandbox travou o Vitest; validações são executadas com a autorização conc
 - Commit RED: `test(US-01): especifica titulo acessivel da pagina inicial`.
 - GREEN: `npm run check` — 1 teste aprovado; lint, tipos estritos e build aprovados.
 - O ponto de montagem vazio no RED é apenas infraestrutura do teste; não contém interface funcional.
+
+## US-02
+- Refatoração sem comportamento novo: o teste existente protege a página inicial.
+- `npm run check` — 1 teste aprovado; lint, tipos e build aprovados.
+- Organização e responsabilidades documentadas no README. Sem RED artificial, conforme exceção da US-02.
