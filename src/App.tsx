@@ -15,8 +15,9 @@ import { FavoritesSections } from './components/FavoritesSections';
 import { encodeRouteId } from './routing/encodeRouteId';
 import { FeedSection } from './components/FeedSection';
 import { NotificationBell } from './components/NotificationBell';
+import type { ApplicationServices } from './services/runtime';
 
-export interface AppRoutesProps { authService?: AuthService; }
+export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
 function ApplicationRoutes(): ReactElement {
   const { user, signOut } = useSession();
