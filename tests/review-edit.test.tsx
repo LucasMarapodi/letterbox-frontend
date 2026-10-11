@@ -41,7 +41,7 @@ test('autor recebe conteúdo existente e falha preserva rascunho', async () => {
   vi.spyOn(community, 'editReview').mockRejectedValue(new Error('Falha'));
   const interaction = await openAuthenticated();
   const input = await screen.findByLabelText('Sua review');
-  expect(input).toHaveValue(expect.stringContaining('A exploração'));
+  expect(input).toHaveValue('A exploração convida a seguir cada caminho. A trilha sonora acompanha muito bem a aventura.');
   await interaction.clear(input); await interaction.type(input, 'Rascunho atualizado');
   await interaction.click(screen.getByRole('button', { name: 'Salvar review' }));
   expect(await screen.findByText('Não foi possível salvar a review. Tente novamente.')).toBeVisible();

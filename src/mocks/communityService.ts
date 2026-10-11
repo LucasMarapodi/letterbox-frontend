@@ -9,7 +9,16 @@ export function createMockCommunityService(options: { reviews?: Review[] } = {})
   const users: User[] = structuredClone(userFixtures);
   let sequence = 1;
   return {
-    async editReview() { throw new Error('Edição não implementada.'); },
+    async editReview(id, text, user) {
+      if (!user) throw new CommunityError('session-required');
+      const review = reviews.find((item) => item.id === id);
+      if (!review) throw new CommunityError('not-found');
+      if (review.userId !== user.id) throw new CommunityError('forbidden');
+      if (!text.trim()) throw new CommunityError('empty-text');
+      review.text = text.trim();
+      review.updatedAt = new Date().toISOString();
+      return structuredClone(review);
+    },
     async getReview(id) {
       const review = reviews.find((item) => item.id === id);
       if (!review) return null;
