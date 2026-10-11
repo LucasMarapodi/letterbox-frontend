@@ -68,3 +68,15 @@ test('busca provisória filtra por trecho do nome sem diferenciar maiúsculas', 
   await expect(service.list({ term: '' })).resolves.toEqual([first, second]);
   await expect(service.list({ term: '   ' })).resolves.toEqual([first, second]);
 });
+
+test('ordena por nome nos dois sentidos sem alterar a origem e mantém o filtro', async () => {
+  const zeta: Game = { ...gameFixture(), id: 'z', title: 'Zeta game' };
+  const alpha: Game = { ...gameFixture(), id: 'a', title: 'Alpha game' };
+  const other: Game = { ...gameFixture(), id: 'o', title: 'Outro' };
+  const seed: Game[] = [zeta, other, alpha];
+  const service = createMockGameService({ games: seed });
+  await expect(service.list({ term: 'game', sort: 'name-asc' })).resolves.toEqual([alpha, zeta]);
+  await expect(service.list({ term: 'game', sort: 'name-desc' })).resolves.toEqual([zeta, alpha]);
+  await expect(service.list()).resolves.toEqual(seed);
+  expect(seed).toEqual([zeta, other, alpha]);
+});

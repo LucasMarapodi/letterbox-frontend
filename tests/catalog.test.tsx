@@ -69,7 +69,7 @@ test('busca por Enter envia o termo ao serviço e apresenta seus resultados', as
   await screen.findByRole('link', { name: 'Jogo público' });
   await user.type(screen.getByRole('textbox', { name: 'Buscar jogos' }), 'Ecos{Enter}');
   expect(await screen.findByRole('link', { name: 'Ecos' })).toBeVisible();
-  expect(services.games.list).toHaveBeenLastCalledWith({ term: 'Ecos' });
+  expect(services.games.list).toHaveBeenLastCalledWith({ term: 'Ecos', sort: 'name-asc' });
   expect(screen.queryByRole('link', { name: 'Jogo público' })).not.toBeInTheDocument();
 });
 
@@ -85,7 +85,7 @@ test('busca sem resultados informa ausência e limpar restaura a lista inicial',
   await user.click(screen.getByRole('button', { name: 'Limpar busca' }));
   expect(await screen.findByRole('link', { name: 'Jogo público' })).toBeVisible();
   expect(input).toHaveValue('');
-  expect(services.games.list).toHaveBeenLastCalledWith({ term: '' });
+  expect(services.games.list).toHaveBeenLastCalledWith({ term: '', sort: 'name-asc' });
 });
 
 test('resposta de uma consulta anterior não substitui os resultados atuais', async () => {
@@ -98,4 +98,24 @@ test('resposta de uma consulta anterior não substitui os resultados atuais', as
   await act(async () => { pending.resolve([makeGame({ title: 'Resposta antiga' })]); await pending.promise; });
   expect(screen.getByRole('link', { name: 'Resultado atual' })).toBeVisible();
   expect(screen.queryByRole('link', { name: 'Resposta antiga' })).not.toBeInTheDocument();
+});
+
+test('ordenar mantém a busca submetida e limpar mantém a ordenação escolhida', async () => {
+  const user = userEvent.setup();
+  const alpha: Game = makeGame({ id: 'a', title: 'Alpha game' });
+  const zeta: Game = makeGame({ id: 'z', title: 'Zeta game' });
+  vi.mocked(services.games.list).mockResolvedValueOnce([alpha, zeta]).mockResolvedValueOnce([alpha, zeta]).mockResolvedValueOnce([zeta, alpha]).mockResolvedValueOnce([zeta, alpha]);
+  renderHome();
+  await screen.findByRole('link', { name: alpha.title });
+  await user.type(screen.getByRole('textbox', { name: 'Buscar jogos' }), 'game{Enter}');
+  await screen.findByRole('link', { name: alpha.title });
+  await user.selectOptions(screen.getByRole('combobox', { name: 'Ordenar por' }), 'name-desc');
+  expect(services.games.list).toHaveBeenLastCalledWith({ term: 'game', sort: 'name-desc' });
+  expect(await screen.findAllByRole('article')).toHaveLength(2);
+  expect(screen.getAllByRole('article')[0]).toHaveTextContent(zeta.title);
+  expect(screen.getByRole('textbox', { name: 'Buscar jogos' })).toHaveValue('game');
+  await user.click(screen.getByRole('button', { name: 'Limpar busca' }));
+  await screen.findByRole('link', { name: alpha.title });
+  expect(services.games.list).toHaveBeenLastCalledWith({ term: '', sort: 'name-desc' });
+  expect(screen.getByRole('combobox', { name: 'Ordenar por' })).toHaveValue('name-desc');
 });
