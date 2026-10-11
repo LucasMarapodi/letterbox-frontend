@@ -8,6 +8,7 @@ export function createMockCommunityService(options: { reviews?: Review[] } = {})
   const users: User[] = structuredClone(userFixtures);
   let sequence = 1;
   return {
+    async getReview() { throw new Error('Leitura não implementada.'); },
     async publish(gameId, text, user) {
       if (!user) throw new CommunityError('session-required');
       if (!text.trim()) throw new CommunityError('empty-text');
