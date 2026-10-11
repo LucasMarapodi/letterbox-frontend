@@ -31,3 +31,6 @@ RED: 2 falhas esperadas e 147 testes verdes, commit 5c0844f. GREEN: 149 testes, 
 
 ## Ajuste solicitado — jogo lateralizado e estrelas
 RED: 3 falhas esperadas e 147 testes verdes, commit 87ede01. GREEN: 150 testes, lint, tipos e build aprovados. Capa, descrição e ações em colunas responsivas; avaliação por radios nativos em estrelas, opção zero, navegação por setas e preservação da escolha em falha. Verificação visual desktop a 1280px e seleção por teclado no navegador; viewport restaurado.
+
+## Ajuste solicitado — dashboard autenticada e menu
+RED: 1 falha esperada e 150 testes verdes, commit b8e5274. GREEN: 151 testes, lint, tipos e build aprovados. Sessão substitui introdução e convite de cadastro por título compacto; logout restaura apresentação para visitantes. Cabeçalho agrupa avatar/nome/logout em controle discreto. Visual conferido no navegador.
