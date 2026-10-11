@@ -18,8 +18,9 @@ test('a página inicial apresenta um título acessível', () => {
   expect(screen.getByRole('heading', { name: 'Game Reviews', level: 1 })).toBeVisible();
 });
 
-test('a Home oferece o primeiro uso dos componentes em uma prévia explícita', async () => {
+test('a Home oferece o catálogo público no lugar da prévia técnica', async () => {
   render(<App />);
-  expect(screen.getByRole('heading', { name: 'Prévia dos componentes', level: 2 })).toBeVisible();
-  expect(await screen.findByText('Nenhum jogo de exemplo disponível.')).toBeVisible();
+  expect(screen.getByRole('heading', { name: 'Jogos', level: 2 })).toBeVisible();
+  expect(await screen.findByText('Nenhum jogo disponível.')).toBeVisible();
+  expect(screen.queryByRole('heading', { name: 'Prévia dos componentes' })).not.toBeInTheDocument();
 });
