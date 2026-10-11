@@ -5,9 +5,9 @@ import { useSession } from '../session/SessionProvider';
 import { Button } from './Button';
 import { ErrorState, LoadingState } from './Feedback';
 
-interface FollowProps { targetId: string; name: string; }
+interface FollowProps { targetId: string; name: string; onChanged?: () => void; }
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; following: boolean };
-function FollowControl({ targetId, name }: FollowProps): ReactElement {
+function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement {
   const { user } = useSession();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -22,7 +22,7 @@ function FollowControl({ targetId, name }: FollowProps): ReactElement {
   async function toggle(): Promise<void> {
     if (!user || state.status !== 'ready' || sending.current) return;
     sending.current = true; setPending(true); setError('');
-    try { await community.setFollowing(targetId, !state.following, user); setState({ status: 'ready', following: !state.following }); }
+    try { await community.setFollowing(targetId, !state.following, user); setState({ status: 'ready', following: !state.following }); onChanged?.(); }
     catch { setError('Não foi possível atualizar a relação. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }

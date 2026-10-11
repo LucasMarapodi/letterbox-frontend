@@ -9,12 +9,14 @@ import { encodeRouteId } from '../routing/encodeRouteId';
 import { useSession } from '../session/SessionProvider';
 import { FavoritesSections } from '../components/FavoritesSections';
 import { FollowButton } from '../components/FollowButton';
+import { ConnectionsSections } from '../components/ConnectionsSections';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: string }): ReactElement {
   const { user } = useSession();
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
+  const [connectionsVersion, setConnectionsVersion] = useState(0);
   useEffect(() => {
     let active = true;
     void community.getProfile(id, user).then((profile) => { if (active) setState({ status: 'ready', profile }); }, () => { if (active) setState({ status: 'error' }); });
@@ -28,7 +30,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
     <section className="profile-overview" aria-label="Informações do perfil">
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
       <div><h2>{profile.user.displayName}</h2><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
-      <FollowButton targetId={id} name={profile.user.displayName} />
+      <FollowButton targetId={id} name={profile.user.displayName} onChanged={() => setConnectionsVersion((value) => value + 1)} />
     </section>
     <section aria-label="Reviews do usuário"><h2>Reviews</h2>
       {profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
@@ -38,6 +40,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}
     </section>
     {user?.id === id && <FavoritesSections key={user.id} />}
+    <ConnectionsSections key={`${id}-${connectionsVersion}`} profileId={id} />
   </>;
 }
 export function ProfilePage(): ReactElement {
