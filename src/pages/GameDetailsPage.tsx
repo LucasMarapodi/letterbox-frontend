@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import type { Game, Id } from '../models';
 import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
-import { services } from '../services';
+import { useServices } from '../services/ServiceProvider';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
 import { GameCover } from '../components/GameCover';
@@ -22,12 +22,13 @@ function releaseLabel(value: string | null): string {
 }
 
 function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
+  const { games } = useServices();
   const [state, setState] = useState<GameState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [opinionsVersion, setOpinionsVersion] = useState(0);
   useEffect(() => {
     let active: boolean = true;
-    services.games.getById(id).then(
+    games.getById(id).then(
       (game) => { if (active) setState({ status: 'ready', game }); },
       () => { if (active) setState({ status: 'error' }); },
     );
@@ -75,3 +76,4 @@ export function GameDetailsPage(): ReactElement {
     {id ? <GameDetailsContent key={id} id={id} /> : <EmptyState message="Jogo não encontrado." />}
   </main>;
 }
+

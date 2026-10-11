@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import type { Favorite } from '../models';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import type { FavoriteKind } from '../services/communityContracts';
 import { useSession } from '../session/SessionProvider';
 import { Button } from './Button';
@@ -10,6 +10,7 @@ import { ErrorState, LoadingState } from './Feedback';
 export interface FavoriteButtonProps { kind: FavoriteKind; targetId: string; }
 type FavoriteState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; favorite: Favorite | null };
 function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement {
+  const { community } = useServices();
   const label = kind === 'game' ? 'jogo' : 'review';
   const { user } = useSession();
   const [state, setState] = useState<FavoriteState>({ status: 'loading' });
@@ -40,3 +41,4 @@ export function FavoriteButton(props: FavoriteButtonProps): ReactElement {
   const { user } = useSession();
   return user ? <FavoriteControl key={`${user.id}-${props.kind}-${props.targetId}`} {...props} /> : <Link className="favorite-login" to="/login">Entrar para favoritar</Link>;
 }
+

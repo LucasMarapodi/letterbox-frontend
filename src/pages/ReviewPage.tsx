@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
 import { encodeRouteId } from '../routing/encodeRouteId';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import type { ReviewDetails } from '../services/communityContracts';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { EditReview } from './EditReview';
@@ -12,6 +12,7 @@ import { FavoriteButton } from '../components/FavoriteButton';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; review: ReviewDetails | null };
 function ReviewContent({ id }: { id: string }): ReactElement {
+  const { community } = useServices();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   const [commentsVersion, setCommentsVersion] = useState(0);
@@ -39,3 +40,4 @@ export function ReviewPage(): ReactElement {
   const id = useOpaqueRouteId('reviewId');
   return <main><h1>Review</h1><p>ID da review: {id}</p>{id ? <ReviewContent key={id} id={id} /> : <EmptyState message="Review não encontrada." />}</main>;
 }
+

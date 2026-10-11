@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Id } from '../models';
 import type { GameOpinions } from '../services/contracts';
-import { services } from '../services';
+import { useServices } from '../services/ServiceProvider';
 import { Avatar } from '../components/Avatar';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
@@ -12,11 +12,12 @@ interface GameOpinionsSectionProps { gameId: Id; }
 type OpinionsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; opinions: GameOpinions };
 
 export function GameOpinionsSection({ gameId }: GameOpinionsSectionProps): ReactElement {
+  const { games } = useServices();
   const [state, setState] = useState<OpinionsState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   useEffect(() => {
     let active: boolean = true;
-    services.games.getOpinions(gameId).then(
+    games.getOpinions(gameId).then(
       (opinions) => { if (active) setState({ status: 'ready', opinions }); },
       () => { if (active) setState({ status: 'error' }); },
     );
@@ -47,3 +48,4 @@ export function GameOpinionsSection({ gameId }: GameOpinionsSectionProps): React
     </>}
   </section>;
 }
+

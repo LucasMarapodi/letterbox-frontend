@@ -4,7 +4,7 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { ProfilePage } from './pages/ProfilePage';
 import { GameDetailsPage } from './pages/GameDetailsPage';
 import type { AuthService } from './services/authContracts';
-import { authService as defaultAuthService } from './services/auth';
+import { ServiceProvider, useServices } from './services/ServiceProvider';
 import { SessionProvider, useSession } from './session/SessionProvider';
 import { LoginPage } from './pages/LoginPage';
 
@@ -49,8 +49,12 @@ function ApplicationRoutes(): ReactElement {
   </>;
 }
 
-export function AppRoutes({ authService = defaultAuthService }: AppRoutesProps): ReactElement {
-  return <SessionProvider service={authService}><ApplicationRoutes /></SessionProvider>;
+function ConfiguredRoutes({ authService }: Pick<AppRoutesProps, 'authService'>): ReactElement {
+  const { auth } = useServices();
+  return <SessionProvider service={authService ?? auth}><ApplicationRoutes /></SessionProvider>;
+}
+export function AppRoutes({ authService, adapters }: AppRoutesProps): ReactElement {
+  return <ServiceProvider value={adapters}><ConfiguredRoutes authService={authService} /></ServiceProvider>;
 }
 
 export default function App(): ReactElement {

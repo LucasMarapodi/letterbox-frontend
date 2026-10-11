@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import type { FavoriteLists } from '../services/communityContracts';
 import { useSession } from '../session/SessionProvider';
 import { encodeRouteId } from '../routing/encodeRouteId';
@@ -9,6 +9,7 @@ import { EmptyState, ErrorState, LoadingState } from './Feedback';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; lists: FavoriteLists };
 export function FavoritesSections(): ReactElement | null {
+  const { community } = useServices();
   const { user } = useSession();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -29,3 +30,4 @@ export function FavoritesSections(): ReactElement | null {
     </section>
   </div>;
 }
+

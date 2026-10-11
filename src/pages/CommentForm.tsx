@@ -2,10 +2,11 @@ import { useState, type ReactElement } from 'react';
 import { ReviewTextForm } from '../components/ReviewTextForm';
 import { useSession } from '../session/SessionProvider';
 import { RequireSession } from '../session/RequireSession';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 
 interface CommentFormProps { reviewId: string; authorId: string; onSaved(): void; }
 function CommentControl({ reviewId, onSaved }: CommentFormProps): ReactElement {
+  const { community } = useServices();
   const { user } = useSession();
   const [version, setVersion] = useState(0);
   const [success, setSuccess] = useState(false);
@@ -23,3 +24,4 @@ export function CommentForm(props: CommentFormProps): ReactElement | null {
   if (user?.id === props.authorId) return null;
   return <RequireSession><CommentControl key={`${user?.id}-${props.reviewId}`} {...props} /></RequireSession>;
 }
+

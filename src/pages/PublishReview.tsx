@@ -1,13 +1,14 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import type { Review } from '../models';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import { CommunityError } from '../services/communityContracts';
 import { useSession } from '../session/SessionProvider';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { ReviewTextForm } from '../components/ReviewTextForm';
 
 function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }): ReactElement {
+  const { community } = useServices();
   const { user } = useSession();
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,3 +41,4 @@ export function PublishReview(props: { gameId: string; onSaved(): void }): React
   const { user } = useSession();
   return user ? <PublishControl key={user.id} {...props} /> : null;
 }
+

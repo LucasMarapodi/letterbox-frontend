@@ -1,12 +1,13 @@
 import { useEffect, useId, useRef, useState, type ReactElement, type FormEvent } from 'react';
 import { useSession } from '../session/SessionProvider';
 import { RequireSession } from '../session/RequireSession';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import { Button } from '../components/Button';
 import { ErrorState, LoadingState } from '../components/Feedback';
 
 interface RatingFormProps { gameId: string; onSaved?: () => void; }
 function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
+  const { community } = useServices();
   const { user } = useSession();
   const groupId = useId();
   const [value, setValue] = useState<string>('0');
@@ -50,3 +51,4 @@ export function RatingForm(props: RatingFormProps): ReactElement {
   const { user } = useSession();
   return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={`${user?.id}-${props.gameId}`} {...props} /></RequireSession></section>;
 }
+

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import type { Connections } from '../services/communityContracts';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { Avatar } from './Avatar';
@@ -8,6 +8,7 @@ import { EmptyState, ErrorState, LoadingState } from './Feedback';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; connections: Connections };
 export function ConnectionsSections({ profileId }: { profileId: string }): ReactElement {
+  const { community } = useServices();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -24,3 +25,4 @@ export function ConnectionsSections({ profileId }: { profileId: string }): React
     {list.users.length ? <ul className="connections-list">{list.users.map((user) => <li key={user.id}><Avatar name={user.displayName} src={user.avatarUrl} /><Link to={`/perfil/${encodeRouteId(user.id)}`}>{user.displayName}</Link></li>)}</ul> : <EmptyState message={list.empty} />}
   </section>)}</div>;
 }
+

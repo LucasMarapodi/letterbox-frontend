@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import { useSession } from '../session/SessionProvider';
 import { Button } from './Button';
 import { ErrorState, LoadingState } from './Feedback';
@@ -8,6 +8,7 @@ import { ErrorState, LoadingState } from './Feedback';
 interface FollowProps { targetId: string; name: string; onChanged?: () => void; }
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; following: boolean };
 function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement {
+  const { community } = useServices();
   const { user } = useSession();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -36,3 +37,4 @@ export function FollowButton(props: FollowProps): ReactElement | null {
   if (user.id === props.targetId) return null;
   return <FollowControl key={`${user.id}-${props.targetId}`} {...props} />;
 }
+
