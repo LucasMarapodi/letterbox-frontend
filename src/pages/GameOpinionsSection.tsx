@@ -5,6 +5,7 @@ import type { Id } from '../models';
 import type { GameOpinions } from '../services/contracts';
 import { services } from '../services';
 import { Avatar } from '../components/Avatar';
+import { encodeRouteId } from '../routing/encodeRouteId';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 
 interface GameOpinionsSectionProps { gameId: Id; }
@@ -36,10 +37,10 @@ export function GameOpinionsSection({ gameId }: GameOpinionsSectionProps): React
         ? 'Ainda sem avaliações.'
         : `Nota média: ${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(state.opinions.averageRating)} de 5`}</p>
       {state.opinions.reviews.length ? state.opinions.reviews.map((review) => <article key={review.id} className="review-card">
-        <h3><Link to={`/reviews/${encodeURIComponent(review.id)}`}>Review de {review.author.displayName}</Link></h3>
+        <h3><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}</Link></h3>
         <div className="visitor">
           <Avatar name={review.author.displayName} src={review.author.avatarUrl} />
-          <Link to={`/perfil/${encodeURIComponent(review.author.id)}`}>{review.author.displayName}</Link>
+          <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link>
         </div>
         <p>{review.text}</p>
       </article>) : <EmptyState message="Nenhuma review publicada para este jogo." />}

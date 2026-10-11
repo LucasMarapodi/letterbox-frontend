@@ -5,6 +5,7 @@ import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
 import { services } from '../services';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
+import { GameCover } from '../components/GameCover';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
 interface GameDetailsContentProps { id: Id; }
@@ -40,9 +41,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   if (!game) return <EmptyState message="Jogo não encontrado." />;
   return <section className="game-information" aria-labelledby="game-title">
     <h2 id="game-title">{game.title}</h2>
-    {game.coverUrl
-      ? <img className="details-cover" src={game.coverUrl} alt={`Capa de ${game.title}`} />
-      : <div className="details-cover game-cover" role="img" aria-label={`Capa de ${game.title} indisponível`}>Sem capa</div>}
+    <GameCover title={game.title} src={game.coverUrl} className="details-cover" />
     <p>{game.summary.trim() || 'Descrição indisponível.'}</p>
     <dl>
       <dt>Gêneros</dt><dd>{game.genres.length ? game.genres.join(', ') : 'Gêneros não informados.'}</dd>

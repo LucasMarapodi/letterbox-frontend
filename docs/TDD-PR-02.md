@@ -31,3 +31,10 @@ Branch `feat/pr-02-catalogo-publico`, criada diretamente de `feat/us-01-a-06-fun
 - No navegador local: busca por Ecos retornou somente o jogo correspondente; ordenar Z–A e limpar restaurou os três jogos nessa ordem; abrir Ecos exibiu capa, descrição, gêneros, plataforma, data, média 4,5 e duas reviews com links.
 - `git diff --check` sem problemas. A branch anterior é ancestral da nova e não há commits de merge na fase.
 - PR preparada localmente em `docs/PR-02.md`; nenhum remoto configurado. Não há PR publicada nem merge.
+
+## Correções P2/P3 — IDs ponto e imagens com erro
+- RED: `npm run check` — 6 falhas reproduzidas, 81 testes verdes: IDs `.` e `..` no percurso cartão→página e catálogo→consulta, mais falhas de capa no cartão e nos detalhes.
+- Commit RED: `test(PR-02): reproduz IDs ponto e falhas de capa`.
+- GREEN: `npm run check` — 87 testes aprovados; lint, tipos e build aprovados.
+- Os testes verificam que a URL gerada não é normalizada por `new URL`, que o ID original chega ao serviço e que `~.`/`~..` e percentuais literais continuam distintos.
+- `GameCover` compartilha a alternativa acessível “Sem capa” para URL ausente ou erro da imagem; mudar a URL permite uma nova tentativa.

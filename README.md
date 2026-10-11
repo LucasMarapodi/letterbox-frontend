@@ -43,6 +43,8 @@ Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para 
 
 `Button` usa botão nativo e não submete formulários por padrão. `TextField` associa seu rótulo com ID próprio ou fornecido. `GameCard` oferece link com ID codificado. `Avatar` oferece iniciais sem foto ou quando a imagem falha. `LoadingState`, `ErrorState` e `EmptyState` recebem mensagens; o erro pode oferecer uma nova tentativa.
 
+`GameCover`, compartilhado por cartões e detalhes, mostra “Sem capa” para URL ausente ou erro de carregamento e permite uma nova tentativa ao receber outra URL. `encodeRouteId` gera URLs seguras inclusive para IDs `.`/`..`; sua representação é documentada em `docs/CONTRACTS.md`.
+
 A prévia inicial `FoundationPreview` permanece como exemplo isolado com testes de componentes; a Home agora apresenta o catálogo. Seus testes usam um serviço substituto e cobrem carregamento, ausência e rejeição com recuperação.
 
 ## Catálogo público — PR-02

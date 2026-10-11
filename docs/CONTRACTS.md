@@ -3,7 +3,8 @@
 Estes tipos descrevem somente a necessidade dos clientes mockados. Não são DTOs definitivos da API REST e não espelham a IGDB.
 
 - Identificadores são strings opacas. Não converter para números nem presumir sequências.
-- Links codificam o ID com `encodeURIComponent` uma única vez. Nas rotas atuais, `useOpaqueRouteId` lê o último segmento do pathname original e decodifica uma única vez, preservando a distinção entre `game/42` e o texto literal `game%2F42`. Não usar o valor de `useParams` diretamente para consultas por ID: o roteador pode converter `%2F` literal em `/`. O hook considera barra final opcional; deve ser adaptado se o ID deixar de ser o último segmento da rota.
+- Links usam `encodeRouteId`. IDs `.` e `..` usam segmentos `~.` e `~..`, evitando sua interpretação como diretórios pelo navegador/roteador. Nos demais IDs, aplica-se `encodeURIComponent` uma única vez, escapando também `~` como `%7E` para não colidir com esses marcadores. IDs literais `~.` e `~..` continuam distintos de `.` e `..`.
+- Nas rotas atuais, `useOpaqueRouteId` lê o último segmento do pathname original, reconhece os marcadores antes de decodificar e preserva a distinção entre `game/42` e o texto literal `game%2F42`. Não usar o valor de `useParams` diretamente para consultas por ID: o roteador pode converter `%2F` literal em `/`. O hook considera barra final opcional; deve ser adaptado se o ID deixar de ser o último segmento da rota. URLs externas devem usar a mesma codificação: navegadores normalizam segmentos brutos `.`/`..`, inclusive `%2E`/`%2E%2E`, antes de a aplicação recebê-los.
 - Datas das fixtures são strings ISO; datas de lançamento, capas, fotos e médias podem estar ausentes (`null`).
 - Gêneros e plataformas são nomes para exibição. Mapeamento dos dados da IGDB pertence ao backend.
 - `Rating` e `Review` são independentes. Não exigir nota para texto ou texto para nota.

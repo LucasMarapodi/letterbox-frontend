@@ -13,6 +13,7 @@ export function useOpaqueRouteId(parameter?: RouteIdParameter): Id | undefined {
   // O pathname original mantém essa informação: decodificar exatamente uma vez.
   const segment: string | undefined = pathname.replace(/\/+$/, '').split('/').at(-1);
   if (segment === undefined) return undefined;
+  if (segment === '~.' || segment === '~..') return segment.slice(1);
   try {
     return decodeURIComponent(segment);
   } catch {
