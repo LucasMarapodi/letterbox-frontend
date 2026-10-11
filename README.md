@@ -24,6 +24,7 @@ npm run check
 - `src/mocks`: fixtures e implementações em memória; acessíveis apenas pela composição dos serviços e pelos testes.
 - `src/App.tsx`: composição da aplicação.
 - `src/main.tsx`: montagem no DOM.
+- `src/routing`: extração de IDs opacos a partir da URL, preservando percentuais literais.
 - `tests`: testes de comportamento e tipos; dados e DOM isolados entre testes.
 - `docs`: decisões e evidências de TDD.
 

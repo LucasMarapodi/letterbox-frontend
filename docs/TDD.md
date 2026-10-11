@@ -46,3 +46,10 @@ O sandbox travou o Vitest; validações são executadas com a autorização conc
 - Nenhum `any`, `@ts-ignore` ou `@ts-nocheck` em `src` ou `tests`.
 - Nenhum remoto configurado (`git remote -v` sem saída). Descrição da PR preparada localmente em `docs/PR-01.md`; publicação permanece pendente.
 - US-07 a US-31 não implementadas. Páginas futuras continuam provisórias e os contratos permanecem abertos.
+
+## Correção da US-05 — IDs opacos
+- RED: `npm run check` — 4 falhas reproduzidas, 42 testes verdes. O clique no GameCard com `game%2F42` chegava como `game/42`; o acesso direto às rotas de jogos, reviews e perfis apresentava a mesma alteração.
+- Commit RED: `test(US-05): reproduz alteracao de IDs opacos no percurso completo`.
+- GREEN: `npm run check` — 46 testes aprovados; lint, tipos e build aprovados.
+- Novas regressões cobrem clique do cartão até a página, URL direta com barra final, `%2F` literal, barra real, escapes aninhados, percentual, Unicode, interrogação e fragmento como conteúdo do ID.
+- `useOpaqueRouteId` preserva a informação do pathname original; a codificação dos links e os contratos dos serviços não foram alterados.

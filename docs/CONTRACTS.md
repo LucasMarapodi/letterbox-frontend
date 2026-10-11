@@ -3,6 +3,7 @@
 Estes tipos descrevem somente a necessidade dos clientes mockados. Não são DTOs definitivos da API REST e não espelham a IGDB.
 
 - Identificadores são strings opacas. Não converter para números nem presumir sequências.
+- Links codificam o ID com `encodeURIComponent` uma única vez. Nas rotas atuais, `useOpaqueRouteId` lê o último segmento do pathname original e decodifica uma única vez, preservando a distinção entre `game/42` e o texto literal `game%2F42`. Não usar o valor de `useParams` diretamente para consultas por ID: o roteador pode converter `%2F` literal em `/`. O hook considera barra final opcional; deve ser adaptado se o ID deixar de ser o último segmento da rota.
 - Datas das fixtures são strings ISO; datas de lançamento, capas, fotos e médias podem estar ausentes (`null`).
 - Gêneros e plataformas são nomes para exibição. Mapeamento dos dados da IGDB pertence ao backend.
 - `Rating` e `Review` são independentes. Não exigir nota para texto ou texto para nota.
