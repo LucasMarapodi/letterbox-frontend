@@ -3,8 +3,11 @@ import { HomePage } from './pages/HomePage';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { GameDetailsPage } from './pages/GameDetailsPage';
+import type { AuthService } from './services/authContracts';
 
-export function AppRoutes(): ReactElement {
+export interface AppRoutesProps { authService?: AuthService; }
+
+export function AppRoutes(_props: AppRoutesProps): ReactElement {
   return <>
     <header>
       <nav aria-label="Navegação principal">
