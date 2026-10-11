@@ -16,6 +16,7 @@ import { encodeRouteId } from './routing/encodeRouteId';
 import { FeedSection } from './components/FeedSection';
 import { NotificationBell } from './components/NotificationBell';
 import type { ApplicationServices } from './services/runtime';
+import { CommunityPage } from './pages/CommunityPage';
 
 export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
@@ -30,6 +31,7 @@ function ApplicationRoutes(): ReactElement {
       <div className="header-controls">
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
+        <Link to="/comunidade">Comunidade</Link>
         {user && <NotificationBell key={user.id} />}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
@@ -38,7 +40,8 @@ function ApplicationRoutes(): ReactElement {
       </div>
     </header>
     <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
-      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={user.id} /> : null} feed={user ? <FeedSection key={user.id} /> : null} />} />
+      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={`favorites-${user.id}`} /> : null} feed={user ? <FeedSection key={`feed-${user.id}`} /> : null} />} />
+      <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
       <Route path="/perfil/:userId" element={<ProfilePage />} />

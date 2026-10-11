@@ -7,6 +7,9 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+.community-navigation { margin: 1.5rem 0 2rem; gap: 0.6rem; }
+.community-navigation button { background: #1c272c; color: #c6ddd4; }
+.community-navigation button[aria-pressed="true"] { background: #67daa3; color: #123427; }
 main, .header-controls, .session-menu, .session-user, .profile-overview > div, .favorites-sections > section, .connections-sections > section { min-width: 0; }
 .header-controls { flex-wrap: wrap; }
 .session-menu { max-width: 100%; }
