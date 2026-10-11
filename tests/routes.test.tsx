@@ -13,7 +13,6 @@ const navigationCases: NavigationCase[] = [
   { link: 'Perfil de exemplo', heading: 'Perfil público' },
   { link: 'Entrar', heading: 'Entrar' },
   { link: 'Criar conta', heading: 'Criar conta' },
-  { link: 'Notificações', heading: 'Notificações' },
 ];
 
 test.each(navigationCases)('o link $link navega para $heading e permite voltar', async ({ link, heading }) => {
@@ -26,6 +25,14 @@ test.each(navigationCases)('o link $link navega para $heading e permite voltar',
 });
 
 interface ParameterCase { path: string; value: string; }
+test('navegação não oferece página de notificações', () => {
+  render(<MemoryRouter><AppRoutes /></MemoryRouter>);
+  expect(screen.queryByRole('link', { name: 'Notificações' })).not.toBeInTheDocument();
+});
+test('URL antiga de notificações é tratada como inexistente', () => {
+  render(<MemoryRouter initialEntries={['/notificacoes']}><AppRoutes /></MemoryRouter>);
+  expect(screen.getByRole('heading', { name: 'Página não encontrada' })).toBeVisible();
+});
 const parameterCases: ParameterCase[] = [
   { path: '/jogos/jogo-42', value: 'ID do jogo: jogo-42' },
   { path: '/reviews/review-42', value: 'ID da review: review-42' },

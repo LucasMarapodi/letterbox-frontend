@@ -12,24 +12,15 @@ const user: User = { id: 'user-1', displayName: 'Ana', username: 'ana', avatarUr
 function service(): AuthService {
   return { login: vi.fn<AuthService['login']>().mockResolvedValue(user), register: vi.fn<AuthService['register']>().mockResolvedValue(user) };
 }
-test('visitante recebe caminho de login ao abrir notificações', () => {
-  render(<MemoryRouter initialEntries={['/notificacoes']}><AppRoutes authService={service()} /></MemoryRouter>);
-  expect(screen.getByText('Entre para acessar este conteúdo.')).toBeVisible();
-  expect(screen.getByRole('link', { name: 'Entrar para continuar' })).toHaveAttribute('href', '/login');
-  expect(screen.queryByText('Esta página é provisória. Funcionalidade prevista para as próximas US.')).not.toBeInTheDocument();
-});
-test('login libera notificações e logout revoga acesso na página atual', async () => {
+test('login inicia sessão e logout preserva navegação pública', async () => {
   const interaction = userEvent.setup();
   render(<MemoryRouter initialEntries={['/login']}><AppRoutes authService={service()} /></MemoryRouter>);
   await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'ana@example.com');
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByLabelText('Usuário conectado');
-  await interaction.click(screen.getByRole('link', { name: 'Notificações' }));
-  expect(screen.queryByText('Entre para acessar este conteúdo.')).not.toBeInTheDocument();
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Entrar para continuar' })).toBeVisible();
   await interaction.click(screen.getByRole('link', { name: 'Início' }));
   expect(screen.getByRole('heading', { name: 'Jogos' })).toBeVisible();
 });
