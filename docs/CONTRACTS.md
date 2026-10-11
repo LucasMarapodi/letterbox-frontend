@@ -28,3 +28,9 @@ Cada factory clona as entradas e cada leitura retorna uma cópia independente, i
 `GameService.list(query?: GameQuery)` recebe `term` opcional. O mock procura trecho do nome sem diferenciar maiúsculas e ignora espaços nas extremidades; termo vazio restaura todos os jogos. A Home envia o termo ao submeter o formulário (Enter ou botão), sem debounce nem rede real. Essas escolhas são provisórias e não constituem regras da API definitiva.
 
 `GameQuery.sort` permite somente `name-asc` e `name-desc`, opções provisórias dos mocks. A comparação usa locale pt-BR. Sem sort o serviço conserva a ordem da fixture; a Home escolhe nome crescente inicialmente. Alterar a ordem mantém o termo da busca submetida; limpar o termo mantém a ordem escolhida. O componente não ordena dados nem filtra jogos.
+
+## Opiniões públicas — PR-02
+
+`GameService.getOpinions(id): Promise<GameOpinions>` retorna média e reviews enriquecidas com identificador, nome de exibição e avatar do autor. O mock calcula a média aritmética das notas do jogo; nenhuma nota retorna `null`, enquanto média zero é válida. Filtra reviews pelo jogo e retorna cópias independentes das entradas e outras leituras. O campo inicial `Game.averageRating` permanece provisório; a tela desta fase usa a média de `getOpinions`, sem recalcular valores no cliente.
+
+Leituras de detalhes e opiniões são independentes: uma falha nas opiniões não oculta as informações do jogo. Datas ISO das fixtures são exibidas em pt-BR/UTC, evitando mudança de dia por fuso. Opções, relacionamentos e formatos permanecem provisórios até alinhamento com a API real.

@@ -1,6 +1,6 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. Fundação das US-01 a US-06, sem backend ou acesso direto à IGDB.
+React + TypeScript + Vite. Fundação e catálogo público das US-01 a US-11, sem backend ou acesso direto à IGDB.
 
 ## Executar
 
@@ -35,7 +35,7 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 ## Rotas provisórias
 
 `/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login`, `/cadastro` e `/notificacoes`.
-As páginas de funcionalidades futuras mostram somente título, ID quando aplicável e aviso de implementação futura. Os links de exemplo na Home são atalhos temporários para verificar a navegação; não representam catálogo, sessão ou dados públicos já existentes.
+Home e detalhes do jogo oferecem catálogo público mockado. As páginas de review, perfil, login, cadastro e notificações mostram título, ID quando aplicável e aviso de implementação futura. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 
@@ -43,4 +43,12 @@ Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para 
 
 `Button` usa botão nativo e não submete formulários por padrão. `TextField` associa seu rótulo com ID próprio ou fornecido. `GameCard` oferece link com ID codificado. `Avatar` oferece iniciais sem foto ou quando a imagem falha. `LoadingState`, `ErrorState` e `EmptyState` recebem mensagens; o erro pode oferecer uma nova tentativa.
 
-A Home tem uma prévia explícita para o primeiro uso desses componentes: texto local que pode ser limpo, avatar de visitante e um único cartão fictício lido pelo serviço. Isso não implementa busca, catálogo, login, review ou persistência das fases seguintes. Os testes da prévia fornecem um serviço substituto e cobrem carregamento, ausência e rejeição com recuperação.
+A prévia inicial `FoundationPreview` permanece como exemplo isolado com testes de componentes; a Home agora apresenta o catálogo. Seus testes usam um serviço substituto e cobrem carregamento, ausência e rejeição com recuperação.
+
+## Catálogo público — PR-02
+
+Visitantes podem listar jogos, buscar pelo nome por Enter ou botão, limpar a busca, ordenar por nome e consultar detalhes, média e reviews. As opções A–Z e Z–A são provisórias. Estado sem notas aparece como ausência de avaliações, e média zero aparece como uma nota válida. Reviews oferecem links para seu conteúdo e para o autor; as páginas de destino serão implementadas nas fases correspondentes.
+
+Fixtures fictícias ilustram jogo completo, lançamento/capa ausentes, média zero e ausência de notas. Capas SVG locais em `public/covers` não usam serviços externos. Os componentes não filtram, ordenam ou calculam média: consomem os resultados da camada de serviços.
+
+Evidências de TDD: `docs/TDD-PR-02.md`. Descrição local da PR: `docs/PR-02.md`. A branch `feat/pr-02-catalogo-publico` deriva da branch da fundação, sem merge. A PR ainda não foi publicada por ausência de remoto.

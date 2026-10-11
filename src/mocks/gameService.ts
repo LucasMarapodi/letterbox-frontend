@@ -1,6 +1,7 @@
 import type { Game, Rating, Review, User } from '../models';
-import type { GameQuery, GameService } from '../services/contracts';
+import type { GameOpinions, GameQuery, GameService, PublicReview } from '../services/contracts';
 import { gameFixtures } from './games';
+import { ratingFixtures, reviewFixtures, userFixtures } from './opinions';
 
 export interface MockGameOptions {
   games?: Game[];
@@ -13,6 +14,9 @@ export interface MockGameOptions {
 export function createMockGameService(options: MockGameOptions = {}): GameService {
   const games: Game[] = structuredClone(options.games ?? gameFixtures);
   const error: Error | undefined = options.error;
+  const ratings: Rating[] = structuredClone(options.ratings ?? ratingFixtures);
+  const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
+  const users: User[] = structuredClone(options.users ?? userFixtures);
   return {
     async list(query: GameQuery = {}): Promise<Game[]> {
       if (error) throw error;
@@ -29,6 +33,20 @@ export function createMockGameService(options: MockGameOptions = {}): GameServic
       const game: Game | undefined = games.find((item) => item.id === id);
       return game ? structuredClone(game) : null;
     },
-    async getOpinions() { throw new Error('Leitura de opiniões não implementada.'); },
+    async getOpinions(id): Promise<GameOpinions> {
+      if (error) throw error;
+      const gameRatings: Rating[] = ratings.filter((rating) => rating.gameId === id);
+      const averageRating: number | null = gameRatings.length
+        ? gameRatings.reduce((total, rating) => total + rating.value, 0) / gameRatings.length
+        : null;
+      const publicReviews: PublicReview[] = reviews.filter((review) => review.gameId === id).map((review) => {
+        const author: User | undefined = users.find((user) => user.id === review.userId);
+        return {
+          ...review,
+          author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null },
+        };
+      });
+      return structuredClone({ averageRating, reviews: publicReviews } satisfies GameOpinions);
+    },
   };
 }

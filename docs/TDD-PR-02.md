@@ -21,3 +21,13 @@ Branch `feat/pr-02-catalogo-publico`, criada diretamente de `feat/us-01-a-06-fun
 - RED: `npm run check` — 7 testes falharam pela ausência de dados, carregamento, mensagem de inexistência e consulta pelo ID; 57 testes anteriores verdes.
 - Commit RED: `test(US-10): especifica detalhes publicos ausencia erro e consulta por ID`.
 - GREEN: `npm run check` — 64 testes aprovados; lint, tipos e build aprovados.
+
+## US-11
+- RED: `npm run check` — 11 falhas de cálculo/leitura de opiniões e apresentação de média/reviews/links; 64 testes anteriores verdes.
+- Commit RED: `test(US-11): especifica media reviews publicas e links para autores`.
+- GREEN: `npm run check` — 75 testes aprovados em 11 arquivos, incluindo 3 testes de tipos; lint, tipos e build aprovados.
+
+## Verificação final
+- No navegador local: busca por Ecos retornou somente o jogo correspondente; ordenar Z–A e limpar restaurou os três jogos nessa ordem; abrir Ecos exibiu capa, descrição, gêneros, plataforma, data, média 4,5 e duas reviews com links.
+- `git diff --check` sem problemas. A branch anterior é ancestral da nova e não há commits de merge na fase.
+- PR preparada localmente em `docs/PR-02.md`; nenhum remoto configurado. Não há PR publicada nem merge.
