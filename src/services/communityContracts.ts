@@ -14,4 +14,5 @@ export interface CommunityService {
   getReview(id: Id): Promise<ReviewDetails | null>;
   editReview(id: Id, text: string, user: User | null): Promise<Review>;
   getComments(reviewId: Id): Promise<PublicComment[]>;
+  comment(reviewId: Id, text: string, user: User | null): Promise<Comment>;
 }

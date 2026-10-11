@@ -12,6 +12,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   ]);
   let sequence = 1;
   return {
+    async comment() { throw new Error('Envio de comentário não implementado.'); },
     async getComments(reviewId) {
       return structuredClone(comments.filter((comment) => comment.reviewId === reviewId).map((comment) => {
         const author = users.find((item) => item.id === comment.userId);
