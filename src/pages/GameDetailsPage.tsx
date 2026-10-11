@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
 import { GameCover } from '../components/GameCover';
 import { RatingForm } from './RatingForm';
+import { PublishReview } from './PublishReview';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
 interface GameDetailsContentProps { id: Id; }
@@ -22,6 +23,7 @@ function releaseLabel(value: string | null): string {
 function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   const [state, setState] = useState<GameState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
+  const [opinionsVersion, setOpinionsVersion] = useState(0);
   useEffect(() => {
     let active: boolean = true;
     services.games.getById(id).then(
@@ -50,7 +52,8 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
       <dt>Lançamento</dt><dd>{releaseLabel(game.releaseDate)}</dd>
     </dl>
     <RatingForm gameId={id} />
-    <GameOpinionsSection key={id} gameId={id} />
+    <PublishReview gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
+    <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
   </section>;
 }
 
