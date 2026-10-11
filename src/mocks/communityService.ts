@@ -15,6 +15,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   const favorites: Favorite[] = [];
   const follows: { followerId: string; followedId: string }[] = [];
   return {
+    async getRecentReviews() { throw new Error('US-33 pendente'); },
     async getFeed(user) {
       if (!user) throw new CommunityError('session-required');
       const followed = new Set(follows.filter((relation) => relation.followerId === user.id).map((relation) => relation.followedId));
