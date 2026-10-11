@@ -12,3 +12,8 @@ Layout GREEN real: Home, próprio perfil, jogo e review em viewports 320, 768 e 
 
 ## US-30
 RED: três falhas esperadas e 213 testes aprovados; commit c5f4156. GREEN: npm run check aprovado, 216 testes, lint, tipos e build. Configuração central, seleção mock/custom, mesma operação em mock/fake e Home com catálogo alternativo pela mesma interface. Telas de produção consomem ServiceProvider/useServices; fachadas preservam compatibilidade. Operações e pendências em SERVICE-INTEGRATION.md.
+
+## US-31 — Validação integrada
+Suíte existente reutilizada e duas lacunas de percurso cobertas com serviços isolados completos via AppRoutes, sem spies: cadastro/login/nota/publicação/edição/favoritos/reabertura/logout; busca/jogo/review/comentário/seguir/feed/notificações/destino. Os testes ficaram verdes sem defeito adicional; nenhuma implementação nova nem RED artificial nessa etapa de validação, conforme US-31. Total: 218 testes, lint, TypeScript estrito e build aprovados.
+
+Navegador após US-30: login de Ana e consulta dos dois eventos pelo sino; Escape retornou foco ao sino; logout removeu o sino. Login e cadastro em viewport 320 x 850 com clientWidth = scrollWidth = 320. Viewport restaurado. Evidência visual pr08-notificacoes.png na pasta de visualizações do chat.
