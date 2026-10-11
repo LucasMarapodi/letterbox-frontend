@@ -8,6 +8,7 @@ export class CommunityError extends Error {
 }
 export interface CommunityService {
   rate(gameId: Id, value: number, user: User | null): Promise<Rating>;
+  getRating(gameId: Id, user: User | null): Promise<Rating | null>;
   publish(gameId: Id, text: string, user: User | null): Promise<Review>;
   findOwnReview(gameId: Id, user: User): Promise<Review | null>;
   getOpinions(gameId: Id): Promise<GameOpinions>;

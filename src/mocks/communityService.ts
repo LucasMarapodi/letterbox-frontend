@@ -12,6 +12,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   ]);
   let sequence = 1;
   return {
+    async getRating() { return null; },
     async comment(reviewId, text, user) {
       if (!user) throw new CommunityError('session-required');
       if (!reviews.some((review) => review.id === reviewId)) throw new CommunityError('not-found');

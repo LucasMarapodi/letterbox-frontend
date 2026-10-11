@@ -67,3 +67,42 @@ test('estrelas permitem seleção por teclado e envio da nota escolhida', async 
   await interaction.click(screen.getByRole('button', { name: 'Salvar nota' }));
   expect(save).toHaveBeenCalledWith('game-1', 3, ana);
 });
+test('serviço recupera nota por usuário e jogo, incluindo zero, sem expor referência mutável', async () => {
+  const service = createMockCommunityService();
+  await service.rate('game-1', 5, ana);
+  const saved = await service.getRating('game-1', ana);
+  expect(saved?.value).toBe(5);
+  if (saved) saved.value = 0;
+  expect((await service.getRating('game-1', ana))?.value).toBe(5);
+  expect((await service.getRating('game-2', ana))?.value).toBe(0);
+  expect(await service.getRating('game-1', { ...ana, id: 'novo' })).toBeNull();
+  await expect(service.getRating('game-1', null)).rejects.toMatchObject({ code: 'session-required' });
+});
+test('reabrir jogo recupera cinco estrelas e reenviar mantém a nota', async () => {
+  await community.rate('game-1', 5, ana);
+  const interaction = userEvent.setup();
+  render(<MemoryRouter initialEntries={['/login']}><AppRoutes /></MemoryRouter>);
+  await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'ana@example.com');
+  await interaction.type(screen.getByLabelText('Senha'), 'teste123');
+  await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  await screen.findByLabelText('Usuário conectado');
+  await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
+  expect(await screen.findByRole('radio', { name: '5 estrelas' })).toBeChecked();
+  await interaction.click(screen.getByRole('link', { name: 'Início' }));
+  await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
+  expect(await screen.findByRole('radio', { name: '5 estrelas' })).toBeChecked();
+  await interaction.click(screen.getByRole('button', { name: 'Salvar nota' }));
+  expect(await screen.findByText('Nota 5 salva.')).toBeVisible();
+});
+test('erro ao consultar nota bloqueia envio e permite recuperar a nota', async () => {
+  vi.spyOn(community, 'getRating').mockRejectedValueOnce(new Error('Falha')).mockResolvedValueOnce({ id: 'r1', userId: ana.id, gameId: 'game-1', value: 5 });
+  const save = vi.spyOn(community, 'rate');
+  const interaction = userEvent.setup();
+  render(<MemoryRouter><SessionProvider service={{ async login() { return ana; }, async register() { return ana; } }}><RatingExample /></SessionProvider></MemoryRouter>);
+  await interaction.click(screen.getByRole('button', { name: 'Iniciar sessão' }));
+  expect(await screen.findByText('Não foi possível carregar sua nota.')).toBeVisible();
+  expect(screen.queryByRole('button', { name: 'Salvar nota' })).not.toBeInTheDocument();
+  expect(save).not.toHaveBeenCalled();
+  await interaction.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+  expect(await screen.findByRole('radio', { name: '5 estrelas' })).toBeChecked();
+});
