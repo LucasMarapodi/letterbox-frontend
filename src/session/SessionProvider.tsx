@@ -5,6 +5,7 @@ import type { AuthService, LoginCredentials } from '../services/authContracts';
 interface SessionContextValue {
   user: User | null;
   signIn(credentials: LoginCredentials): Promise<User>;
+  signOut(): void;
   authService: AuthService;
 }
 interface SessionProviderProps { children: ReactNode; service: AuthService; }
@@ -17,7 +18,8 @@ export function SessionProvider({ children, service }: SessionProviderProps): Re
     setUser(result);
     return result;
   }
-  const value: SessionContextValue = { user, signIn, authService: service };
+  function signOut(): void { setUser(null); }
+  const value: SessionContextValue = { user, signIn, signOut, authService: service };
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 

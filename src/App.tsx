@@ -7,13 +7,14 @@ import type { AuthService } from './services/authContracts';
 import { authService as defaultAuthService } from './services/auth';
 import { SessionProvider, useSession } from './session/SessionProvider';
 import { LoginPage } from './pages/LoginPage';
+import { RequireSession } from './session/RequireSession';
 
 import { RegisterPage } from './pages/RegisterPage';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
 function ApplicationRoutes(): ReactElement {
-  const { user } = useSession();
+  const { user, signOut } = useSession();
   return <>
     <header>
       <nav aria-label="Navegação principal">
@@ -23,6 +24,7 @@ function ApplicationRoutes(): ReactElement {
         <Link to="/notificacoes">Notificações</Link>
       </nav>
       {user && <span aria-label="Usuário conectado">{user.displayName}</span>}
+      {user && <button type="button" onClick={signOut}>Sair</button>}
     </header>
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -31,7 +33,7 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
-      <Route path="/notificacoes" element={<PlaceholderPage title="Notificações" />} />
+      <Route path="/notificacoes" element={<main><h1>Notificações</h1><RequireSession><p>Esta página é provisória. Funcionalidade prevista para as próximas US.</p></RequireSession></main>} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
     </Routes>
   </>;
