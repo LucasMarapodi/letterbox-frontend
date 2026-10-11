@@ -57,7 +57,7 @@ Evidências de TDD: `docs/TDD-PR-02.md`. Descrição local da PR: `docs/PR-02.md
 
 ## Autenticação mockada — PR-03
 
-Login, cadastro sem login automático, sessão em memória e logout. Notificações usa `RequireSession`, proteção reutilizável para ações das próximas US. Conteúdo público continua acessível a visitantes.
+Login, cadastro sem login automático, sessão em memória e logout. `RequireSession` oferece proteção reutilizável para ações das próximas US. Conteúdo público continua acessível a visitantes.
 
 Credenciais fictícias: `ana@example.com` / `teste123`. Decisões e limitações em `docs/AUTH.md`; evidências em `docs/TDD-PR-03.md`; descrição para revisão em `docs/PR-03.md`.
 
