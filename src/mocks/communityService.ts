@@ -21,7 +21,14 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
   }
   return {
-    async getGamesInDiscussion() { throw new Error('US-36 pendente'); },
+    async getGamesInDiscussion(period) {
+      const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));
+      const gameByReview = new Map(reviews.map((review) => [review.id, review.gameId]));
+      return structuredClone(gameFixtures.map((game) => {
+        const activity = eligible.filter((comment) => gameByReview.get(comment.reviewId) === game.id).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+        return { game, commentCount: activity.length, lastCommentAt: activity[0]?.createdAt ?? '' };
+      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || a.game.id.localeCompare(b.game.id)));
+    },
     async getMostCommented(period) {
       const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));
       return structuredClone(reviews.map((review) => {

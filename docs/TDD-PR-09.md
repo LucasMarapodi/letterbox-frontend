@@ -13,3 +13,6 @@ RED: 5 falhas e 224 testes aprovados; commit 896361d. GREEN: 229 testes, lint, t
 
 ## US-35
 RED: 4 falhas e 229 aprovados; commit 03eb3b1. GREEN: 233 testes, lint, tipos e build. Contagem por comentário elegível, reviews antigas, desempates, estados e resposta atrasada descartada.
+
+## US-36
+RED: 4 falhas e 233 aprovados; commit bd9aa27. GREEN: 237 testes, lint, tipos e build. Soma entre reviews, períodos, desempates por atividade/ID, capa ausente, link completo, erro/retry/vazio e resposta atrasada.

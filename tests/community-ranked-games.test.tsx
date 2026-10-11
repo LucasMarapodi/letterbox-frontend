@@ -29,7 +29,7 @@ test('desempata por último comentário e ID e mantém jogo sem capa', async () 
   const cards = within(screen.getByRole('region', { name: 'Jogos em discussão' })).getAllByRole('article');
   expect(within(cards[0]).getByText('1 comentário no período')).toBeVisible();
   await interaction.click(within(cards[0]).getByRole('link'));
-  expect(await screen.findByRole('heading', { name: 'Atlas de Cinzas', level: 1 })).toBeVisible();
+  expect(await screen.findByRole('heading', { name: 'Atlas de Cinzas', level: 2 })).toBeVisible();
 });
 async function open(): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup(); render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes /></MemoryRouter>);
