@@ -8,6 +8,7 @@ import { GameOpinionsSection } from './GameOpinionsSection';
 import { GameCover } from '../components/GameCover';
 import { RatingForm } from './RatingForm';
 import { PublishReview } from './PublishReview';
+import { FavoriteButton } from '../components/FavoriteButton';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
 interface GameDetailsContentProps { id: Id; }
@@ -56,6 +57,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     </dl>
     </div>
     <aside className="game-actions" aria-label="Avaliar e publicar">
+    <FavoriteButton kind="game" targetId={id} />
     <RatingForm gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
     <PublishReview gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
     </aside>

@@ -46,6 +46,10 @@ textarea { width: 100%; min-height: 9rem; display: block; margin: 0.6rem 0 1rem;
 .profile-overview .avatar { width: 5rem; height: 5rem; flex-shrink: 0; font-size: 1.6rem; }
 .profile-overview h2 { margin: 0; }
 .profile-username { margin: 0.2rem 0; color: #91aaa3; }
+.favorite-control { margin: 0 0 1rem; }
+.favorite-control button { background: #253e35; border-color: #4c7866; color: #c2f0da; }
+.favorite-control button[aria-pressed="true"] { background: #67daa3; color: #123427; }
+.favorite-login { display: inline-block; margin-bottom: 1rem; font-size: 0.8rem; }
 .review-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 :root { background: #101619; color: #f3f5f4; font-family: 'Segoe UI', system-ui, sans-serif; }
 body { background: radial-gradient(ellipse at 50% 0%, #263b3a 0, #141f23 34rem, #101619 65rem); min-height: 100vh; }

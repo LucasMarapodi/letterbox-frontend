@@ -1,6 +1,6 @@
 import type { CommunityService } from '../services/communityContracts';
 import { CommunityError } from '../services/communityContracts';
-import type { Rating, Review, User, Comment } from '../models';
+import type { Rating, Review, User, Comment, Favorite } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
 export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[] } = {}): CommunityService {
@@ -11,9 +11,22 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     { id: 'comment-1', reviewId: 'review-1', userId: 'user-2', text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
   ]);
   let sequence = 1;
+  const favorites: Favorite[] = [];
   return {
-    async getFavorite() { throw new Error('Favoritos não implementados.'); },
-    async setFavorite() { throw new Error('Favoritos não implementados.'); },
+    async getFavorite(kind, targetId, user) {
+      if (!user) throw new CommunityError('session-required');
+      return structuredClone(favorites.find((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId) ?? null);
+    },
+    async setFavorite(kind, targetId, selected, user) {
+      if (!user) throw new CommunityError('session-required');
+      if (!gameFixtures.some((game) => game.id === targetId)) throw new CommunityError('not-found');
+      const index = favorites.findIndex((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId);
+      if (!selected) { if (index >= 0) favorites.splice(index, 1); return null; }
+      if (index >= 0) return structuredClone(favorites[index]);
+      const favorite: Favorite = { id: `mock-favorite-${sequence++}`, userId: user.id, targetType: kind, targetId };
+      favorites.push(favorite);
+      return structuredClone(favorite);
+    },
     async getProfile(id, sessionUser = null) {
       if (sessionUser?.id === id && !users.some((item) => item.id === id)) users.push(structuredClone(sessionUser));
       const user = users.find((item) => item.id === id);
