@@ -3,7 +3,7 @@ import type { GameOpinions, PublicReview } from './contracts';
 export interface ReviewDetails extends PublicReview { game: { id: Id; title: string }; }
 export interface PublicComment extends Comment { author: Pick<User, 'id' | 'displayName' | 'avatarUrl'>; }
 export interface PublicProfile { user: User; reviews: ReviewDetails[]; }
-export type FavoriteKind = 'game';
+export type FavoriteKind = 'game' | 'review';
 
 export class CommunityError extends Error {
   constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found') { super(code); }
