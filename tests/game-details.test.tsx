@@ -9,12 +9,13 @@ import type { GameService, Services } from '../src/services/contracts';
 import { deferred, makeGame } from './fixtures';
 
 vi.mock('../src/services', () => ({ services: {
-  games: { list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>() },
+  games: { list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
 } } satisfies { services: Services }));
 
 beforeEach(() => {
   vi.mocked(services.games.list).mockReset().mockResolvedValue([]);
   vi.mocked(services.games.getById).mockReset().mockResolvedValue(null);
+  vi.mocked(services.games.getOpinions).mockReset().mockResolvedValue({ averageRating: null, reviews: [] });
 });
 
 function renderDetails(id: string = 'game-1'): void {

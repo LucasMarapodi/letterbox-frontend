@@ -1,10 +1,13 @@
-import type { Game } from '../models';
+import type { Game, Rating, Review, User } from '../models';
 import type { GameQuery, GameService } from '../services/contracts';
 import { gameFixtures } from './games';
 
 export interface MockGameOptions {
   games?: Game[];
   error?: Error;
+  ratings?: Rating[];
+  reviews?: Review[];
+  users?: User[];
 }
 
 export function createMockGameService(options: MockGameOptions = {}): GameService {
@@ -26,5 +29,6 @@ export function createMockGameService(options: MockGameOptions = {}): GameServic
       const game: Game | undefined = games.find((item) => item.id === id);
       return game ? structuredClone(game) : null;
     },
+    async getOpinions() { throw new Error('Leitura de opiniões não implementada.'); },
   };
 }

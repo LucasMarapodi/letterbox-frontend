@@ -9,7 +9,7 @@ import type { GameService, Services } from '../src/services/contracts';
 import { deferred, makeGame } from './fixtures';
 
 vi.mock('../src/services', () => ({ services: {
-  games: { list: vi.fn<GameService['list']>().mockResolvedValue([]), getById: vi.fn<GameService['getById']>().mockResolvedValue(null) },
+  games: { list: vi.fn<GameService['list']>().mockResolvedValue([]), getById: vi.fn<GameService['getById']>().mockResolvedValue(null), getOpinions: vi.fn<GameService['getOpinions']>().mockResolvedValue({ averageRating: null, reviews: [] }) },
 } } satisfies { services: Services }));
 
 function renderHome(): void { render(<MemoryRouter><HomePage /></MemoryRouter>); }

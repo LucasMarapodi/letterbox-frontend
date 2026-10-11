@@ -9,6 +9,7 @@ vi.mock('../src/services', () => ({
     games: {
       async list(): Promise<Game[]> { return []; },
       async getById(): Promise<null> { return null; },
+      async getOpinions() { return { averageRating: null, reviews: [] }; },
     },
   },
 } satisfies { services: Services }));
