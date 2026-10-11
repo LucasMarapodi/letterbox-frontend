@@ -185,6 +185,17 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .profile-overview { flex-wrap: wrap; }
 .follow-control { margin-left: auto; }
 .feed-section { margin-top: 3rem; }
+.notification-bell { display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem; background: transparent; color: #c8dadf; border-color: transparent; }
+.notification-bell:hover:not(:disabled) { background: #253b3c; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1rem; background: #071014c9; }
+.notification-modal { width: min(100%, 34rem); max-height: 80dvh; overflow: auto; border: 1px solid #405259; border-radius: 24px; padding: 1.5rem; background: #1c272c; box-shadow: 0 24px 80px #0008; }
+.modal-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.modal-heading h2 { margin: 0; }
+.modal-heading button { background: transparent; color: #d4e5e9; font-size: 1.4rem; }
+.notification-list { list-style: none; padding: 0; margin-bottom: 0; }
+.notification-list li + li { border-top: 1px solid #33464b; }
+.notification-list a { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; text-decoration: none; }
+.notification-list time { display: block; margin-top: 0.4rem; color: #98b0ba; font-size: 0.8rem; }
 .feed-description { color: #98b0ba; }
 .feed-author { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 .feed-author time { margin-left: auto; color: #98b0ba; font-size: 0.8rem; }

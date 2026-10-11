@@ -14,6 +14,7 @@ import { Avatar } from './components/Avatar';
 import { FavoritesSections } from './components/FavoritesSections';
 import { encodeRouteId } from './routing/encodeRouteId';
 import { FeedSection } from './components/FeedSection';
+import { NotificationBell } from './components/NotificationBell';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
@@ -26,6 +27,7 @@ function ApplicationRoutes(): ReactElement {
       <div className="header-controls">
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
+        {user && <NotificationBell key={user.id} />}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
       {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" onClick={signOut}>Sair <span aria-hidden="true">↗</span></button></div>}
