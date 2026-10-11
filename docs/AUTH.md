@@ -7,3 +7,5 @@ O adaptador é selecionado em `src/services/auth.ts`. Formulários e sessão con
 Sessão centralizada em `SessionProvider`, exclusivamente em memória. Nenhuma senha fica no contexto de sessão; o serviço retorna somente o usuário público. Recarregar remove a sessão. Não há tokens, cookies, acesso ao backend ou garantia de segurança/autorização real.
 
 E-mails dos mocks são comparados ignorando espaços externos e caixa; senhas são comparadas literalmente. Campos obrigatórios não definem política de senha. Login válido mostra sucesso e oferece retorno ao catálogo, sem redirecionamento automático.
+
+Cadastro: nome, e-mail e senha são provisórios. E-mail exige formato básico e unicidade sem diferenciar caixa/espaços externos. Não há política de senha nem login automático. ID e username são gerados apenas para preencher o modelo mock; contas ficam na memória da instância.

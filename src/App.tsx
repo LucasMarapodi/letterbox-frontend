@@ -8,6 +8,8 @@ import { authService as defaultAuthService } from './services/auth';
 import { SessionProvider, useSession } from './session/SessionProvider';
 import { LoginPage } from './pages/LoginPage';
 
+import { RegisterPage } from './pages/RegisterPage';
+
 export interface AppRoutesProps { authService?: AuthService; }
 
 function ApplicationRoutes(): ReactElement {
@@ -28,7 +30,7 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/reviews/:reviewId" element={<PlaceholderPage title="Review" parameter="reviewId" parameterLabel="ID da review" />} />
       <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/cadastro" element={<PlaceholderPage title="Criar conta" />} />
+      <Route path="/cadastro" element={<RegisterPage />} />
       <Route path="/notificacoes" element={<PlaceholderPage title="Notificações" />} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
     </Routes>
@@ -42,3 +44,4 @@ export function AppRoutes({ authService = defaultAuthService }: AppRoutesProps):
 export default function App(): ReactElement {
   return <BrowserRouter><AppRoutes /></BrowserRouter>;
 }
+
