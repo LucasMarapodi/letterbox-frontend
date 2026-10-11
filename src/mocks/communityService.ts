@@ -14,6 +14,8 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   let sequence = 1;
   const favorites: Favorite[] = [];
   return {
+    async isFollowing() { throw new Error('US-25 pendente'); },
+    async setFollowing() { throw new Error('US-25 pendente'); },
     async getFavorites(user) {
       if (!user) throw new CommunityError('session-required');
       const own = favorites.filter((favorite) => favorite.userId === user.id);
