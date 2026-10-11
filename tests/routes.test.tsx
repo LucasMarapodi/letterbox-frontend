@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import { AppRoutes } from '../src/App';
+import { GameCard } from '../src/components/GameCard';
+import type { Game } from '../src/models';
 
 interface NavigationCase { link: string; heading: string; }
 const navigationCases: NavigationCase[] = [
@@ -41,4 +43,32 @@ test('uma URL desconhecida apresenta mensagem e caminho de retorno', async () =>
   expect(screen.getByRole('heading', { name: 'Página não encontrada' })).toBeVisible();
   await user.click(screen.getByRole('link', { name: 'Início' }));
   expect(screen.getByRole('heading', { name: 'Game Reviews' })).toBeVisible();
+});
+
+const opaqueIds: string[] = ['game%2F42', 'game/42', 'game%2f42', 'game%252F42', 'game%42', 'jogo ç?#42'];
+
+test.each(opaqueIds)('preserva o ID literal %s no percurso cartão → página', async (id) => {
+  const user = userEvent.setup();
+  const game: Game = { id, title: 'Jogo com ID opaco', summary: '', coverUrl: null, genres: [], platforms: [], releaseDate: null, averageRating: null };
+  render(<MemoryRouter initialEntries={['/cartao']}>
+    <Routes>
+      <Route path="/cartao" element={<GameCard game={game} />} />
+      <Route path="*" element={<AppRoutes />} />
+    </Routes>
+  </MemoryRouter>);
+  await user.click(screen.getByRole('link', { name: game.title }));
+  expect(screen.getByRole('heading', { name: 'Detalhes do jogo' })).toBeVisible();
+  expect(screen.getByText(`ID do jogo: ${id}`)).toBeVisible();
+});
+
+interface OpaqueRouteCase { prefix: string; label: string; }
+const opaqueRoutes: OpaqueRouteCase[] = [
+  { prefix: '/jogos', label: 'ID do jogo' },
+  { prefix: '/reviews', label: 'ID da review' },
+  { prefix: '/perfil', label: 'ID do usuário' },
+];
+
+test.each(opaqueRoutes)('preserva percentuais literais ao abrir diretamente $prefix', ({ prefix, label }) => {
+  render(<MemoryRouter initialEntries={[`${prefix}/item%252F42/`]}><AppRoutes /></MemoryRouter>);
+  expect(screen.getByText(`${label}: item%2F42`)).toBeVisible();
 });
