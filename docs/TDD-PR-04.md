@@ -7,3 +7,6 @@ RED: 10 falhas esperadas e 107 testes verdes, commit 8764620. GREEN: 117 testes,
 
 ## US-16
 RED: 7 falhas esperadas e 118 testes verdes, commit 719971c. GREEN: 125 testes, lint, tipos e build aprovados. Publicação, unicidade por usuário/jogo e preservação do texto. Opiniões públicas compartilham o estado do serviço de escrita.
+
+## US-17
+RED: 4 falhas esperadas e 125 testes verdes, commit a2460aa. GREEN: 129 testes, lint, tipos e build aprovados. Leitura pública com autor/jogo/data, IDs opacos, inexistência, carregamento e recuperação de erro.

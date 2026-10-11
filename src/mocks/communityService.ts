@@ -2,13 +2,20 @@ import type { CommunityService } from '../services/communityContracts';
 import { CommunityError } from '../services/communityContracts';
 import type { Rating, Review, User } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
+import { gameFixtures } from './games';
 export function createMockCommunityService(options: { reviews?: Review[] } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = structuredClone(userFixtures);
   let sequence = 1;
   return {
-    async getReview() { throw new Error('Leitura não implementada.'); },
+    async getReview(id) {
+      const review = reviews.find((item) => item.id === id);
+      if (!review) return null;
+      const author = users.find((item) => item.id === review.userId);
+      const game = gameFixtures.find((item) => item.id === review.gameId);
+      return structuredClone({ ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } });
+    },
     async publish(gameId, text, user) {
       if (!user) throw new CommunityError('session-required');
       if (!text.trim()) throw new CommunityError('empty-text');

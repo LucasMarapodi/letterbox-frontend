@@ -9,6 +9,7 @@ import { SessionProvider, useSession } from './session/SessionProvider';
 import { LoginPage } from './pages/LoginPage';
 
 import { RegisterPage } from './pages/RegisterPage';
+import { ReviewPage } from './pages/ReviewPage';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
@@ -30,7 +31,7 @@ function ApplicationRoutes(): ReactElement {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
-      <Route path="/reviews/:reviewId" element={<PlaceholderPage title="Review" parameter="reviewId" parameterLabel="ID da review" />} />
+      <Route path="/reviews/:reviewId" element={<ReviewPage />} />
       <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
