@@ -19,7 +19,8 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     },
     async setFavorite(kind, targetId, selected, user) {
       if (!user) throw new CommunityError('session-required');
-      if (!gameFixtures.some((game) => game.id === targetId)) throw new CommunityError('not-found');
+      const exists = kind === 'game' ? gameFixtures.some((game) => game.id === targetId) : reviews.some((review) => review.id === targetId);
+      if (!exists) throw new CommunityError('not-found');
       const index = favorites.findIndex((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId);
       if (!selected) { if (index >= 0) favorites.splice(index, 1); return null; }
       if (index >= 0) return structuredClone(favorites[index]);

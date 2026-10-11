@@ -10,6 +10,7 @@ import { ErrorState, LoadingState } from './Feedback';
 export interface FavoriteButtonProps { kind: FavoriteKind; targetId: string; }
 type FavoriteState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; favorite: Favorite | null };
 function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement {
+  const label = kind === 'game' ? 'jogo' : 'review';
   const { user } = useSession();
   const [state, setState] = useState<FavoriteState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -31,7 +32,7 @@ function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement 
   if (state.status === 'loading') return <LoadingState message="Carregando favorito…" />;
   if (state.status === 'error') return <ErrorState message="Não foi possível carregar o favorito." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
   return <div className="favorite-control">
-    <Button disabled={pending} aria-pressed={Boolean(state.favorite)} onClick={() => { void toggle(); }}>{pending ? 'Atualizando favorito…' : state.favorite ? 'Remover jogo dos favoritos' : 'Favoritar jogo'}</Button>
+    <Button disabled={pending} aria-pressed={Boolean(state.favorite)} onClick={() => { void toggle(); }}>{pending ? 'Atualizando favorito…' : state.favorite ? `Remover ${label} dos favoritos` : `Favoritar ${label}`}</Button>
     {error && <p role="alert">{error}</p>}
   </div>;
 }
