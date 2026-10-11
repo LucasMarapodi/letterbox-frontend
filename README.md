@@ -37,3 +37,9 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 As páginas de funcionalidades futuras mostram somente título, ID quando aplicável e aviso de implementação futura. Os links de exemplo na Home são atalhos temporários para verificar a navegação; não representam catálogo, sessão ou dados públicos já existentes.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
+
+## Componentes básicos
+
+`Button` usa botão nativo e não submete formulários por padrão. `TextField` associa seu rótulo com ID próprio ou fornecido. `GameCard` oferece link com ID codificado. `Avatar` oferece iniciais sem foto ou quando a imagem falha. `LoadingState`, `ErrorState` e `EmptyState` recebem mensagens; o erro pode oferecer uma nova tentativa.
+
+A Home tem uma prévia explícita para o primeiro uso desses componentes: texto local que pode ser limpo, avatar de visitante e um único cartão fictício lido pelo serviço. Isso não implementa busca, catálogo, login, review ou persistência das fases seguintes. Os testes da prévia fornecem um serviço substituto e cobrem carregamento, ausência e rejeição com recuperação.

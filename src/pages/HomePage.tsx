@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
+import { FoundationPreview } from './FoundationPreview';
 
 export function HomePage(): ReactElement {
   return <main>
@@ -10,5 +11,6 @@ export function HomePage(): ReactElement {
       <Link to="/reviews/review-1">Review de exemplo</Link>{' '}
       <Link to="/perfil/user-1">Perfil de exemplo</Link>
     </nav>
+    <FoundationPreview />
   </main>;
 }

@@ -31,3 +31,18 @@ O sandbox travou o Vitest; validações são executadas com a autorização conc
 - Commit RED: `test(US-05): especifica navegacao parametros e pagina inexistente`.
 - GREEN: `npm run check` — 22 testes aprovados; lint, tipos e build aprovados.
 - Navegação testada com MemoryRouter, incluindo retorno à Home e IDs diferentes dos exemplos.
+
+## US-06
+- RED 1: `npm run check` — 10 testes dos componentes falharam por ausência dos elementos acessíveis; 22 testes anteriores verdes.
+- Commit RED 1: `test(US-06): especifica componentes acessiveis e estados de interface`.
+- GREEN 1: `npm run check` — 32 testes aprovados; lint, tipos e build aprovados.
+- RED 2: `npm run check` — 4 testes da prévia falharam; após incluir a composição na Home, 5 falhas esperadas com 32 testes anteriores verdes.
+- Commit RED 2: `test(US-06): especifica primeiro uso e estados da previa`.
+- GREEN final: `npm run check` — 37 testes aprovados em 7 arquivos (34 de runtime e 3 de tipos); lint, tipos e build aprovados.
+- Botões testados por Enter/Espaço, campos por rótulo, cartão por destino/foco, avatar por ausência/falha da foto. Estados da prévia testados com serviço substituto e promessa controlada, sem temporizadores arbitrários.
+
+## Revisão da fase
+- `git diff --check`: sem problemas de whitespace.
+- Nenhum `any`, `@ts-ignore` ou `@ts-nocheck` em `src` ou `tests`.
+- Nenhum remoto configurado (`git remote -v` sem saída). Descrição da PR preparada localmente em `docs/PR-01.md`; publicação permanece pendente.
+- US-07 a US-31 não implementadas. Páginas futuras continuam provisórias e os contratos permanecem abertos.
