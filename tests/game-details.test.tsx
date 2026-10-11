@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter } from 'react-router-dom';
 import { beforeEach, expect, test, vi } from 'vitest';
@@ -45,6 +45,14 @@ test('jogo parcial mostra alternativas para os campos ausentes', async () => {
   expect(screen.getByText('Gêneros não informados.')).toBeVisible();
   expect(screen.getByText('Plataformas não informadas.')).toBeVisible();
   expect(screen.getByText('Lançamento não informado.')).toBeVisible();
+});
+
+test('detalhes mostram Sem capa quando a URL da imagem falha', async () => {
+  vi.mocked(services.games.getById).mockResolvedValueOnce(makeGame());
+  renderDetails();
+  fireEvent.error(await screen.findByRole('img', { name: 'Capa de Jogo público' }));
+  expect(screen.getByRole('img', { name: 'Capa de Jogo público indisponível' })).toHaveTextContent('Sem capa');
+  expect(screen.getByRole('heading', { name: 'Jogo público' })).toBeVisible();
 });
 
 test('jogo inexistente é distinto de dados parciais', async () => {

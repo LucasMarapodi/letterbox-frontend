@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { HomePage } from '../src/pages/HomePage';
+import { AppRoutes } from '../src/App';
 import { services } from '../src/services';
 import type { Game, Id } from '../src/models';
 import type { GameService, Services } from '../src/services/contracts';
@@ -118,4 +119,20 @@ test('ordenar mantém a busca submetida e limpar mantém a ordenação escolhida
   await screen.findByRole('link', { name: alpha.title });
   expect(services.games.list).toHaveBeenLastCalledWith({ term: '', sort: 'name-desc' });
   expect(screen.getByRole('combobox', { name: 'Ordenar por' })).toHaveValue('name-desc');
+});
+
+test.each(['.', '..', '~.', '~..'])('clicar no catálogo consulta o ID literal %s', async (id) => {
+  const user = userEvent.setup();
+  const game: Game = makeGame({ id });
+  vi.mocked(services.games.list).mockResolvedValueOnce([game]);
+  vi.mocked(services.games.getById).mockResolvedValueOnce(game);
+  render(<MemoryRouter><AppRoutes /></MemoryRouter>);
+  const link = await screen.findByRole('link', { name: game.title });
+  const href: string | null = link.getAttribute('href');
+  if (!href) throw new Error('Link sem destino.');
+  // O navegador não pode normalizar o ID como navegação para diretório pai.
+  expect(new URL(href, 'http://localhost').pathname).toBe(href);
+  await user.click(link);
+  expect(await screen.findByRole('heading', { name: game.title, level: 2 })).toBeVisible();
+  expect(services.games.getById).toHaveBeenCalledWith(id);
 });

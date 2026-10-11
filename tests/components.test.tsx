@@ -60,6 +60,16 @@ test('cartão possui link acessível e codifica o ID no destino', async () => {
   expect(link).toHaveFocus();
 });
 
+test('cartão mostra Sem capa após erro da imagem e tenta uma URL diferente', () => {
+  const withCover: Game = { ...game, coverUrl: '/invalida.png' };
+  const { rerender } = render(<MemoryRouter><GameCard game={withCover} /></MemoryRouter>);
+  fireEvent.error(screen.getByAltText(''));
+  expect(screen.getByRole('img', { name: `Capa de ${game.title} indisponível` })).toHaveTextContent('Sem capa');
+  rerender(<MemoryRouter><GameCard game={{ ...withCover, coverUrl: '/nova.png' }} /></MemoryRouter>);
+  expect(screen.getByAltText('')).toHaveAttribute('src', '/nova.png');
+  expect(screen.queryByText('Sem capa')).not.toBeInTheDocument();
+});
+
 test('avatar sem foto apresenta alternativa acessível', () => {
   render(<Avatar name="Lucas Marapodi" />);
   expect(screen.getByRole('img', { name: 'Lucas Marapodi' })).toHaveTextContent('LM');

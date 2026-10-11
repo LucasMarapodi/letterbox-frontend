@@ -45,7 +45,7 @@ test('uma URL desconhecida apresenta mensagem e caminho de retorno', async () =>
   expect(screen.getByRole('heading', { name: 'Game Reviews' })).toBeVisible();
 });
 
-const opaqueIds: string[] = ['game%2F42', 'game/42', 'game%2f42', 'game%252F42', 'game%42', 'jogo ç?#42'];
+const opaqueIds: string[] = ['game%2F42', 'game/42', 'game%2f42', 'game%252F42', 'game%42', 'jogo ç?#42', '.', '..', '~.', '~..', '%2E', '%2E%2E'];
 
 test.each(opaqueIds)('preserva o ID literal %s no percurso cartão → página', async (id) => {
   const user = userEvent.setup();
