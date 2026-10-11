@@ -55,7 +55,9 @@ a { color: #c6ddd4; }
 .brand-mark i:nth-child(3) { background: #70b8ec; }
 .header-inner nav { margin-left: auto; align-items: center; gap: 1.5rem; }
 .header-inner nav a { text-decoration: none; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #bcc8cc; }
-.header-inner nav a:last-child { padding: 0.65rem 1rem; border: 1px solid #536764; border-radius: 999px; color: #e3efe9; }
+.header-inner nav .signup-link { padding: 0.65rem 1rem; border: 1px solid #536764; border-radius: 999px; color: #e3efe9; }
+.session-user { display: flex; align-items: center; gap: 0.65rem; }
+.session-user .avatar { width: 2.2rem; height: 2.2rem; background: #34534a; color: #d4f7e7; font-size: 0.85rem; }
 .header-inner nav a:hover { color: #7ce5b5; }
 main { max-width: 72rem; padding: 2rem; }
 .dashboard { padding-top: 0; }

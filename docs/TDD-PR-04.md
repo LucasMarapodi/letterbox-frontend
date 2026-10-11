@@ -25,3 +25,6 @@ RED: 1 falha esperada e 147 testes verdes, commit 6ced071. GREEN: 148 testes, li
 
 ## Revisão final da fase
 148 testes aprovados, lint sem any, TypeScript estrito e build. Verificação visual local: login fictício Ana, acesso à review de Leo e comentário publicado na lista correta. Evidência visual fora do repositório: pr-04-review.png. Sem merge e sem publicação por ausência de remoto.
+
+## Ajuste solicitado — login e cabeçalho
+RED: 2 falhas esperadas e 147 testes verdes, commit 5c0844f. GREEN: 149 testes, lint, tipos e build aprovados. Login redireciona à dashboard sem mensagem intermediária. Cabeçalho autenticado exibe avatar/nome/Sair e oculta Entrar/Criar conta; logout restaura links.

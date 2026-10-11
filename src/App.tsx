@@ -10,6 +10,7 @@ import { LoginPage } from './pages/LoginPage';
 
 import { RegisterPage } from './pages/RegisterPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { Avatar } from './components/Avatar';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
@@ -21,10 +22,9 @@ function ApplicationRoutes(): ReactElement {
       <Link className="brand" to="/" aria-label="Game Reviews"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>Game Reviews</Link>
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
-        <Link to="/login">Entrar</Link>{' '}
-        <Link to="/cadastro">Criar conta</Link>
+        {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
-      {user && <span aria-label="Usuário conectado">{user.displayName}</span>}
+      {user && <div className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></div>}
       {user && <button type="button" onClick={signOut}>Sair</button>}
       </div>
     </header>

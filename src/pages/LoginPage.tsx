@@ -1,15 +1,16 @@
 import { useRef, useState, type FormEvent, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { AuthError } from '../services/authContracts';
 import { useSession } from '../session/SessionProvider';
 
 type LoginErrors = Partial<Record<'email' | 'password', string>>;
-type LoginFeedback = { status: 'idle' } | { status: 'pending' } | { status: 'success'; name: string } | { status: 'error'; message: string };
+type LoginFeedback = { status: 'idle' } | { status: 'pending' } | { status: 'error'; message: string };
 
 export function LoginPage(): ReactElement {
   const { signIn } = useSession();
+  const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [errors, setErrors] = useState<LoginErrors>({});
@@ -29,9 +30,8 @@ export function LoginPage(): ReactElement {
     sending.current = true;
     setFeedback({ status: 'pending' });
     try {
-      const user = await signIn({ email, password });
-      setPassword('');
-      setFeedback({ status: 'success', name: user.displayName });
+      await signIn({ email, password });
+      navigate('/', { replace: true });
     } catch (error: unknown) {
       setFeedback({ status: 'error', message: error instanceof AuthError && error.code === 'invalid-credentials'
         ? 'E-mail ou senha inválidos.' : 'Não foi possível entrar. Tente novamente.' });
@@ -49,7 +49,6 @@ export function LoginPage(): ReactElement {
     </form>
     {feedback.status === 'pending' && <p role="status">Entrando…</p>}
     {feedback.status === 'error' && <p role="alert">{feedback.message}</p>}
-    {feedback.status === 'success' && <><p role="status">Você entrou como {feedback.name}.</p><Link to="/">Continuar para o catálogo</Link></>}
     <p>Não tem conta? <Link to="/cadastro">Criar uma conta</Link></p>
   </main>;
 }
