@@ -19,3 +19,9 @@ O sandbox travou o Vitest; validações são executadas com a autorização conc
 - Commit RED: `test(US-03): especifica contratos validos e invalidos do dominio`.
 - GREEN: `npm run check` — 4 testes aprovados (3 de tipos); lint, tipos e build aprovados.
 - Casos válidos com `satisfies`; casos inválidos documentados e rejeitados pelo TypeScript.
+
+## US-04
+- RED: `npm test` — 8 testes de leitura/erro/isolamento/seleção falharam nos pontos de teste não funcionais.
+- Commit RED: `test(US-04): especifica leitura erro isolamento e selecao de servicos`.
+- GREEN: `npm run check` — 12 testes aprovados; lint, tipos e build aprovados.
+- Inclui cópias profundas das entradas/retornos, fixtures vazias e substituição do adaptador via contrato.

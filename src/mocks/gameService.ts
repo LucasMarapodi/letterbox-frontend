@@ -1,15 +1,24 @@
 import type { Game } from '../models';
 import type { GameService } from '../services/contracts';
+import { gameFixtures } from './games';
 
 export interface MockGameOptions {
   games?: Game[];
   error?: Error;
 }
 
-/** Ponto de teste ainda sem leitura funcional. */
-export function createMockGameService(_options: MockGameOptions = {}): GameService {
+export function createMockGameService(options: MockGameOptions = {}): GameService {
+  const games: Game[] = structuredClone(options.games ?? gameFixtures);
+  const error: Error | undefined = options.error;
   return {
-    async list() { throw new Error('Leitura não implementada.'); },
-    async getById() { throw new Error('Leitura não implementada.'); },
+    async list(): Promise<Game[]> {
+      if (error) throw error;
+      return structuredClone(games);
+    },
+    async getById(id): Promise<Game | null> {
+      if (error) throw error;
+      const game: Game | undefined = games.find((item) => item.id === id);
+      return game ? structuredClone(game) : null;
+    },
   };
 }
