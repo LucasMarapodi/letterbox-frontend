@@ -14,3 +14,7 @@ Branch `feat/pr-03-autenticacao-mockada`, derivada da PR-02 no commit `f952f24`.
 ## US-14
 - RED: 3 falhas esperadas e 103 testes aprovados; commit c855d49.
 - GREEN: 106 testes, lint, tipos e build aprovados.
+
+## Revisão US-05 — notificações sem página
+- RED: 2 falhas esperadas e 104 testes verdes; commit fb8dd3a.
+- GREEN: 106 testes, lint, tipos e build aprovados. Rota e link removidos; testes antigos de acesso ajustados ao novo escopo.

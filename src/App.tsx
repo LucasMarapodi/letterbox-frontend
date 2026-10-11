@@ -7,7 +7,6 @@ import type { AuthService } from './services/authContracts';
 import { authService as defaultAuthService } from './services/auth';
 import { SessionProvider, useSession } from './session/SessionProvider';
 import { LoginPage } from './pages/LoginPage';
-import { RequireSession } from './session/RequireSession';
 
 import { RegisterPage } from './pages/RegisterPage';
 
@@ -20,8 +19,7 @@ function ApplicationRoutes(): ReactElement {
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
         <Link to="/login">Entrar</Link>{' '}
-        <Link to="/cadastro">Criar conta</Link>{' '}
-        <Link to="/notificacoes">Notificações</Link>
+        <Link to="/cadastro">Criar conta</Link>
       </nav>
       {user && <span aria-label="Usuário conectado">{user.displayName}</span>}
       {user && <button type="button" onClick={signOut}>Sair</button>}
@@ -33,7 +31,6 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
-      <Route path="/notificacoes" element={<main><h1>Notificações</h1><RequireSession><p>Esta página é provisória. Funcionalidade prevista para as próximas US.</p></RequireSession></main>} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
     </Routes>
   </>;
