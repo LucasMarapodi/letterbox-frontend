@@ -1,5 +1,8 @@
 import type { Comment } from '../models';
-import type { RankingPeriod } from '../services/communityContracts';
-export function commentsInPeriod(_comments: Comment[], _period: RankingPeriod, _clock: () => Date): Comment[] {
-  void _comments; void _period; void _clock; throw new Error('US-34 pendente');
+import { isRankingPeriod, type RankingPeriod } from '../services/communityContracts';
+export function commentsInPeriod(comments: Comment[], period: RankingPeriod, clock: () => Date): Comment[] {
+  if (!isRankingPeriod(period)) throw new Error('Período inválido.');
+  const hours: Record<RankingPeriod, number> = { '24h': 24, '7d': 168, '30d': 720 };
+  const end = clock().getTime(); const start = end - hours[period] * 3600000;
+  return comments.filter((comment) => { const time = Date.parse(comment.createdAt); return time >= start && time <= end; });
 }

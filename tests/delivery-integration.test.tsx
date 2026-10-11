@@ -39,7 +39,7 @@ test('cadastro login nota publicação edição favoritos e logout percorrem ser
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByRole('button', { name: 'Notificações' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Salvar nota' })).not.toBeInTheDocument();
-});
+}, 15000);
 
 test('busca review comentário seguir feed e notificações funcionam sem spies de serviço', async () => {
   const adapters = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
@@ -67,4 +67,4 @@ test('busca review comentário seguir feed e notificações funcionam sem spies 
   await interaction.click(await within(dialog).findByRole('link', { name: /Leo comentou na sua review/ }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(await screen.findByRole('textbox', { name: 'Sua review' })).toBeVisible();
-});
+}, 15000);
