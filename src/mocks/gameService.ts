@@ -14,7 +14,12 @@ export function createMockGameService(options: MockGameOptions = {}): GameServic
     async list(query: GameQuery = {}): Promise<Game[]> {
       if (error) throw error;
       const term: string = (query.term ?? '').trim().toLocaleLowerCase('pt-BR');
-      return structuredClone(games.filter((game) => game.title.toLocaleLowerCase('pt-BR').includes(term)));
+      const results: Game[] = games.filter((game) => game.title.toLocaleLowerCase('pt-BR').includes(term));
+      if (query.sort) {
+        const direction: number = query.sort === 'name-desc' ? -1 : 1;
+        results.sort((first, second) => direction * first.title.localeCompare(second.title, 'pt-BR'));
+      }
+      return structuredClone(results);
     },
     async getById(id): Promise<Game | null> {
       if (error) throw error;

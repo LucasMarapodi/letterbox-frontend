@@ -26,3 +26,5 @@ Cada factory clona as entradas e cada leitura retorna uma cópia independente, i
 ## Busca provisória — PR-02
 
 `GameService.list(query?: GameQuery)` recebe `term` opcional. O mock procura trecho do nome sem diferenciar maiúsculas e ignora espaços nas extremidades; termo vazio restaura todos os jogos. A Home envia o termo ao submeter o formulário (Enter ou botão), sem debounce nem rede real. Essas escolhas são provisórias e não constituem regras da API definitiva.
+
+`GameQuery.sort` permite somente `name-asc` e `name-desc`, opções provisórias dos mocks. A comparação usa locale pt-BR. Sem sort o serviço conserva a ordem da fixture; a Home escolhe nome crescente inicialmente. Alterar a ordem mantém o termo da busca submetida; limpar o termo mantém a ordem escolhida. O componente não ordena dados nem filtra jogos.

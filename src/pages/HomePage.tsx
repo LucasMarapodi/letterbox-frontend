@@ -7,7 +7,7 @@ import { GameCard } from '../components/GameCard';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
-import type { GameQuery } from '../services/contracts';
+import type { GameQuery, GameSort } from '../services/contracts';
 
 type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; games: Game[] };
 
@@ -15,7 +15,7 @@ export function HomePage(): ReactElement {
   const [state, setState] = useState<CatalogState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [term, setTerm] = useState<string>('');
-  const [query, setQuery] = useState<GameQuery>({ term: '' });
+  const [query, setQuery] = useState<GameQuery>({ term: '', sort: 'name-asc' });
   useEffect(() => {
     let active: boolean = true;
     services.games.list(query).then(
@@ -28,13 +28,20 @@ export function HomePage(): ReactElement {
   function search(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     setState({ status: 'loading' });
-    setQuery({ term });
+    setQuery((previous) => ({ ...previous, term }));
   }
 
   function clearSearch(): void {
     setTerm('');
     setState({ status: 'loading' });
-    setQuery({ term: '' });
+    setQuery((previous) => ({ ...previous, term: '' }));
+  }
+
+  function changeSort(value: string): void {
+    if (value !== 'name-asc' && value !== 'name-desc') return;
+    const sort: GameSort = value;
+    setState({ status: 'loading' });
+    setQuery((previous) => ({ ...previous, sort }));
   }
 
   function retry(): void {
@@ -49,6 +56,13 @@ export function HomePage(): ReactElement {
       <Button type="submit">Buscar</Button>{' '}
       <Button onClick={clearSearch}>Limpar busca</Button>
     </form>
+    <div className="sort-field">
+      <label htmlFor="game-sort">Ordenar por</label>{' '}
+      <select id="game-sort" value={query.sort} onChange={(event) => changeSort(event.target.value)}>
+        <option value="name-asc">Nome: A–Z</option>
+        <option value="name-desc">Nome: Z–A</option>
+      </select>
+    </div>
     <nav aria-label="Rotas de exemplo">
       <Link to="/jogos/game-1">Jogo de exemplo</Link>{' '}
       <Link to="/reviews/review-1">Review de exemplo</Link>{' '}
