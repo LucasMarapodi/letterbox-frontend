@@ -25,3 +25,9 @@ O sandbox travou o Vitest; validações são executadas com a autorização conc
 - Commit RED: `test(US-04): especifica leitura erro isolamento e selecao de servicos`.
 - GREEN: `npm run check` — 12 testes aprovados; lint, tipos e build aprovados.
 - Inclui cópias profundas das entradas/retornos, fixtures vazias e substituição do adaptador via contrato.
+
+## US-05
+- RED: `npm run check` — 10 testes falharam por ausência de links, parâmetros e mensagem de página inexistente; 12 testes anteriores verdes.
+- Commit RED: `test(US-05): especifica navegacao parametros e pagina inexistente`.
+- GREEN: `npm run check` — 22 testes aprovados; lint, tipos e build aprovados.
+- Navegação testada com MemoryRouter, incluindo retorno à Home e IDs diferentes dos exemplos.

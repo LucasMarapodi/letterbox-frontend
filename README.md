@@ -30,3 +30,10 @@ npm run check
 Execute uma US por vez. Antes de qualquer comportamento, escreva e execute o teste RED e faça seu commit. Refatorações sem comportamento novo usam testes existentes; não precisam de um RED artificial.
 
 Não publicar contratos provisórios como decisões da API real. Não implementar Mobile, backend, banco, likes ou outras funcionalidades fora da fase.
+
+## Rotas provisórias
+
+`/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login`, `/cadastro` e `/notificacoes`.
+As páginas de funcionalidades futuras mostram somente título, ID quando aplicável e aviso de implementação futura. Os links de exemplo na Home são atalhos temporários para verificar a navegação; não representam catálogo, sessão ou dados públicos já existentes.
+URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
+Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
