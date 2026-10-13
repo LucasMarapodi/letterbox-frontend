@@ -6,6 +6,7 @@ import { createMockServices } from '../mocks/services';
 import { createMockGameService } from '../mocks/gameService';
 import { createMockNotificationService } from '../mocks/notificationService';
 import type { FetchTransport } from './http/client';
+import { HttpFailure } from './http/client';
 import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters, type HttpSessionStore } from './http/adapters';
 import { createHttpAuthService } from './http/authService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
@@ -32,6 +33,17 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
   const session = options.session ?? createHttpSessionStore();
   let http: HttpAdapters | undefined;
   const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), { ...options, session });
-  return { ...previous, auth: createHttpAuthService(getHttp, session) };
+  const unavailable = async (): Promise<never> => { throw new HttpFailure('configuration'); };
+  return {
+    ...previous, auth: createHttpAuthService(getHttp, session), http: getHttp,
+    privateFeatures: { opinions: false, favorites: false, follows: false, feed: false, notifications: false },
+    community: {
+      ...previous.community,
+      getProfile: (id) => previous.community.getProfile(id),
+      rate: unavailable, getRating: unavailable, publish: unavailable, findOwnReview: unavailable, editReview: unavailable, comment: unavailable,
+      getFavorites: unavailable, getFavorite: unavailable, setFavorite: unavailable, getFeed: unavailable, isFollowing: unavailable, setFollowing: unavailable,
+    },
+    notifications: { list: unavailable },
+  };
 }
 export const defaultApplicationServices = createDefaultApplicationServices({ apiBaseUrl: import.meta.env.VITE_API_BASE_URL });

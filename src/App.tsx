@@ -21,7 +21,8 @@ import { CommunityPage } from './pages/CommunityPage';
 export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
 function ApplicationRoutes(): ReactElement {
-  const { user, signOut, notice } = useSession();
+  const { user, signOut, notice, version } = useSession();
+  const { privateFeatures } = useServices();
   const contentRef = useRef<HTMLDivElement>(null);
   return <>
     <a className="skip-link" href="#conteudo-principal" onClick={(event) => { event.preventDefault(); contentRef.current?.focus(); }}>Ir para o conteúdo principal</a>
@@ -32,7 +33,7 @@ function ApplicationRoutes(): ReactElement {
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
         <Link to="/comunidade">Comunidade</Link>
-        {user && <NotificationBell key={user.id} />}
+        {user && privateFeatures?.notifications !== false && <NotificationBell key={`${version}-${user.id}`} />}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
       {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" onClick={signOut}>Sair <span aria-hidden="true">↗</span></button></div>}
@@ -41,7 +42,7 @@ function ApplicationRoutes(): ReactElement {
     </header>
     {notice && <p className="session-notice" role="alert">{notice}</p>}
     <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
-      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={`favorites-${user.id}`} /> : null} feed={user ? <FeedSection key={`feed-${user.id}`} /> : null} />} />
+      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user && privateFeatures?.favorites !== false ? <FavoritesSections key={`favorites-${version}-${user.id}`} /> : null} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
       <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />

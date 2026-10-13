@@ -38,7 +38,9 @@ function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }
   </section>;
 }
 export function PublishReview(props: { gameId: string; onSaved(): void }): ReactElement | null {
-  const { user } = useSession();
-  return user ? <PublishControl key={user.id} {...props} /> : null;
+  const { user, version } = useSession();
+  const { privateFeatures } = useServices();
+  if (privateFeatures?.opinions === false) return null;
+  return user ? <PublishControl key={`${version}-${user.id}`} {...props} /> : null;
 }
 

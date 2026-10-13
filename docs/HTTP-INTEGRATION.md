@@ -1,6 +1,18 @@
 # Infraestrutura HTTP — terceira fase
 
-A I-PR-02 prepara transporte, contratos e adaptadores. Os domínios só serão ativados pelas suas US de fluxo (I-PR-03 a I-PR-06). A aplicação atual ainda usa os serviços anteriores; preencher uma URL não ativa HTTP nem constitui integração completa. A retirada final dos mocks pertence à I-PR-07.
+A I-PR-02 prepara transporte, contratos e adaptadores. A I-PR-03 ativou autenticação HTTP no runtime produtivo. Os demais domínios serão ativados por suas US (I-PR-04 a I-PR-06); a retirada final dos mocks pertence à I-PR-07. Isso não constitui integração completa da aplicação.
+
+## Autenticação ativada — I-PR-03
+
+createDefaultApplicationServices é a entrada produtiva. Cadastro envia somente o request permitido e retorna usuário validado, sem sessão automática. Login envia credenciais, mantém token pendente em memória e consulta me com Bearer antes de divulgar User à UI. A identidade de me deve coincidir com a do login. Cada tentativa invalida anteriores; não há localStorage/sessionStorage.
+
+O store publica mudanças sem divulgar credenciais a componentes. AuthService expõe apenas usuário confirmado, subscribe e versão; SessionProvider limpa UI em logout/401. Logout é assíncrono: captura token, limpa sessão e aborta requests privados imediatamente, depois tenta revogação. Falha de revogação é informada sem restaurar usuário. Respostas antigas não removem conta nova.
+
+Contexto e store compartilham versão; componentes privados usam essa versão nas suas keys para descartar estado anterior. O provider preserva toda a composição, inclusive flags e acesso ao mesmo conjunto HTTP para futuras US. privateFeatures bloqueia temporariamente opiniões, favoritos, relações, feed e notificações na entrada HTTP até a ativação de seus fluxos. Os serviços privados correspondentes também rejeitam acesso, sem aceitar User como autorização ou usar mocks. Consultas públicas antigas ficam disponíveis até migração, sem receber identidade da sessão para fabricar perfil local.
+
+Cada próxima US deve reutilizar a mesma fábrica/store, implementar a ponte HTTP de seus métodos e habilitar sua capacidade somente após verificar o fluxo. Doubles legados são selecionados apenas em tests/setup.ts; App em execução não usa essa configuração de testes. createApplicationServices/mock continua temporariamente disponível para a suíte/consultas públicas, sem fallback de autenticação.
+
+Validação de navegador em 13/10/2026: Vite http://127.0.0.1:5173 e API existente http://localhost:5080, origens distintas e sem proxy. Conta nova criada/duplicada, login de Ana e da nova conta, credenciais inválidas, logout, reload visitante e navbar sem dados privados mockados. Harness HTTP real verificou 201/409 no cadastro, 200 login/me, 204 logout com zero bytes e 401 do token revogado; headers CORS liberaram a origem do Vite. Nenhum código de Back foi alterado. .env local ignorado foi configurado para a porta de validação.
 
 ## Composição
 
@@ -12,11 +24,11 @@ As portas HTTP distinguem consultas do endpoint das composições da UI: `profil
 
 ## Sessão e erros
 
-`auth.login` devolve LoginResponse validado, sem autenticar a UI automaticamente. A I-US-07 deverá estabelecer a sessão pendente e executar `auth.me` antes de liberar o usuário conectado. Token/expiresAt permanecem separados de User e só em memória; nenhuma persistência ou autenticação de produção foi introduzida.
+O adaptador de transporte `http.auth.login` devolve LoginResponse; a ponte HTTP de AuthService implementada na I-US-07 estabelece sessão pendente e executa me antes de devolver User à UI. Token/expiresAt permanecem separados de User e só em memória; nenhuma persistência ou autenticação de produção foi introduzida.
 
 Operações privadas obtêm Bearer do store, nunca de um userId enviado pelo chamador; públicas não enviam token mesmo com sessão. Ausência de sessão rejeita privados antes do transporte. Clear/establish abortam requisições privadas anteriores e alteram a versão; respostas antigas não podem encerrar a sessão nova. 401 privado da versão atual limpa o store, inclusive se o corpo é inválido. 401 público de login não interfere na sessão existente.
 
-O adaptador logout envia a operação de revogação e limpa o store mesmo se ela falhar, preservando sessão posterior. A integração do contexto/botão assíncrono, limpeza imediata da UI e mensagem de revogação não confirmada pertencem à I-US-08; ainda não estão ativadas nas telas.
+O adaptador logout captura o token e limpa o store imediatamente antes da revogação, preservando sessão posterior. Contexto/botão assíncrono e mensagem de revogação não confirmada foram ativados na I-US-08.
 
 HttpFailure discrimina configuration/network/http/contract/cancelled. Status e código seguro ficam disponíveis; mensagens externas, payloads, tokens e exceções de rede não são copiados para a mensagem do erro. 204 não lê JSON. Cada operação pode receber AbortSignal. Cancelamento é identificado para ser ignorado pela UI nas US de fluxo. Não há repetição automática de escritas ou fallback.
 

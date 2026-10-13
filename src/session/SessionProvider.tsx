@@ -18,26 +18,30 @@ export function SessionProvider({ children, service }: SessionProviderProps): Re
   const userRef = useRef(user);
   const [notice, setNotice] = useState<string | null>(null);
   const requestVersion = useRef(0);
+  const [version, setVersion] = useState(() => service.sessionVersion?.() ?? 0);
   function applyUser(next: User | null): void { userRef.current = next; setUser(next); }
   useEffect(() => service.subscribe?.(() => {
+    setVersion(service.sessionVersion?.() ?? requestVersion.current);
     const next = service.sessionUser?.() ?? null;
     if (userRef.current && !next) setNotice('Sua sessão expirou. Entre novamente.');
     applyUser(next);
   }), [service]);
   async function signIn(credentials: LoginCredentials): Promise<User> {
-    const version = ++requestVersion.current;
+    const request = ++requestVersion.current;
+    setVersion(service.sessionVersion?.() ?? request);
     setNotice(null); applyUser(null);
     const result: User = await service.login(credentials);
-    if (version !== requestVersion.current) throw new Error('Solicitação de login invalidada.');
+    if (request !== requestVersion.current) throw new Error('Solicitação de login invalidada.');
     applyUser(result);
     return result;
   }
   async function signOut(): Promise<void> {
-    const version = ++requestVersion.current; applyUser(null); setNotice(null);
+    const request = ++requestVersion.current; applyUser(null); setNotice(null);
+    setVersion(service.sessionVersion?.() ?? request);
     try { await service.logout?.(); }
-    catch { if (version === requestVersion.current) setNotice('Você saiu deste dispositivo, mas não foi possível confirmar a revogação na API.'); }
+    catch { if (request === requestVersion.current) setNotice('Você saiu deste dispositivo, mas não foi possível confirmar a revogação na API.'); }
   }
-  const value: SessionContextValue = { user, notice, version: 0, signIn, signOut, authService: service };
+  const value: SessionContextValue = { user, notice, version, signIn, signOut, authService: service };
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 

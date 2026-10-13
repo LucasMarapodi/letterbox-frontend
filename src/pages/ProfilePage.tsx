@@ -13,8 +13,8 @@ import { ConnectionsSections } from '../components/ConnectionsSections';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: string }): ReactElement {
-  const { community } = useServices();
-  const { user } = useSession();
+  const { community, privateFeatures } = useServices();
+  const { user, version } = useSession();
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   const [connectionsVersion, setConnectionsVersion] = useState(0);
@@ -40,7 +40,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
         <Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review de {review.game.title}</Link>
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}
     </section>
-    {user?.id === id && <FavoritesSections key={user.id} />}
+    {user?.id === id && privateFeatures?.favorites !== false && <FavoritesSections key={`${version}-${user.id}`} />}
     <ConnectionsSections key={`${id}-${connectionsVersion}`} profileId={id} />
   </>;
 }

@@ -38,7 +38,9 @@ function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement 
   </div>;
 }
 export function FavoriteButton(props: FavoriteButtonProps): ReactElement {
-  const { user } = useSession();
-  return user ? <FavoriteControl key={`${user.id}-${props.kind}-${props.targetId}`} {...props} /> : <Link className="favorite-login" to="/login">Entrar para favoritar</Link>;
+  const { user, version } = useSession();
+  const { privateFeatures } = useServices();
+  if (privateFeatures?.favorites === false) return <></>;
+  return user ? <FavoriteControl key={`${version}-${user.id}-${props.kind}-${props.targetId}`} {...props} /> : <Link className="favorite-login" to="/login">Entrar para favoritar</Link>;
 }
 
