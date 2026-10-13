@@ -14,4 +14,3 @@ RED: 5 falhas e 258 aprovados (263 casos); commit 94daebb. GREEN: 263 testes, li
 RED: 41 falhas e 263 aprovados (304 casos); commit 3230f3d. GREEN inicial: 304 testes, lint, tipos e build. Revisão acrescentou RED de 401 malformado e horário 24:00: 2 falhas e 304 aprovados; commit 7d0b65e. GREEN final: 306 testes, lint, tipos e build.
 
 34 operações de endpoint verificadas em transporte controlado, com método/path/query/body/Bearer; consultas públicas omitem token. Perfil e conexões compostos. Escrita filtra campos extras, inexistência/erro não cai em fixture. Sessão única exigida em privados, logout limpa em falha, 401 da sessão atual limpa inclusive com JSON inválido, 401 de login não limpa outra sessão e resposta atrasada não revoga sessão nova. Export no runtime e configuração .env.example preparados; ativação das telas reservada às US de fluxo. Regressões e injeção pelo provider reutilizam a suíte anterior. Nenhum E2E/API real foi executado nesta entrega.
-
