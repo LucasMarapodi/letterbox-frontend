@@ -37,7 +37,7 @@ export function RegisterPage(): ReactElement {
       setFeedback({ status: 'success' });
     } catch (error: unknown) {
       setFeedback({ status: 'error', message: error instanceof AuthError && error.code === 'duplicate-email'
-        ? 'Este e-mail já está cadastrado.' : 'Não foi possível criar a conta. Tente novamente.' });
+        ? 'Este e-mail já está cadastrado.' : error instanceof AuthError && error.code === 'invalid-fields' ? 'Os dados do cadastro são inválidos. Confira os campos.' : 'Não foi possível criar a conta. Tente novamente.' });
     } finally { sending.current = false; }
   }
 
