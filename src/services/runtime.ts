@@ -5,6 +5,7 @@ import type { NotificationService } from './notificationContracts';
 import { createMockServices } from '../mocks/services';
 import { createMockGameService } from '../mocks/gameService';
 import { createMockNotificationService } from '../mocks/notificationService';
+import type { FetchTransport } from './http/client';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; }
@@ -24,3 +25,7 @@ export function createApplicationServices(config: ServiceConfig, adapters?: Appl
 }
 export const serviceConfig = readServiceConfig({ apiBaseUrl: import.meta.env.VITE_API_BASE_URL });
 export const defaultApplicationServices = createApplicationServices(serviceConfig);
+export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown }, options: { transport?: FetchTransport } = {}): ApplicationServices {
+  void config; void options;
+  return createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+}
