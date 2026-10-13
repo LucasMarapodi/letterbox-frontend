@@ -21,7 +21,7 @@ import { CommunityPage } from './pages/CommunityPage';
 export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
 function ApplicationRoutes(): ReactElement {
-  const { user, signOut } = useSession();
+  const { user, signOut, notice } = useSession();
   const contentRef = useRef<HTMLDivElement>(null);
   return <>
     <a className="skip-link" href="#conteudo-principal" onClick={(event) => { event.preventDefault(); contentRef.current?.focus(); }}>Ir para o conteúdo principal</a>
@@ -39,6 +39,7 @@ function ApplicationRoutes(): ReactElement {
       </div>
       </div>
     </header>
+    {notice && <p className="session-notice" role="alert">{notice}</p>}
     <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
       <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={`favorites-${user.id}`} /> : null} feed={user ? <FeedSection key={`feed-${user.id}`} /> : null} />} />
       <Route path="/comunidade" element={<CommunityPage />} />

@@ -6,7 +6,7 @@ import { createMockServices } from '../mocks/services';
 import { createMockGameService } from '../mocks/gameService';
 import { createMockNotificationService } from '../mocks/notificationService';
 import type { FetchTransport } from './http/client';
-import { createHttpAdapters, type HttpAdapters, type HttpSessionStore } from './http/adapters';
+import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters, type HttpSessionStore } from './http/adapters';
 import { createHttpAuthService } from './http/authService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
@@ -28,9 +28,9 @@ export function createApplicationServices(config: ServiceConfig, adapters?: Appl
 export const serviceConfig = readServiceConfig({ apiBaseUrl: import.meta.env.VITE_API_BASE_URL });
 export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown }, options: { transport?: FetchTransport; session?: HttpSessionStore } = {}): ApplicationServices {
   const previous = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const session = options.session ?? createHttpSessionStore();
   let http: HttpAdapters | undefined;
-  const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), options);
-  return { ...previous, auth: createHttpAuthService(getHttp) };
+  const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), { ...options, session });
+  return { ...previous, auth: createHttpAuthService(getHttp, session) };
 }
-import { readHttpConfig } from './http/adapters';
 export const defaultApplicationServices = createDefaultApplicationServices({ apiBaseUrl: import.meta.env.VITE_API_BASE_URL });

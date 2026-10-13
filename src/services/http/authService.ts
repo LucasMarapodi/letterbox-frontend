@@ -1,7 +1,8 @@
 import type { AuthService } from '../authContracts';
 import { AuthError } from '../authContracts';
 import { HttpFailure } from './client';
-import type { HttpAdapters } from './adapters';
+import type { HttpAdapters, HttpSessionStore } from './adapters';
+import type { User } from '../../models';
 import type { LoginResponse } from './dtos';
 export function createHttpRegistration(getAdapters: () => HttpAdapters): AuthService['register'] {
   return async (input) => {
@@ -13,10 +14,18 @@ export function createHttpRegistration(getAdapters: () => HttpAdapters): AuthSer
     }
   };
 }
-export function createHttpAuthService(getAdapters: () => HttpAdapters): AuthService {
+export function createHttpAuthService(getAdapters: () => HttpAdapters, session: HttpSessionStore): AuthService {
   let sequence = 0;
   let controller: AbortController | null = null;
+  let confirmedUser: User | null = null;
+  let confirmedVersion = -1;
+  const listeners = new Set<() => void>();
+  function notify(): void { for (const listener of listeners) listener(); }
+  session.subscribe(() => { if (session.version() !== confirmedVersion) confirmedUser = null; notify(); });
   return {
+    sessionUser() { return confirmedUser ? structuredClone(confirmedUser) : null; },
+    sessionVersion: () => session.version(),
+    subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     register: createHttpRegistration(getAdapters),
     async login(credentials) {
       const http = getAdapters();
@@ -39,6 +48,7 @@ export function createHttpAuthService(getAdapters: () => HttpAdapters): AuthServ
         if (attempt !== sequence || http.session.version() !== ownedVersion) throw new HttpFailure('cancelled');
         if (user.id !== result.user.id) throw new HttpFailure('contract');
         http.session.establish({ ...result, user });
+        confirmedUser = user; confirmedVersion = session.version(); notify();
         return user;
       } catch (error: unknown) {
         if (attempt !== sequence) throw new HttpFailure('cancelled');
@@ -46,6 +56,6 @@ export function createHttpAuthService(getAdapters: () => HttpAdapters): AuthServ
         throw error;
       } finally { if (attempt === sequence) controller = null; }
     },
-    logout() { sequence++; controller?.abort(); controller = null; getAdapters().session.clear(); },
+    async logout() { sequence++; controller?.abort(); controller = null; await getAdapters().auth.logout(); },
   };
 }

@@ -63,14 +63,16 @@ export function readHttpConfig(input: { apiBaseUrl?: unknown }): HttpAdapterConf
 export function createHttpSessionStore(): HttpSessionStore {
   let state: SessionSnapshot | null = null;
   let version = 0;
-  function clear(): void { controller?.abort(); controller = null; state = null; version++; }
+  const listeners = new Set<() => void>();
+  function notify(): void { for (const listener of listeners) listener(); }
+  function clear(): void { controller?.abort(); controller = null; state = null; version++; notify(); }
   let controller: AbortController | null = null;
   return {
     current() { return state ? { ...state, user: structuredClone(state.user) } : null; },
     version() { return version; },
     clear,
-    subscribe(listener) { void listener; return () => undefined; },
-    establish(login) { clear(); controller = new AbortController(); state = { ...structuredClone(login), version, signal: controller.signal }; },
+    subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    establish(login) { clear(); controller = new AbortController(); state = { ...structuredClone(login), version, signal: controller.signal }; notify(); },
   };
 }
 function decodeVoid(value: unknown): void { if (value !== undefined) throw new HttpFailure('contract'); }
@@ -102,7 +104,11 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       register: (input, signal) => call({ method: 'POST', path: ['auth', 'register'], body: { name: input.name, email: input.email, password: input.password }, signal }, decodeUser),
       login: (input, signal) => call({ method: 'POST', path: ['auth', 'login'], body: { email: input.email, password: input.password }, signal }, decodeLogin),
       me: (signal) => call({ path: ['auth', 'me'], signal }, decodeUser, true),
-      async logout(signal) { const version = session.version(); try { await call({ method: 'POST', path: ['auth', 'logout'], signal }, decodeVoid, true); } finally { if (session.version() === version) session.clear(); } },
+      async logout(signal) {
+        const snapshot = session.current(); session.clear();
+        if (!snapshot) return;
+        decodeVoid(await client.request({ method: 'POST', path: ['auth','logout'], token: snapshot.token, signal }));
+      },
     },
     games: {
       list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort }, signal }, list(decodeGame)),
