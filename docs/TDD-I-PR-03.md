@@ -4,3 +4,6 @@ Branch feat/integracao-pr-03-sessao, base ab99e3c. Somente Front; alterações d
 
 ## I-US-06
 RED: 5 falhas e 306 aprovados; commit 3f9a931. GREEN: 311 testes, lint, tipos e build. Cadastro no runtime produtivo usa HTTP, DTO retornado, body restrito, 400/409, pendência e duplo envio, erro/rede sem conta substituta e sucesso sem autenticar. Doubles da suíte legada configurados exclusivamente em tests/setup.ts; os novos testes injetam transporte na composição produtiva.
+
+## I-US-07
+RED: 8 falhas e 311 aprovados; commit 274c07e. GREEN: 319 testes, lint, tipos e build. Sequência login/me, Bearer privado, User confirmado, falhas 400/401/contrato/identidade, token pendente invalidado e login concorrente descartado. Sem Storage; remontagem com nova composição volta a visitante.
