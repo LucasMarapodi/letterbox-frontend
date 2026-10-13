@@ -15,6 +15,7 @@ export class CommunityError extends Error {
   constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found' | 'self-follow' | 'duplicate-follow') { super(code); }
 }
 export interface CommunityService {
+  getGameReviews(gameId: Id): Promise<PublicReview[]>;
   getGamesInDiscussion(period: RankingPeriod): Promise<RankedGame[]>;
   getMostCommented(period: RankingPeriod): Promise<RankedReview[]>;
   getRecentReviews(): Promise<ReviewDetails[]>;

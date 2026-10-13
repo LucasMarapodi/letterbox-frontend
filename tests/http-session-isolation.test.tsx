@@ -26,7 +26,7 @@ test('autenticação HTTP não consulta nem exibe dados privados de mocks não m
 });
 test('serviços privados ainda não migrados não aceitam identidade de usuário para gravar em mocks', async () => {
   const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'});
-  for (const operation of [() => adapters.community.publish('game-1','Texto',userA), () => adapters.community.comment('review-2','Texto',userA), () => adapters.community.setFavorite('game','game-1',true,userA), () => adapters.community.findOwnReview('game-1',userA), () => adapters.community.getFavorites(userA), () => adapters.community.getFeed(userA), () => adapters.community.isFollowing('user-2',userA), () => adapters.community.setFollowing('user-2',true,userA), () => adapters.notifications.list(userA)]) {
+  for (const operation of [() => adapters.community.setFavorite('game','game-1',true,userA), () => adapters.community.getFavorites(userA), () => adapters.community.getFeed(userA), () => adapters.community.isFollowing('user-2',userA), () => adapters.community.setFollowing('user-2',true,userA), () => adapters.notifications.list(userA)]) {
     await expect(operation()).rejects.toMatchObject({kind:'configuration'});
   }
 });
