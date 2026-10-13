@@ -59,7 +59,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     </div>
     <aside className="game-actions" aria-label="Avaliar e publicar">
     <FavoriteButton kind="game" targetId={id} />
-    <RatingForm gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
+    <RatingForm gameId={id} onSaved={() => { setAttempt((value) => value + 1); setOpinionsVersion((version) => version + 1); }} />
     <PublishReview gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
     </aside>
     <div className="game-discussion">

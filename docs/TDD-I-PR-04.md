@@ -4,3 +4,6 @@ Branch feat/integracao-pr-04-reviews, base 0c58697 de Front. Código de Back nã
 
 ## I-US-10
 RED focado: 5 falhas e 3 aprovados, sem erros de tipos; commit 33cb323. GREEN: 332 testes, lint, tipos e build. Catálogo, filtros, percentuais literais, detalhes e opiniões HTTP; 404 válido vira null, rede/500/contrato não viram ausência. Zero/data sem hora/capa null e erro/recuperação/vazio na interface. Cenários de autenticação foram isolados do GET público novo por double de catálogo em tests; visitante agora consulta apenas catálogo público sem Bearer.
+
+## I-US-11
+RED: 8 falhas esperadas; commit 0738b61. GREEN: 340 testes, lint, tipos e build. Notas pessoais HTTP, wrappers null/zero/decimal, corpo somente value e Bearer da sessão (User recebido não autoriza), 400/401/404 e visitante rejeitado. Estrelas recuperam decimal e preservam resposta salva; PUT atualiza jogo e opiniões por consultas HTTP. Capacidades separadas permitem ativação individual dos fluxos.

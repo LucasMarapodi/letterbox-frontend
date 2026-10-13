@@ -28,7 +28,7 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
     event.preventDefault();
     if (!user || sending.current || loadState !== 'ready') return;
     sending.current = true; setPending(true); setMessage(''); setFailed(false);
-    try { const rating = await community.rate(gameId, Number(value), user); setMessage(`Nota ${rating.value} salva.`); onSaved?.(); }
+    try { const rating = await community.rate(gameId, Number(value), user); setValue(String(rating.value)); setMessage(`Nota ${rating.value} salva.`); onSaved?.(); }
     catch { setFailed(true); setMessage('Não foi possível salvar a nota. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }
@@ -50,7 +50,7 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
 export function RatingForm(props: RatingFormProps): ReactElement {
   const { user, version } = useSession();
   const { privateFeatures } = useServices();
-  if (privateFeatures?.opinions === false) return <></>;
+  if ((privateFeatures?.rating ?? privateFeatures?.opinions) === false) return <></>;
   return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={`${version}-${user?.id}-${props.gameId}`} {...props} /></RequireSession></section>;
 }
 
