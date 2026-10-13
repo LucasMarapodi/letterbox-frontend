@@ -5,7 +5,7 @@ import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, 
 import { HttpFailure, createHttpClient, validateApiBaseUrl, type FetchTransport, type HttpRequest } from './client';
 import { decodeUser, decodeGame, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
 export interface SessionSnapshot { token: string; user: User; expiresAt: string; version: number; signal: AbortSignal; }
-export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; clear(): void; }
+export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; clear(): void; subscribe(listener: () => void): () => void; }
 export interface HttpAdapterConfig { apiBaseUrl: string; }
 export interface HttpAdapters {
   session: HttpSessionStore;
@@ -69,6 +69,7 @@ export function createHttpSessionStore(): HttpSessionStore {
     current() { return state ? { ...state, user: structuredClone(state.user) } : null; },
     version() { return version; },
     clear,
+    subscribe(listener) { void listener; return () => undefined; },
     establish(login) { clear(); controller = new AbortController(); state = { ...structuredClone(login), version, signal: controller.signal }; },
   };
 }
