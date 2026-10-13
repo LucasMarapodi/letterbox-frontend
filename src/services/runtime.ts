@@ -9,6 +9,7 @@ import type { FetchTransport } from './http/client';
 import { HttpFailure } from './http/client';
 import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters, type HttpSessionStore } from './http/adapters';
 import { createHttpAuthService } from './http/authService';
+import { createHttpGameService } from './http/gameService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export type PrivateFeature = 'opinions' | 'favorites' | 'follows' | 'feed' | 'notifications';
@@ -35,7 +36,7 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
   const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), { ...options, session });
   const unavailable = async (): Promise<never> => { throw new HttpFailure('configuration'); };
   return {
-    ...previous, auth: createHttpAuthService(getHttp, session), http: getHttp,
+    ...previous, auth: createHttpAuthService(getHttp, session), games: createHttpGameService(getHttp), http: getHttp,
     privateFeatures: { opinions: false, favorites: false, follows: false, feed: false, notifications: false },
     community: {
       ...previous.community,
