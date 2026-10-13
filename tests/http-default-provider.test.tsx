@@ -1,0 +1,22 @@
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { expect, test, vi } from 'vitest';
+import { createDefaultApplicationServices } from '../src/services/runtime';
+import type { FetchTransport } from '../src/services/http/client';
+import { wireUser } from './http-fixtures';
+test('entrada padrão preserva capacidades HTTP ao montar provider sem override', async () => {
+  const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'})).mockResolvedValueOnce(Response.json(wireUser));
+  const defaults=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport});
+  const original=await vi.importActual<typeof import('../src/services/runtime')>('../src/services/runtime');
+  vi.doMock('../src/services/runtime',()=>({...original,defaultApplicationServices:defaults}));
+  const {AppRoutes}=await import('../src/App'); const {MemoryRouter}=await import('react-router-dom');
+  const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes/></MemoryRouter>);
+  await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only');
+  await interaction.click(screen.getByRole('button',{name:'Entrar'}));
+  await screen.findByLabelText('Usuário conectado');
+  expect(screen.queryByRole('button',{name:'Notificações'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('region',{name:'Feed de reviews'})).not.toBeInTheDocument();
+  expect(screen.queryByText('Não foi possível carregar os favoritos.')).not.toBeInTheDocument();
+  expect(transport).toHaveBeenCalledTimes(2);
+  vi.doUnmock('../src/services/runtime');
+});
