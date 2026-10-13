@@ -2,6 +2,8 @@
 
 React + TypeScript + Vite. US-01 a US-37 implementadas e verificadas: catálogo, autenticação, reviews, perfis, favoritos, conexões, feed, notificações e Comunidade pública com rankings, sem backend ou acesso direto à IGDB.
 
+Terceira fase: I-PR-02 prepara cliente HTTP, validação dos DTOs e adaptadores compartilhando sessão em memória. A ativação dos fluxos reais será feita pelas próximas PRs. Consulte [infraestrutura e limites](docs/HTTP-INTEGRATION.md) e [descrição da entrega](docs/I-PR-02.md).
+
 ## Executar
 
 Em `Front`, com Node.js 24 e npm:

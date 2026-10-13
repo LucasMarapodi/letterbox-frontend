@@ -2,7 +2,8 @@ import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '..
 import type { GameQuery } from '../contracts';
 import type { User } from '../../models';
 import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
-import { HttpFailure, type FetchTransport } from './client';
+import { HttpFailure, createHttpClient, validateApiBaseUrl, type FetchTransport, type HttpRequest } from './client';
+import { decodeUser, decodeGame, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
 export interface SessionSnapshot { token: string; user: User; expiresAt: string; version: number; signal: AbortSignal; }
 export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; clear(): void; }
 export interface HttpAdapterConfig { apiBaseUrl: string; }
@@ -55,6 +56,95 @@ export interface HttpAdapters {
   };
   notifications: { list(signal?: AbortSignal): Promise<NotificationResponse[]>; };
 }
-export function readHttpConfig(input: { apiBaseUrl?: unknown }): HttpAdapterConfig { void input; throw new HttpFailure('configuration'); }
-export function createHttpSessionStore(): HttpSessionStore { throw new HttpFailure('configuration'); }
-export function createHttpAdapters(config: HttpAdapterConfig, options: { transport?: FetchTransport; session?: HttpSessionStore } = {}): HttpAdapters { void config; void options; throw new HttpFailure('configuration'); }
+export function readHttpConfig(input: { apiBaseUrl?: unknown }): HttpAdapterConfig {
+  if (typeof input.apiBaseUrl !== 'string' || !input.apiBaseUrl.trim()) throw new HttpFailure('configuration');
+  return { apiBaseUrl: validateApiBaseUrl(input.apiBaseUrl.trim()) };
+}
+export function createHttpSessionStore(): HttpSessionStore {
+  let state: SessionSnapshot | null = null;
+  let version = 0;
+  function clear(): void { controller?.abort(); controller = null; state = null; version++; }
+  let controller: AbortController | null = null;
+  return {
+    current() { return state ? { ...state, user: structuredClone(state.user) } : null; },
+    version() { return version; },
+    clear,
+    establish(login) { clear(); controller = new AbortController(); state = { ...structuredClone(login), version, signal: controller.signal }; },
+  };
+}
+function decodeVoid(value: unknown): void { if (value !== undefined) throw new HttpFailure('contract'); }
+export function createHttpAdapters(config: HttpAdapterConfig, options: { transport?: FetchTransport; session?: HttpSessionStore } = {}): HttpAdapters {
+  const client = createHttpClient(readHttpConfig(config).apiBaseUrl, options.transport);
+  const session = options.session ?? createHttpSessionStore();
+  async function call<T>(request: Omit<HttpRequest, 'token'>, decode: Decoder<T>, authenticated = false): Promise<T> {
+    const snapshot = authenticated ? session.current() : null;
+    if (authenticated && !snapshot) throw new HttpFailure('http', 401, 'unauthorized');
+    const signal = snapshot ? request.signal ? AbortSignal.any([snapshot.signal, request.signal]) : snapshot.signal : request.signal;
+    try {
+      const value = await client.request({ ...request, signal, ...(snapshot ? { token: snapshot.token } : {}) });
+      if (snapshot && session.version() !== snapshot.version) throw new HttpFailure('cancelled');
+      return decode(value);
+    } catch (error: unknown) {
+      if (snapshot && session.version() !== snapshot.version) throw new HttpFailure('cancelled');
+      if (snapshot && error instanceof HttpFailure && error.status === 401) session.clear();
+      throw error;
+    }
+  }
+  const list = <T>(decode: Decoder<T>): Decoder<T[]> => (value) => decodeList(value, decode);
+  const getUser = (id: string, signal?: AbortSignal): Promise<PublicUserResponse> => call({ path: ['users', id], signal }, decodeUser);
+  const userReviews = (id: string, signal?: AbortSignal): Promise<ReviewResponse[]> => call({ path: ['users', id, 'reviews'], signal }, list(decodeReview));
+  const followers = (id: string, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', id, 'followers'], signal }, list(decodeUser));
+  const following = (id: string, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', id, 'following'], signal }, list(decodeUser));
+  return {
+    session,
+    auth: {
+      register: (input, signal) => call({ method: 'POST', path: ['auth', 'register'], body: { name: input.name, email: input.email, password: input.password }, signal }, decodeUser),
+      login: (input, signal) => call({ method: 'POST', path: ['auth', 'login'], body: { email: input.email, password: input.password }, signal }, decodeLogin),
+      me: (signal) => call({ path: ['auth', 'me'], signal }, decodeUser, true),
+      async logout(signal) { const version = session.version(); try { await call({ method: 'POST', path: ['auth', 'logout'], signal }, decodeVoid, true); } finally { if (session.version() === version) session.clear(); } },
+    },
+    games: {
+      list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort }, signal }, list(decodeGame)),
+      get: (id, signal) => call({ path: ['games', id], signal }, decodeGame),
+      opinions: (id, signal) => call({ path: ['games', id, 'opinions'], signal }, decodeOpinions),
+      reviews: (id, signal) => call({ path: ['games', id, 'reviews'], signal }, list(decodeReview)),
+      myRating: (id, signal) => call({ path: ['games', id, 'rating', 'me'], signal }, unwrapRating, true),
+      rate: (id, input, signal) => call({ method: 'PUT', path: ['games', id, 'rating', 'me'], body: { value: input.value }, signal }, decodeRating, true),
+      myReview: (id, signal) => call({ path: ['games', id, 'reviews', 'me'], signal }, unwrapReview, true),
+      publish: (id, input, signal) => call({ method: 'POST', path: ['games', id, 'reviews'], body: { text: input.text }, signal }, decodeReview, true),
+    },
+    reviews: {
+      get: (id, signal) => call({ path: ['reviews', id], signal }, decodeReview),
+      edit: (id, input, signal) => call({ method: 'PATCH', path: ['reviews', id], body: { text: input.text }, signal }, decodeReview, true),
+      comments: (id, signal) => call({ path: ['reviews', id, 'comments'], signal }, list(decodeComment)),
+      comment: (id, input, signal) => call({ method: 'POST', path: ['reviews', id, 'comments'], body: { text: input.text }, signal }, decodeComment, true),
+    },
+    profiles: {
+      get: getUser, reviews: userReviews, followers, following,
+      async profile(id, signal) { const [user, reviews] = await Promise.all([getUser(id, signal), userReviews(id, signal)]); return { user, reviews }; },
+      async connections(id, signal) { const [followerUsers, followingUsers] = await Promise.all([followers(id, signal), following(id, signal)]); return { followers: followerUsers, following: followingUsers }; },
+      edit: (input, signal) => call({ method: 'PATCH', path: ['users', 'me', 'profile'], signal, body: { ...(input.displayName === undefined ? {} : { displayName: input.displayName }), ...(input.bio === undefined ? {} : { bio: input.bio }), ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }) } }, decodeUser, true),
+    },
+    social: {
+      favorites: (signal) => call({ path: ['favorites'], signal }, decodeFavoriteLists, true),
+      favorite: (kind, id, signal) => call({ path: ['favorites', kind, id], signal }, unwrapFavorite, true),
+      async setFavorite(kind, id, selected, signal) {
+        if (selected) return call({ method: 'PUT', path: ['favorites', kind, id], signal }, decodeFavorite, true);
+        await call({ method: 'DELETE', path: ['favorites', kind, id], signal }, decodeVoid, true); return null;
+      },
+      isFollowing: (id, signal) => call({ path: ['users', id, 'follow', 'me'], signal }, unwrapFollowing, true),
+      async setFollowing(id, selected, signal) {
+        if (selected) return call({ method: 'PUT', path: ['users', id, 'follow'], signal }, unwrapFollowing, true);
+        await call({ method: 'DELETE', path: ['users', id, 'follow'], signal }, decodeVoid, true); return false;
+      },
+    },
+    community: {
+      recent: (signal) => call({ path: ['community', 'reviews', 'recent'], signal }, list(decodeReview)),
+      mostCommented: (period, signal) => call({ path: ['community', 'reviews', 'most-commented'], query: { period }, signal }, list(decodeRankedReview)),
+      gamesInDiscussion: (period, signal) => call({ path: ['community', 'games', 'in-discussion'], query: { period }, signal }, list(decodeRankedGame)),
+      feed: (signal) => call({ path: ['feed', 'following'], signal }, list(decodeReview), true),
+      dashboard: (signal) => call({ path: ['dashboard'], signal }, decodeDashboard, true),
+    },
+    notifications: { list: (signal) => call({ path: ['notifications'], signal }, list(decodeNotification), true) },
+  };
+}

@@ -5,6 +5,8 @@ import type { NotificationService } from './notificationContracts';
 import { createMockServices } from '../mocks/services';
 import { createMockGameService } from '../mocks/gameService';
 import { createMockNotificationService } from '../mocks/notificationService';
+// Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
+export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; }
 export interface ServiceConfig { apiBaseUrl: string; implementation: 'mock' | 'custom'; }
 export function readServiceConfig(input: { apiBaseUrl?: unknown; implementation?: unknown } = {}): ServiceConfig {
