@@ -1,4 +1,9 @@
 import type { PublicUserResponse, GameResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse } from '../src/services/http/dtos';
+import type { FetchTransport } from '../src/services/http/client';
+/** Isola casos de autenticação do catálogo público migrado em outra PR. */
+export function withCatalog(transport: FetchTransport): FetchTransport {
+  return (url, init) => new URL(url).pathname === '/api/v1/games' ? Promise.resolve(Response.json([])) : transport(url, init);
+}
 export const wireUser: PublicUserResponse = { id: 'u%2F1', username: 'ana', displayName: 'Ana', bio: '', avatarUrl: null };
 export const wireGame: GameResponse = { id: 'game%2F42', title: 'Jogo HTTP', summary: '', coverUrl: null, genres: ['RPG'], platforms: ['PC'], releaseDate: '2024-02-29', averageRating: 4.5 };
 export const wireReview: ReviewResponse = { id: 'r/1', userId: wireUser.id, gameId: wireGame.id, text: 'Review', createdAt: '2026-10-13T12:30:00+00:00', updatedAt: null, author: { id: wireUser.id, displayName: wireUser.displayName, avatarUrl: null }, game: { id: wireGame.id, title: wireGame.title, coverUrl: null } };
