@@ -12,7 +12,7 @@ import { createHttpAuthService } from './http/authService';
 import { createHttpGameService } from './http/gameService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
-export type PrivateFeature = 'opinions' | 'favorites' | 'follows' | 'feed' | 'notifications';
+export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'feed' | 'notifications';
 export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
 export interface ServiceConfig { apiBaseUrl: string; implementation: 'mock' | 'custom'; }
 export function readServiceConfig(input: { apiBaseUrl?: unknown; implementation?: unknown } = {}): ServiceConfig {

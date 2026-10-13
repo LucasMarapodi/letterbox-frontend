@@ -4,6 +4,9 @@ import type { FetchTransport } from '../src/services/http/client';
 export function withCatalog(transport: FetchTransport): FetchTransport {
   return (url, init) => new URL(url).pathname === '/api/v1/games' ? Promise.resolve(Response.json([])) : transport(url, init);
 }
+export function withAuthentication(transport: FetchTransport): FetchTransport {
+  return (url, init) => url.endsWith('/auth/login') ? Promise.resolve(Response.json({ user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' })) : url.endsWith('/auth/me') ? Promise.resolve(Response.json(wireUser)) : transport(url, init);
+}
 export const wireUser: PublicUserResponse = { id: 'u%2F1', username: 'ana', displayName: 'Ana', bio: '', avatarUrl: null };
 export const wireGame: GameResponse = { id: 'game%2F42', title: 'Jogo HTTP', summary: '', coverUrl: null, genres: ['RPG'], platforms: ['PC'], releaseDate: '2024-02-29', averageRating: 4.5 };
 export const wireReview: ReviewResponse = { id: 'r/1', userId: wireUser.id, gameId: wireGame.id, text: 'Review', createdAt: '2026-10-13T12:30:00+00:00', updatedAt: null, author: { id: wireUser.id, displayName: wireUser.displayName, avatarUrl: null }, game: { id: wireGame.id, title: wireGame.title, coverUrl: null } };
