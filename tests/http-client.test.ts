@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest';
 import { createHttpClient, type FetchTransport } from '../src/services/http/client';
-function fake(response: Response): ReturnType<typeof vi.fn<FetchTransport>> { return vi.fn<FetchTransport>().mockResolvedValue(response); }
+function fake(response: Response): ReturnType<typeof vi.fn<FetchTransport>> { return vi.fn<FetchTransport>().mockImplementation(async () => response.clone()); }
 test('URL base, segmentos opacos e query são codificados independentemente', async () => {
   const fetch = fake(Response.json([]));
   const client = createHttpClient('http://localhost:5000/', fetch);
@@ -19,7 +19,7 @@ test('JSON e Bearer são opt-in e escrita não é repetida', async () => {
 });
 test('204 não tenta ler JSON', async () => {
   const response = new Response(null, { status: 204 }); const json = vi.spyOn(response, 'json');
-  await expect(createHttpClient('http://localhost:5000', fake(response)).request({ method: 'DELETE', path: ['favorites','game','g'] })).resolves.toBeUndefined();
+  await expect(createHttpClient('http://localhost:5000', vi.fn<FetchTransport>().mockResolvedValue(response)).request({ method: 'DELETE', path: ['favorites','game','g'] })).resolves.toBeUndefined();
   expect(json).not.toHaveBeenCalled();
 });
 test.each([[400,'validation_failed'],[401,'unauthorized'],[403,'forbidden'],[404,'not_found'],[409,'conflict'],[500,'internal_error']] as const)('HTTP %s preserva status/código sem expor mensagem externa', async (status, code) => {
