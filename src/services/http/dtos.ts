@@ -1,12 +1,12 @@
 import type { User, Game, Rating, Favorite } from '../../models';
 import type { ReviewDetails, PublicComment, FavoriteLists, RankedReview, RankedGame } from '../communityContracts';
 import type { NotificationItem } from '../notificationContracts';
-export interface PublicUserResponse extends User {}
-export interface GameResponse extends Game {}
-export interface RatingResponse extends Rating {}
-export interface FavoriteResponse extends Favorite {}
+export type PublicUserResponse = User;
+export type GameResponse = Game;
+export type RatingResponse = Rating;
+export type FavoriteResponse = Favorite;
 export interface ReviewResponse extends ReviewDetails { game: { id: string; title: string; coverUrl: string | null }; }
-export interface CommentResponse extends PublicComment {}
+export type CommentResponse = PublicComment;
 export type NotificationResponse = NotificationItem;
 export interface LoginResponse { token: string; expiresAt: string; user: PublicUserResponse; }
 export interface MyRatingResponse { rating: RatingResponse | null; }
@@ -17,7 +17,7 @@ export interface GameOpinionsResponse { averageRating: number | null; reviews: R
 export interface FavoriteListsResponse extends FavoriteLists { reviews: ReviewResponse[]; }
 export interface DashboardResponse { favorites: FavoriteListsResponse; feed: ReviewResponse[]; }
 export interface RankedReviewResponse extends RankedReview { review: ReviewResponse; }
-export interface RankedGameResponse extends RankedGame {}
+export type RankedGameResponse = RankedGame;
 export interface RegisterRequest { name: string; email: string; password: string; }
 export interface LoginRequest { email: string; password: string; }
 export interface RatingRequest { value: number; }
