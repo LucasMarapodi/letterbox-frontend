@@ -90,6 +90,12 @@ test('401 privado revoga sessão atual, mas 401 de login não revoga outra sess�
   await expect(adapters.auth.login({ email: 'test@example.com', password: 'wrong' })).rejects.toMatchObject({ status: 401 }); expect(adapters.session.current()).not.toBeNull();
   await expect(adapters.auth.me()).rejects.toMatchObject({ status: 401 }); expect(adapters.session.current()).toBeNull();
 });
+test('401 privado com corpo incompatível ainda revoga a sessão', async () => {
+  const transport = vi.fn<FetchTransport>().mockResolvedValue(new Response('não é JSON', { status: 401 }));
+  const adapters = createHttpAdapters({ apiBaseUrl: 'http://localhost:5207' }, { transport }); adapters.session.establish(login);
+  await expect(adapters.auth.me()).rejects.toMatchObject({ kind: 'contract', status: 401 });
+  expect(adapters.session.current()).toBeNull();
+});
 test('resposta da sessão anterior é invalidada sem limpar a sessão nova', async () => {
   const pending = deferred<Response>(); const transport = vi.fn<FetchTransport>().mockReturnValue(pending.promise);
   const adapters = createHttpAdapters({ apiBaseUrl: 'http://localhost:5207' }, { transport }); adapters.session.establish(login);

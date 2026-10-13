@@ -47,3 +47,6 @@ test('campos ausentes tipos errados datas impossíveis e números inválidos sã
   expect(() => decodeRankedGame({ game: wireGame, commentCount: 1.5, lastCommentAt: wireReview.createdAt })).toThrow();
   expect(() => decodeDashboard({ favorites: { games: [], reviews: [null] }, feed: [] })).toThrow();
 });
+test('instantes não aceitam 24 horas normalizadas silenciosamente para o dia seguinte', () => {
+  expect(() => decodeReview({ ...wireReview, createdAt: '2026-10-13T24:00:00Z' })).toThrow();
+});
