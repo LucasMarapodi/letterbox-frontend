@@ -7,6 +7,7 @@ interface SessionContextValue {
   signIn(credentials: LoginCredentials): Promise<User>;
   signOut(): Promise<void>;
   notice: string | null;
+  version: number;
   authService: AuthService;
 }
 interface SessionProviderProps { children: ReactNode; service: AuthService; }
@@ -36,7 +37,7 @@ export function SessionProvider({ children, service }: SessionProviderProps): Re
     try { await service.logout?.(); }
     catch { if (version === requestVersion.current) setNotice('Você saiu deste dispositivo, mas não foi possível confirmar a revogação na API.'); }
   }
-  const value: SessionContextValue = { user, notice, signIn, signOut, authService: service };
+  const value: SessionContextValue = { user, notice, version: 0, signIn, signOut, authService: service };
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 

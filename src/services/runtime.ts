@@ -10,7 +10,8 @@ import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAd
 import { createHttpAuthService } from './http/authService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
-export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; }
+export type PrivateFeature = 'opinions' | 'favorites' | 'follows' | 'feed' | 'notifications';
+export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
 export interface ServiceConfig { apiBaseUrl: string; implementation: 'mock' | 'custom'; }
 export function readServiceConfig(input: { apiBaseUrl?: unknown; implementation?: unknown } = {}): ServiceConfig {
   const implementation = input.implementation ?? 'mock';
