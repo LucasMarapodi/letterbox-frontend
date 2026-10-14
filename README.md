@@ -2,7 +2,7 @@
 
 React + TypeScript + Vite. US-01 a US-37 implementadas e verificadas: catálogo, autenticação, reviews, perfis, favoritos, conexões, feed, notificações e Comunidade pública com rankings, sem backend ou acesso direto à IGDB.
 
-Terceira fase: I-PR-02 prepara cliente HTTP/DTOs; I-PR-03 ativa cadastro, login confirmado por me, logout e isolamento em memória pela API. Configure VITE_API_BASE_URL em .env conforme .env.example e execute Back existente. Demais domínios públicos ainda aguardam integração; ações privadas não migradas ficam bloqueadas na composição HTTP para impedir leitura/escrita em mocks. Consulte [infraestrutura e limites](docs/HTTP-INTEGRATION.md) e [entrega de autenticação](docs/I-PR-03.md).
+Terceira fase: I-PR-02 prepara cliente HTTP/DTOs; I-PR-03 ativa autenticação e isolamento; I-PR-04 ativa catálogo, notas, reviews e comentários pela API. Configure VITE_API_BASE_URL em .env conforme .env.example e execute Back existente. Perfis/social e Dashboard/Comunidade/sino ainda aguardam integração; ações privadas não migradas ficam bloqueadas na composição HTTP. Consulte [infraestrutura e limites](docs/HTTP-INTEGRATION.md) e [entrega de jogos e opiniões](docs/I-PR-04.md).
 
 ## Executar
 
@@ -37,7 +37,7 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 ## Rotas provisórias
 
 `/`, `/comunidade`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
-Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Reviews possuem leitura pública, edição do autor e comentários. Perfis públicos mostram biografia, avatar e reviews. Favoritos pessoais de jogos e reviews aparecem na Home e próprio perfil. Notificações são acessadas pelo sino e modal, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
+Home, detalhes, notas, reviews e comentários consomem HTTP na composição produtiva. Login e cadastro também usam a API. Perfis e Comunidade ainda têm consultas públicas legadas; favoritos, relações, feed e notificações privados estão bloqueados até suas PRs. Doubles de testes preservam a cobertura das telas existentes. Os links de exemplo na Home permanecem temporários e podem apontar a registros ausentes na API.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 

@@ -1,6 +1,6 @@
 # Infraestrutura HTTP — terceira fase
 
-A I-PR-02 prepara transporte, contratos e adaptadores. A I-PR-03 ativou autenticação HTTP no runtime produtivo. Os demais domínios serão ativados por suas US (I-PR-04 a I-PR-06); a retirada final dos mocks pertence à I-PR-07. Isso não constitui integração completa da aplicação.
+A I-PR-02 prepara transporte, contratos e adaptadores. A I-PR-03 ativou autenticação HTTP e a I-PR-04 ativou catálogo e opiniões no runtime produtivo. Perfis/social e Dashboard/Comunidade/sino serão ativados nas I-PR-05 e I-PR-06; a retirada final dos mocks pertence à I-PR-07. Isso não constitui integração completa da aplicação.
 
 ## Autenticação ativada — I-PR-03
 
@@ -8,7 +8,17 @@ createDefaultApplicationServices é a entrada produtiva. Cadastro envia somente 
 
 O store publica mudanças sem divulgar credenciais a componentes. AuthService expõe apenas usuário confirmado, subscribe e versão; SessionProvider limpa UI em logout/401. Logout é assíncrono: captura token, limpa sessão e aborta requests privados imediatamente, depois tenta revogação. Falha de revogação é informada sem restaurar usuário. Respostas antigas não removem conta nova.
 
-Contexto e store compartilham versão; componentes privados usam essa versão nas suas keys para descartar estado anterior. O provider preserva toda a composição, inclusive flags e acesso ao mesmo conjunto HTTP para futuras US. privateFeatures bloqueia temporariamente opiniões, favoritos, relações, feed e notificações na entrada HTTP até a ativação de seus fluxos. Os serviços privados correspondentes também rejeitam acesso, sem aceitar User como autorização ou usar mocks. Consultas públicas antigas ficam disponíveis até migração, sem receber identidade da sessão para fabricar perfil local.
+Contexto e store compartilham versão; componentes privados usam essa versão nas suas keys para descartar estado anterior. O provider preserva toda a composição, inclusive flags e acesso ao mesmo conjunto HTTP. Capacidades individuais rating/publishReview/editReview/comments estão ativadas; favoritos, relações, feed e notificações privados continuam bloqueados e seus serviços rejeitam acesso. Consultas públicas antigas de outros domínios ficam disponíveis até migração, sem receber identidade da sessão para fabricar perfil local.
+
+## Jogos e opiniões ativados — I-PR-04
+
+GameService consulta catálogo com term/sort, detalhe e opinions públicos sem Bearer. 404 válido no detalhe/review vira ausência; rede, 500 e contrato inválido continuam erro. Capas null, datas sem hora, média null e zero são válidos.
+
+CommunityService possui pontes HTTP para nota pessoal, review própria/publicação/lista, leitura/edição de review e comentários. User recebido pelo contrato legado não autoriza requests: a sessão compartilhada fornece Bearer. Escritas enviam somente value ou text. Ratings e review própria desembrulham os objetos nullable da API.
+
+PUT de nota atualiza nota local validada e consulta jogo/opinions. POST de review atualiza lista por GET reviews; 409 consulta reviews/me para oferecer edição. PATCH retorna projeção validada, mantendo ID/createdAt e atualizando texto/updatedAt; novas visitas consultam a API. POST de comentário refresca a lista sem inserção otimista. 403/404/rede na edição e 400/404/rede no comentário preservam rascunho com mensagens distintas. Logout/401 desmontam formulários e invalidam requests privados anteriores.
+
+Validação: 361 testes, lint, tipos e build; navegador sem interceptações com duas contas, nota cinco ao reabrir, publicação/edição, comentário visível para visitante e origem de API indisponível sem fallback. Harness real redigido verifica status e CORS; detalhes e limites em [I-PR-04](I-PR-04.md).
 
 Cada próxima US deve reutilizar a mesma fábrica/store, implementar a ponte HTTP de seus métodos e habilitar sua capacidade somente após verificar o fluxo. Doubles legados são selecionados apenas em tests/setup.ts; App em execução não usa essa configuração de testes. createApplicationServices/mock continua temporariamente disponível para a suíte/consultas públicas, sem fallback de autenticação.
 
