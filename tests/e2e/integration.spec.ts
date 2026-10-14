@@ -11,6 +11,7 @@ let host: ChildProcess | undefined;
 type Call = { method: string; path: string; status: number; source: 'browser' | 'infrastructure' | 'permissions' };
 const calls: Call[] = [];
 let inventory: string[] = [];
+let corsMismatch = false;
 const routes = [
   '/auth/register', '/auth/login', '/auth/logout', '/auth/me',
   '/users/{userId}', '/users/me/profile', '/users/{userId}/reviews', '/users/{userId}/followers', '/users/{userId}/following',
@@ -34,7 +35,10 @@ function string(value: unknown): string {
 function observe(page: Page): void {
   page.on('response', (response) => {
     const url = new URL(response.url());
-    if (url.origin === api) calls.push({ method: response.request().method(), path: template(url.pathname), status: response.status(), source: 'browser' });
+    if (url.origin === api) {
+      calls.push({ method: response.request().method(), path: template(url.pathname), status: response.status(), source: 'browser' });
+      if (response.headers()['access-control-allow-origin'] !== origin) corsMismatch = true;
+    }
   });
 }
 async function start(request: APIRequestContext): Promise<void> {
@@ -89,6 +93,7 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   const a = await browser.newPage({ baseURL: origin });
   const b = await browser.newPage({ baseURL: origin });
   observe(a); observe(b);
+  await mkdir('docs/evidence', { recursive: true });
   const suffix = randomUUID();
   const password = randomUUID();
   const emailA = `e2e.a.${suffix}@example.test`;
@@ -147,6 +152,7 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   await expect(b.getByText('Nova review E2E para o feed.', { exact: true })).toBeVisible();
   await b.getByRole('button', { name: 'Notificações', exact: true }).click();
   await expect(b.getByText('E2E Autora publicou uma nova review', { exact: true })).toBeVisible();
+  await b.screenshot({ path: 'docs/evidence/I-PR-07-notifications.png' });
   await b.keyboard.press('Escape');
   await expect(b.getByRole('button', { name: 'Notificações', exact: true })).toBeFocused();
   await game(b, 'game-3');
@@ -182,6 +188,9 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
     expect(response.status()).toBe(204);
     expect(response.headers()['access-control-allow-origin']).toBe(origin);
     expect(response.headers()['access-control-allow-methods']).toContain(method);
+    const allowedHeaders = response.headers()['access-control-allow-headers'].toLowerCase().split(',').map((header) => header.trim());
+    expect(allowedHeaders).toContain('authorization');
+    expect(allowedHeaders).toContain('content-type');
   }
   const forbiddenOrigin = await request.get(`${api}/health`, { headers: { Origin: 'http://untrusted.invalid' } });
   expect(forbiddenOrigin.headers()['access-control-allow-origin']).toBeUndefined();
@@ -222,8 +231,9 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   const browserCalls = new Set(calls.filter((c) => c.source === 'browser' && c.status >= 200 && c.status < 300).map((c) => `${c.method} ${c.path}`));
   // Required methods include shared resource paths with multiple verbs.
   expect([...browserCalls].sort()).toEqual(inventory.sort());
-  await mkdir('docs/evidence', { recursive: true });
-  await writeFile('docs/evidence/I-PR-07-calls.json', JSON.stringify({ date: '2026-10-14', front: origin, api, calls }, null, 2));
+  expect(corsMismatch).toBe(false);
+  await writeFile('docs/evidence/I-PR-07-calls.json', JSON.stringify({ date: new Date().toISOString().slice(0, 10), front: origin, api, calls }, null, 2));
+  await b.getByRole('heading', { name: 'Game Reviews', exact: true }).click();
   await b.screenshot({ path: 'docs/evidence/I-PR-07-public.png', fullPage: true });
   await a.close(); await b.close();
 });
