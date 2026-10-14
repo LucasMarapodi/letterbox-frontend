@@ -66,7 +66,9 @@ test('pendência bloqueia duplo envio e comentário publicado aparece', async ()
   expect(screen.getByText('Comentário publicado.')).toBeVisible();
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Entrar para continuar' })).toBeVisible();
+  await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
+  await interaction.click(await screen.findByRole('link', { name: 'Review de Leo' }));
+  expect(await screen.findByRole('link', { name: 'Entrar para continuar' })).toBeVisible();
 });
 test('visitante lê mas não envia comentário', async () => {
   render(<MemoryRouter initialEntries={['/reviews/review-2']}><AppRoutes /></MemoryRouter>);

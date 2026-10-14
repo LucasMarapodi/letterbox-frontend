@@ -52,7 +52,7 @@ test('201 consulta lista, exibe uma vez, limpa campo e logout remove envio',asyn
   const {interaction,transport}=await open();await interaction.type(await screen.findByLabelText('Seu comentário'),'Comentário');await interaction.dblClick(screen.getByRole('button',{name:'Publicar comentário'}));
   expect(await screen.findByText('Comentário publicado.')).toBeVisible(); const comments=await screen.findByRole('list',{name:'Comentários da review'});
   expect(within(comments).getAllByText('Comentário')).toHaveLength(1); expect(screen.getByLabelText('Seu comentário')).toHaveValue('');expect(transport.mock.calls.filter(([url,init])=>url.endsWith('/comments')&&init.method==='POST')).toHaveLength(1);
-  await interaction.click(screen.getByRole('button',{name:'Sair'})); expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();expect(within(comments).getByText('Comentário')).toBeVisible();
+  await interaction.click(screen.getByRole('button',{name:'Sair'})); expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();await interaction.click(screen.getByRole('link',{name:'Review de exemplo'}));expect(within(await screen.findByRole('list',{name:'Comentários da review'})).getByText('Comentário')).toBeVisible();
 });
 test.each([[400,'Seu comentário não foi aceito. Verifique o texto.'],[404,'Esta review não está mais disponível.'],[0,'Não foi possível publicar o comentário. Tente novamente.']])('erro %s preserva comentário sem inserir sucesso local',async(status,message)=>{
   const {interaction}=await open(status);await interaction.type(await screen.findByLabelText('Seu comentário'),'rascunho');await interaction.click(screen.getByRole('button',{name:'Publicar comentário'}));

@@ -43,10 +43,10 @@ test.each(['/perfil/u%252F1', '/reviews/review', '/comunidade'])('logout em %s s
 });
 test('redireciona após limpeza local sem aguardar revogação; falha mantém aviso no Início', async () => {
   const pending = deferred<Response>();
-  const { user } = await open('/comunidade', { logout: pending.promise });
+  const { user } = await open('/comunidade', { logout: pending.promise.then(() => { throw new TypeError('offline'); }) });
   await user.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.getByLabelText('Rota atual')).toHaveTextContent(/^\/$/);
-  await act(async () => { pending.resolve(Response.error()); await pending.promise; });
+  await act(async () => { pending.resolve(new Response(null, { status: 204 })); await pending.promise; });
   expect(await screen.findByRole('alert')).toHaveTextContent('não foi possível confirmar a revogação na API');
   expect(screen.queryByRole('link', { name: 'Meu perfil' })).not.toBeInTheDocument();
 });
@@ -69,9 +69,9 @@ test.each([204, 503])('logout anterior tardio (%s) não encerra nem navega sobre
   const pending = deferred<Response>();
   const { user } = await open('/comunidade', { logout: pending.promise });
   await user.click(screen.getByRole('button', { name: 'Sair' }));
-  await user.click(screen.getByRole('link', { name: 'Entrar', exact: true }));
+  await user.click(screen.getByRole('link', { name: 'Entrar' }));
   await user.type(screen.getByLabelText('E-mail'), 'new@example.test'); await user.type(screen.getByLabelText('Senha'), 'test-only');
-  await user.click(screen.getByRole('button', { name: 'Entrar', exact: true }));
+  await user.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByText('Nova conta');
   await user.click(screen.getByRole('link', { name: 'Meu perfil' }));
   const path = screen.getByLabelText('Rota atual').textContent;
