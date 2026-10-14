@@ -15,6 +15,7 @@ import { createHttpProfileService } from './http/profileService';
 import { createHttpFollowService, createHttpFavoriteService } from './http/socialService';
 import { createHttpRatingService, createHttpPublishingService, createHttpReviewService, createHttpCommentService } from './http/opinionService';
 import { communityRequest } from './http/opinionService';
+import { createHttpCommunityQueries } from './http/communityService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'dashboard' | 'feed' | 'notifications';
@@ -53,6 +54,7 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
       ...createHttpCommentService(getHttp),
       ...createHttpFollowService(getHttp),
       ...createHttpFavoriteService(getHttp),
+      ...createHttpCommunityQueries(getHttp),
       getFeed: () => communityRequest(() => getHttp().community.feed()),
     },
     notifications: { list: unavailable },
