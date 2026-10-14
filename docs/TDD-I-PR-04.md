@@ -9,3 +9,5 @@ RED focado: 5 falhas e 3 aprovados, sem erros de tipos; commit 33cb323. GREEN: 3
 RED: 8 falhas esperadas; commit 0738b61. GREEN: 340 testes, lint, tipos e build. Notas pessoais HTTP, wrappers null/zero/decimal, corpo somente value e Bearer da sessão (User recebido não autoriza), 400/401/404 e visitante rejeitado. Estrelas recuperam decimal e preservam resposta salva; PUT atualiza jogo e opiniões por consultas HTTP. Capacidades separadas permitem ativação individual dos fluxos.
 ## I-US-12
 RED: 5 falhas esperadas; commit 62b709e. GREEN: 345 testes, lint, tipos e build. Publicação com text/Bearer, review própria por wrapper, conflito 409 consulta registro existente, falha preserva rascunho e sucesso atualiza a lista pública por GET reviews sem duplicar ou sobrescrever a média.
+## I-US-13
+RED: 7 falhas esperadas; commit 2cb5507. GREEN: 352 testes, lint, tipos e build. Leitura HTTP pública, PATCH somente text, projeção validada, ID/createdAt preservados; edição exclusiva do autor na UI e autorização Bearer no servidor. Mensagens distintas para 403, 404 e rede sem perder rascunho. Ajustadas as esperas da navegação e a seleção do texto público no teste.

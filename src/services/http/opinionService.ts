@@ -28,3 +28,12 @@ export function createHttpPublishingService(getHttp: () => HttpAdapters): Pick<C
     getGameReviews: (id) => getHttp().games.reviews(id),
   };
 }
+export function createHttpReviewService(getHttp: () => HttpAdapters): Pick<CommunityService, 'getReview' | 'editReview'> {
+  return {
+    async getReview(id) {
+      try { return await getHttp().reviews.get(id); }
+      catch (error: unknown) { if (error instanceof HttpFailure && error.kind === 'http' && error.status === 404) return null; throw error; }
+    },
+    editReview: (id, text) => communityRequest(() => getHttp().reviews.edit(id, { text }), 'empty-text'),
+  };
+}

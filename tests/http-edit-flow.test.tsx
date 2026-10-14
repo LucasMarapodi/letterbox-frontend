@@ -45,13 +45,13 @@ async function open(failure?: number, other = false): Promise<ReturnType<typeof 
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   await screen.findByLabelText('Usuário conectado');
   // Navegação pública pelo mesmo roteador, sem substituir o serviço da página.
-  await interaction.click(screen.getByRole('link',{name:'Review de exemplo'}));
+  await interaction.click(await screen.findByRole('link',{name:'Review de exemplo'}));
   return interaction;
 }
 test('autor edita a projeção da API e UI mantém a data original', async () => {
   const interaction = await open();
   await interaction.clear(await screen.findByLabelText('Sua review')); await interaction.type(screen.getByLabelText('Sua review'),updated.text); await interaction.click(screen.getByRole('button',{name:'Salvar review'}));
-  expect(await screen.findByText('Review atualizada.')).toBeVisible(); expect(screen.getByText(updated.text)).toBeVisible(); expect(screen.getByText('13/10/2026')).toHaveAttribute('dateTime',wireReview.createdAt);
+  expect(await screen.findByText('Review atualizada.')).toBeVisible(); expect(screen.getByText(updated.text, {selector:'p.review-text'})).toBeVisible(); expect(screen.getByText('13/10/2026')).toHaveAttribute('dateTime',wireReview.createdAt);
 });
 test.each([[403,'Você não tem permissão para editar esta review.'],[404,'Esta review não está mais disponível.'],[0,'Não foi possível salvar a review. Tente novamente.']])('erro %s preserva o texto com mensagem própria', async (status, message) => {
   const interaction = await open(status);
@@ -59,4 +59,3 @@ test.each([[403,'Você não tem permissão para editar esta review.'],[404,'Esta
   expect(await screen.findByText(message)).toBeVisible(); expect(screen.getByLabelText('Sua review')).toHaveValue('Review rascunho'); expect(screen.queryByText('Review atualizada.')).not.toBeInTheDocument();
 });
 test('outro autor não recebe formulário de edição',async()=>{await open(undefined,true); expect(await screen.findByRole('heading',{name:'Review de Outro'})).toBeVisible(); expect(screen.queryByLabelText('Sua review')).not.toBeInTheDocument();});
-
