@@ -26,6 +26,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   const [state, setState] = useState<GameState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [opinionsVersion, setOpinionsVersion] = useState(0);
+  const [reviewsVersion, setReviewsVersion] = useState(0);
   useEffect(() => {
     let active: boolean = true;
     games.getById(id).then(
@@ -60,10 +61,10 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     <aside className="game-actions" aria-label="Avaliar e publicar">
     <FavoriteButton kind="game" targetId={id} />
     <RatingForm gameId={id} onSaved={() => { setAttempt((value) => value + 1); setOpinionsVersion((version) => version + 1); }} />
-    <PublishReview gameId={id} onSaved={() => setOpinionsVersion((version) => version + 1)} />
+    <PublishReview gameId={id} onSaved={() => setReviewsVersion((version) => version + 1)} />
     </aside>
     <div className="game-discussion">
-    <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
+    <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} reviewsVersion={reviewsVersion} />
     </div>
   </section>;
 }

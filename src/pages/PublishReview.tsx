@@ -26,7 +26,7 @@ function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }
     catch (failure: unknown) {
       if (failure instanceof CommunityError && failure.code === 'duplicate-review') {
         setError('Você já tem uma review para este jogo.');
-        try { setReview(await community.findOwnReview(gameId, user)); } catch { /* O texto permanece para nova tentativa. */ }
+        try { const own = await community.findOwnReview(gameId, user); setReview(own); if (own) onSaved(); } catch { /* O texto permanece para nova tentativa. */ }
       } else throw failure;
     }
   }
@@ -40,7 +40,7 @@ function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }
 export function PublishReview(props: { gameId: string; onSaved(): void }): ReactElement | null {
   const { user, version } = useSession();
   const { privateFeatures } = useServices();
-  if (privateFeatures?.opinions === false) return null;
+  if ((privateFeatures?.publishReview ?? privateFeatures?.opinions) === false) return null;
   return user ? <PublishControl key={`${version}-${user.id}`} {...props} /> : null;
 }
 

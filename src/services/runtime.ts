@@ -10,7 +10,7 @@ import { HttpFailure } from './http/client';
 import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters, type HttpSessionStore } from './http/adapters';
 import { createHttpAuthService } from './http/authService';
 import { createHttpGameService } from './http/gameService';
-import { createHttpRatingService } from './http/opinionService';
+import { createHttpRatingService, createHttpPublishingService } from './http/opinionService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'feed' | 'notifications';
@@ -38,12 +38,13 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
   const unavailable = async (): Promise<never> => { throw new HttpFailure('configuration'); };
   return {
     ...previous, auth: createHttpAuthService(getHttp, session), games: createHttpGameService(getHttp), http: getHttp,
-    privateFeatures: { opinions: false, rating: true, publishReview: false, editReview: false, comments: false, favorites: false, follows: false, feed: false, notifications: false },
+    privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: false, comments: false, favorites: false, follows: false, feed: false, notifications: false },
     community: {
       ...previous.community,
       getProfile: (id) => previous.community.getProfile(id),
       ...createHttpRatingService(getHttp),
-      publish: unavailable, findOwnReview: unavailable, editReview: unavailable, comment: unavailable,
+      ...createHttpPublishingService(getHttp),
+      editReview: unavailable, comment: unavailable,
       getFavorites: unavailable, getFavorite: unavailable, setFavorite: unavailable, getFeed: unavailable, isFollowing: unavailable, setFollowing: unavailable,
     },
     notifications: { list: unavailable },

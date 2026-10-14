@@ -21,3 +21,10 @@ export function createHttpRatingService(getHttp: () => HttpAdapters): Pick<Commu
     rate: (id, value) => communityRequest(() => getHttp().games.rate(id, { value }), 'invalid-rating'),
   };
 }
+export function createHttpPublishingService(getHttp: () => HttpAdapters): Pick<CommunityService, 'findOwnReview' | 'publish' | 'getGameReviews'> {
+  return {
+    findOwnReview: (id) => communityRequest(() => getHttp().games.myReview(id)),
+    publish: (id, text) => communityRequest(() => getHttp().games.publish(id, { text }), 'empty-text', 'duplicate-review'),
+    getGameReviews: (id) => getHttp().games.reviews(id),
+  };
+}
