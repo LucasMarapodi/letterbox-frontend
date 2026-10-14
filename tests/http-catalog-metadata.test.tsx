@@ -5,7 +5,7 @@ import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireGame, wirePage, withAuthentication } from './http-fixtures';
+import { wireGame, wirePage, wireReview, withAuthentication } from './http-fixtures';
 import { deferred } from './fixtures';
 const headers = { 'X-Catalog-Stale': 'true', 'X-Catalog-Fetched-At': '2026-10-14T10:00:00Z' };
 function mount(transport: FetchTransport, path = '/'): void {
@@ -43,9 +43,25 @@ test('headers tardios de busca antiga não mudam freshness da página nova', asy
   await act(async () => { pending.resolve(Response.json(wirePage([wireGame]), { headers })); await pending.promise; });
   expect(screen.queryByText(/Dados do catálogo desatualizados/)).not.toBeInTheDocument();
 });
+test('consultar novamente detalhe atualiza também opiniões e remove aviso anterior', async () => {
+  let fresh = false;
+  const transport = vi.fn<FetchTransport>().mockImplementation(async (url) => Response.json(url.endsWith('/opinions') ? { averageRating: null, reviews: [] } : wireGame, { headers: { ...headers, 'X-Catalog-Stale': fresh ? 'false' : 'true' } }));
+  mount(transport, '/jogos/game%252F42');
+  await screen.findByText(/Dados do catálogo desatualizados/);
+  fresh = true;
+  await userEvent.setup().click(screen.getByRole('button', { name: 'Consultar novamente' }));
+  await screen.findByRole('heading', { name: wireGame.title });
+  expect(screen.queryByText(/Dados do catálogo desatualizados/)).not.toBeInTheDocument();
+  expect(transport.mock.calls.filter(([url]) => url.endsWith('/opinions'))).toHaveLength(2);
+});
+test('review também sinaliza metadados do jogo projetado', async () => {
+  mount(async (url) => Response.json(url.endsWith('/comments') ? [] : wireReview, { headers }), '/reviews/r%2F1');
+  await screen.findByText('Review');
+  expect(await screen.findByText(/Dados do catálogo desatualizados/)).toBeVisible();
+});
 test.each([502, 503, 504])('falha de integração %s mantém sessão e oferece retry', async (status) => {
   const transport = vi.fn<FetchTransport>().mockImplementation(withAuthentication(async (url) => {
-    if (new URL(url).pathname === '/api/v1/games') return Response.json({ code: 'http_error', message: 'Seguro' }, { status });
+    if (new URL(url).pathname === '/api/v1/games') return Response.json({ code: status === 502 ? 'integration_invalid_response' : status === 503 ? 'integration_unavailable' : 'integration_timeout', message: 'Seguro' }, { status });
     throw new Error('Request extra inesperado');
   }));
   mount(transport, '/login');
@@ -60,3 +76,4 @@ test.each([502, 503, 504])('falha de integração %s mantém sessão e oferece r
   expect(transport.mock.calls.length).toBe(count + 1);
   expect(screen.getByRole('link', { name: 'Meu perfil' })).toBeVisible();
 });
+
