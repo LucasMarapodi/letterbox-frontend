@@ -11,6 +11,7 @@ import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAd
 import { createHttpAuthService } from './http/authService';
 import { createHttpGameService } from './http/gameService';
 import { createHttpProfileService } from './http/profileService';
+import { createHttpFollowService } from './http/socialService';
 import { createHttpRatingService, createHttpPublishingService, createHttpReviewService, createHttpCommentService } from './http/opinionService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
@@ -39,7 +40,7 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
   const unavailable = async (): Promise<never> => { throw new HttpFailure('configuration'); };
   return {
     ...previous, auth: createHttpAuthService(getHttp, session), games: createHttpGameService(getHttp), http: getHttp,
-    privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: false, follows: false, feed: false, notifications: false },
+    privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: false, follows: true, feed: false, notifications: false },
     community: {
       ...previous.community,
       ...createHttpProfileService(getHttp),
@@ -47,7 +48,8 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
       ...createHttpPublishingService(getHttp),
       ...createHttpReviewService(getHttp),
       ...createHttpCommentService(getHttp),
-      getFavorites: unavailable, getFavorite: unavailable, setFavorite: unavailable, getFeed: unavailable, isFollowing: unavailable, setFollowing: unavailable,
+      ...createHttpFollowService(getHttp),
+      getFavorites: unavailable, getFavorite: unavailable, setFavorite: unavailable, getFeed: unavailable,
     },
     notifications: { list: unavailable },
   };
