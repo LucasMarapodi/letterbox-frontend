@@ -22,7 +22,7 @@ export interface CommunityService {
   getFeed(user: User | null): Promise<ReviewDetails[]>;
   getConnections(profileId: Id): Promise<Connections>;
   isFollowing(targetId: Id, user: User | null): Promise<boolean>;
-  setFollowing(targetId: Id, selected: boolean, user: User | null): Promise<void>;
+  setFollowing(targetId: Id, selected: boolean, user: User | null): Promise<void | boolean>;
   getFavorites(user: User | null): Promise<FavoriteLists>;
   getFavorite(kind: FavoriteKind, targetId: Id, user: User | null): Promise<Favorite | null>;
   setFavorite(kind: FavoriteKind, targetId: Id, selected: boolean, user: User | null): Promise<Favorite | null>;
