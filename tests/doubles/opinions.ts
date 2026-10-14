@@ -1,4 +1,4 @@
-import type { Rating, Review, User } from '../models';
+import type { Rating, Review, User } from '../../src/models';
 
 /** Opiniões fictícias, independentes de notas e sem dados de pessoas reais. */
 export const userFixtures: User[] = [

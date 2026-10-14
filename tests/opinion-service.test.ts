@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { createMockGameService } from '../src/mocks/gameService';
+import { createMockGameService } from './doubles/gameService';
 import type { Rating, Review, User } from '../src/models';
 
 const user: User = { id: 'user-1', username: 'ana', displayName: 'Ana', bio: '', avatarUrl: null };

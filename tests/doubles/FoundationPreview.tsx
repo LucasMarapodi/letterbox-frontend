@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react';
-import type { GameService } from '../services/contracts';
+import type { GameService } from '../../src/services/contracts';
 import { useEffect, useState } from 'react';
-import type { Game } from '../models';
-import { services } from '../services';
-import { Avatar } from '../components/Avatar';
-import { Button } from '../components/Button';
-import { TextField } from '../components/TextField';
-import { GameCard } from '../components/GameCard';
-import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
+import type { Game } from '../../src/models';
+import { services } from '../../src/services';
+import { Avatar } from '../../src/components/Avatar';
+import { Button } from '../../src/components/Button';
+import { TextField } from '../../src/components/TextField';
+import { GameCard } from '../../src/components/GameCard';
+import { EmptyState, ErrorState, LoadingState } from '../../src/components/Feedback';
 
 export interface FoundationPreviewProps { gameService?: Pick<GameService, 'getById'>; }
 type PreviewState =

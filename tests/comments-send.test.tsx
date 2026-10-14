@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { community } from '../src/services/community';
-import { createMockCommunityService } from '../src/mocks/communityService';
+import { createMockCommunityService } from './doubles/communityService';
 import type { Comment, User } from '../src/models';
 import { deferred } from './fixtures';
 

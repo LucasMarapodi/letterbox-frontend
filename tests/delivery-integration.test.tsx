@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import { AppRoutes } from '../src/App';
-import { createApplicationServices } from '../src/services/runtime';
+import { createTestApplicationServices } from './doubles/applicationServices';
 
 test('cadastro login nota publicação edição favoritos e logout percorrem serviços integrados', async () => {
-  const adapters = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const adapters = createTestApplicationServices();
   const interaction = userEvent.setup();
   render(<MemoryRouter initialEntries={['/cadastro']}><AppRoutes adapters={adapters} /></MemoryRouter>);
   await interaction.type(screen.getByRole('textbox', { name: 'Nome' }), 'Demonstração');
@@ -42,7 +42,7 @@ test('cadastro login nota publicação edição favoritos e logout percorrem ser
 }, 15000);
 
 test('busca review comentário seguir feed e notificações funcionam sem spies de serviço', async () => {
-  const adapters = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const adapters = createTestApplicationServices();
   const interaction = userEvent.setup();
   render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={adapters} /></MemoryRouter>);
   await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'ana@example.com');

@@ -1,6 +1,6 @@
-import type { User } from '../models';
-import type { AuthService } from '../services/authContracts';
-import { AuthError } from '../services/authContracts';
+import type { User } from '../../src/models';
+import type { AuthService } from '../../src/services/authContracts';
+import { AuthError } from '../../src/services/authContracts';
 import { accountFixtures } from './accounts';
 import type { MockUserStore, MockSessionStore } from './userStore';
 

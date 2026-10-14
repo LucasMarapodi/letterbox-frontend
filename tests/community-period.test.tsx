@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import { AppRoutes } from '../src/App';
-import { commentsInPeriod } from '../src/mocks/commentWindow';
+import { commentsInPeriod } from './doubles/commentWindow';
 import { isRankingPeriod, type RankingPeriod } from '../src/services/communityContracts';
 import type { Comment } from '../src/models';
 

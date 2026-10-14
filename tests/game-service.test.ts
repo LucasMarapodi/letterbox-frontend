@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import type { Game } from '../src/models';
-import { createMockGameService } from '../src/mocks/gameService';
+import { createMockGameService } from './doubles/gameService';
 
 function gameFixture(): Game {
   return { id: 'game-1', title: 'Aventura de exemplo', summary: 'Um jogo fictício.', coverUrl: null, genres: ['Aventura'], platforms: ['PC'], releaseDate: null, averageRating: null };

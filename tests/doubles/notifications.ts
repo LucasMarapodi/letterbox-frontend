@@ -1,4 +1,4 @@
-import type { NotificationEvent } from '../services/notificationContracts';
+import type { NotificationEvent } from '../../src/services/notificationContracts';
 
 /** Eventos fictícios já ocorridos; não são gerados pelas ações da aplicação. */
 export const notificationFixtures: NotificationEvent[] = [

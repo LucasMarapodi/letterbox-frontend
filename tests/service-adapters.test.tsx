@@ -2,22 +2,22 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
-import { createApplicationServices, readServiceConfig, type ApplicationServices } from '../src/services/runtime';
-import { createMockServices } from '../src/mocks/services';
-import { createMockNotificationService } from '../src/mocks/notificationService';
-import { gameFixtures } from '../src/mocks/games';
+import { createDefaultApplicationServices, readHttpConfig, type ApplicationServices } from '../src/services/runtime';
+import { createTestApplicationServices } from './doubles/applicationServices';
+import { createMockServices } from './doubles/services';
+import { createMockNotificationService } from './doubles/notificationService';
+import { gameFixtures } from './doubles/games';
 
-test('configuração central preserva URL e rejeita seleção desconhecida', () => {
-  expect(readServiceConfig({ apiBaseUrl: ' https://api.example.test/ ', implementation: 'custom' })).toEqual({ apiBaseUrl: 'https://api.example.test/', implementation: 'custom' });
-  expect(readServiceConfig()).toEqual({ apiBaseUrl: '', implementation: 'mock' });
-  expect(() => readServiceConfig({ implementation: 'http-inventado' })).toThrow();
+test('configuração HTTP preserva URL e rejeita origem ausente ou inválida', () => {
+  expect(readHttpConfig({ apiBaseUrl: ' https://api.example.test/ ' })).toEqual({ apiBaseUrl: 'https://api.example.test' });
+  expect(() => readHttpConfig({})).toThrow();
+  expect(() => readHttpConfig({apiBaseUrl:'invalid'})).toThrow();
 });
-test('mesma operação funciona com mock e fake sem chamadas reais', async () => {
-  const mock = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
-  expect((await mock.games.list()).length).toBeGreaterThan(0);
-  const fake: ApplicationServices = { ...mock, games: { ...mock.games, list: async () => [] } };
-  expect(await createApplicationServices({ apiBaseUrl: 'https://api.example.test/', implementation: 'custom' }, fake).games.list()).toEqual([]);
-  expect(() => createApplicationServices({ apiBaseUrl: '', implementation: 'custom' })).toThrow();
+test('runtime usa transporte HTTP substituível sem selecionar motor fictício', async () => {
+  const transport=vi.fn(async()=>Response.json([]));
+  const service=createDefaultApplicationServices({apiBaseUrl:'https://api.example.test'},{transport});
+  expect(await service.games.list()).toEqual([]);expect(transport).toHaveBeenCalledTimes(1);
+  const double=createTestApplicationServices();expect(await double.games.list()).not.toHaveLength(0);
 });
 test('Home usa fornecedor alternativo pela mesma interface sem reescrita', async () => {
   const mock = createMockServices();

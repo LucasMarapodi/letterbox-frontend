@@ -2,7 +2,7 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
-import { FoundationPreview } from '../src/pages/FoundationPreview';
+import { FoundationPreview } from './doubles/FoundationPreview';
 import type { Game } from '../src/models';
 import type { GameService } from '../src/services/contracts';
 
