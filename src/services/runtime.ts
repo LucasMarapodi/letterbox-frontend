@@ -10,6 +10,7 @@ import { HttpFailure } from './http/client';
 import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters, type HttpSessionStore } from './http/adapters';
 import { createHttpAuthService } from './http/authService';
 import { createHttpGameService } from './http/gameService';
+import { createHttpProfileService } from './http/profileService';
 import { createHttpRatingService, createHttpPublishingService, createHttpReviewService, createHttpCommentService } from './http/opinionService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
@@ -41,7 +42,7 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
     privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: false, follows: false, feed: false, notifications: false },
     community: {
       ...previous.community,
-      getProfile: (id) => previous.community.getProfile(id),
+      ...createHttpProfileService(getHttp),
       ...createHttpRatingService(getHttp),
       ...createHttpPublishingService(getHttp),
       ...createHttpReviewService(getHttp),
