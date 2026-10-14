@@ -6,9 +6,11 @@ import { GameCard } from '../components/GameCard';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
+import { CatalogNotice } from '../components/CatalogNotice';
+import { HttpFailure } from '../services/http/client';
 import type { GamePage, GameQuery, GameSort } from '../services/contracts';
 
-type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; data: GamePage };
+type CatalogState = { status: 'loading' } | { status: 'error'; integration: boolean } | { status: 'ready'; data: GamePage };
 
 export function HomePage({ authenticated = false, favorites, feed }: { authenticated?: boolean; favorites?: ReactNode; feed?: ReactNode }): ReactElement {
   const { games } = useServices();
@@ -21,7 +23,7 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
     let active: boolean = true;
     games.list(query).then(
       (data) => { if (active) setState({ status: 'ready', data }); },
-      () => { if (active) setState({ status: 'error' }); },
+      (error: unknown) => { if (active) setState({ status: 'error', integration: error instanceof HttpFailure && [502, 503, 504].includes(error.status ?? 0) }); },
     );
     return () => { active = false; };
   }, [attempt, query]);
@@ -79,7 +81,8 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
     <section aria-labelledby="catalog-title">
       <h2 id="catalog-title">Jogos</h2>
       {state.status === 'loading' && <LoadingState message="Carregando jogos…" />}
-      {state.status === 'error' && <ErrorState message="Não foi possível carregar os jogos." onRetry={retry} />}
+      {state.status === 'error' && <ErrorState message={state.integration ? 'O catálogo está temporariamente indisponível. Tente novamente.' : 'Não foi possível carregar os jogos.'} onRetry={retry} />}
+      {state.status === 'ready' && <CatalogNotice paths={[['games']]} onRetry={retry} />}
       {state.status === 'ready' && (state.data.items.length
         ? <div className="game-grid">{state.data.items.map((game) => <GameCard key={game.id} game={game} />)}</div>
         : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />)}

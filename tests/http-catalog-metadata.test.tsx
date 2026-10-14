@@ -22,7 +22,8 @@ test('stale confirmado mostra data e retry usa mesma consulta sem request adicio
   expect(screen.queryByText(/Dados do catálogo desatualizados/)).not.toBeInTheDocument();
   expect(transport).toHaveBeenCalledTimes(2);
 });
-test.each([{}, { 'X-Catalog-Stale': 'false' }, { 'X-Catalog-Stale': 'invalid' }])('headers sem stale confirmado não inventam aviso: %j', async (metadata) => {
+const headerCases: Record<string, string>[] = [{}, { 'X-Catalog-Stale': 'false' }, { 'X-Catalog-Stale': 'invalid' }];
+test.each(headerCases)('headers sem stale confirmado não inventam aviso: %j', async (metadata) => {
   mount(async () => Response.json(wirePage([wireGame]), { headers: metadata }));
   await screen.findByRole('link', { name: wireGame.title });
   expect(screen.queryByText(/Dados do catálogo desatualizados/)).not.toBeInTheDocument();
@@ -76,4 +77,3 @@ test.each([502, 503, 504])('falha de integração %s mantém sessão e oferece r
   expect(transport.mock.calls.length).toBe(count + 1);
   expect(screen.getByRole('link', { name: 'Meu perfil' })).toBeVisible();
 });
-

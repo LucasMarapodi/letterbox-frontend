@@ -1,0 +1,11 @@
+{
+  "mode": "real-backend-contract-only-no-igdb",
+  "healthStatus": 200,
+  "openApiStatus": 200,
+  "origin": "http://127.0.0.1:5173",
+  "api": "http://localhost:5083",
+  "exposedHeaders": "Location,X-Catalog-Stale,X-Catalog-Fetched-At",
+  "catalogSchema": {
+    "$ref": "#/components/schemas/GamePageResponse"
+  }
+}

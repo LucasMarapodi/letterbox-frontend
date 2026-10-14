@@ -9,6 +9,7 @@ import { EditReview } from './EditReview';
 import { CommentsSection } from './CommentsSection';
 import { CommentForm } from './CommentForm';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { CatalogNotice } from '../components/CatalogNotice';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; review: ReviewDetails | null };
 function ReviewContent({ id }: { id: string }): ReactElement {
@@ -26,6 +27,7 @@ function ReviewContent({ id }: { id: string }): ReactElement {
   const review = state.review;
   if (!review) return <EmptyState message="Review não encontrada." />;
   return <article className="review-card">
+    <CatalogNotice paths={[[ 'reviews', id ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
     <h2>Review de <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link></h2>
     <Link to={`/jogos/${encodeRouteId(review.game.id)}`}>{review.game.title}</Link>
     <p><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></p>
@@ -40,4 +42,3 @@ export function ReviewPage(): ReactElement {
   const id = useOpaqueRouteId('reviewId');
   return <main><h1>Review</h1><p>ID da review: {id}</p>{id ? <ReviewContent key={id} id={id} /> : <EmptyState message="Review não encontrada." />}</main>;
 }
-

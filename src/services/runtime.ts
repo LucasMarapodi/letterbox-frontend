@@ -12,15 +12,19 @@ import { createHttpFollowService, createHttpFavoriteService } from './http/socia
 import { createHttpRatingService, createHttpPublishingService, createHttpReviewService, createHttpCommentService } from './http/opinionService';
 import { communityRequest } from './http/opinionService';
 import { createHttpCommunityQueries } from './http/communityService';
+import { createCatalogStore, type CatalogStore } from './catalogMetadata';
 // HTTP é a única fonte de negócio na aplicação.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'dashboard' | 'feed' | 'notifications';
-export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; dashboard?: DashboardService; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
+export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; dashboard?: DashboardService; catalog?: CatalogStore; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
 export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown }, options: { transport?: FetchTransport; session?: HttpSessionStore } = {}): ApplicationServices {
   const session = options.session ?? createHttpSessionStore();
+  const catalog = createCatalogStore();
+  session.subscribe(() => catalog.clear());
   let http: HttpAdapters | undefined;
-  const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), { ...options, session });
+  const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), { ...options, session, catalog });
   return {
+    catalog,
     auth: createHttpAuthService(getHttp, session), games: createHttpGameService(getHttp), http: getHttp,
     privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: true, follows: true, dashboard: true, feed: true, notifications: true },
     dashboard: { get: () => communityRequest(() => getHttp().community.dashboard()) },

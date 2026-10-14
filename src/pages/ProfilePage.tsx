@@ -11,6 +11,7 @@ import { FavoritesSections } from '../components/FavoritesSections';
 import { FollowButton } from '../components/FollowButton';
 import { ConnectionsSections } from '../components/ConnectionsSections';
 import { ProfileEditor } from './ProfileEditor';
+import { CatalogNotice } from '../components/CatalogNotice';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: string }): ReactElement {
@@ -29,6 +30,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
   const profile = state.profile;
   if (!profile) return <EmptyState message="Perfil não encontrado." />;
   return <>
+    <CatalogNotice paths={[[ 'users', id, 'reviews' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
     <section className="profile-overview" aria-label="Informações do perfil">
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
       <div><h2>{profile.user.displayName}</h2><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
@@ -50,4 +52,3 @@ export function ProfilePage(): ReactElement {
   const id = useOpaqueRouteId('userId');
   return <main><h1>Perfil público</h1><p className="game-id">ID do usuário: {id}</p>{id ? <ProfileContent key={id} id={id} /> : <EmptyState message="Perfil não encontrado." />}</main>;
 }
-
