@@ -21,12 +21,22 @@ export function createHttpAuthService(getAdapters: () => HttpAdapters, session: 
   let confirmedVersion = -1;
   const listeners = new Set<() => void>();
   function notify(): void { for (const listener of listeners) listener(); }
-  session.subscribe(() => { if (session.version() !== confirmedVersion) confirmedUser = null; notify(); });
+  session.subscribe(() => { confirmedUser = session.version() === confirmedVersion ? session.current()?.user ?? null : null; notify(); });
   return {
     sessionUser() { return confirmedUser ? structuredClone(confirmedUser) : null; },
     sessionVersion: () => session.version(),
     subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     register: createHttpRegistration(getAdapters),
+    async editProfile(input) {
+      const version = session.version();
+      if (!confirmedUser || version !== confirmedVersion) throw new HttpFailure('http', 401, 'unauthorized');
+      let user: User;
+      try { user = await getAdapters().profiles.edit(input); }
+      catch (error: unknown) { if (error instanceof HttpFailure && error.kind === 'http' && error.status === 400) throw new AuthError('invalid-fields'); throw error; }
+      if (session.version() !== version) throw new HttpFailure('cancelled');
+      session.updateUser(user);
+      return user;
+    },
     async login(credentials) {
       const http = getAdapters();
       const attempt = ++sequence;

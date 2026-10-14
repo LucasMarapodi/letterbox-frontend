@@ -5,11 +5,12 @@ import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
+import type { PublicUserResponse } from '../src/services/http/dtos';
 import { wireUser, withAuthentication } from './http-fixtures';
 import { deferred } from './fixtures';
 const initial = {...wireUser,avatarUrl:'https://example.test/old.png'};
 async function open(status?:number,other=false){
-  let profile=initial;
+  let profile: PublicUserResponse=initial;
   const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
     if(new URL(url).pathname==='/api/v1/games')return Response.json([]);
     if(url.endsWith('/profile')&&init.method==='PATCH'){
@@ -29,7 +30,7 @@ test('formulário PATCH atualiza perfil/navbar e limpar avatar envia null',async
 });
 test('campos não modificados são omitidos',async()=>{const {interaction,transport}=await open();await interaction.type(await screen.findByLabelText('Biografia'),'Nova bio');await interaction.click(screen.getByRole('button',{name:'Salvar perfil'}));await screen.findByText('Perfil atualizado.');expect(transport.mock.calls.find(([,init])=>init.method==='PATCH')?.[1].body).toBe('{"bio":"Nova bio"}');});
 test.each([400,0])('falha %s preserva valores sem sucesso',async(status)=>{const {interaction}=await open(status);await interaction.type(await screen.findByLabelText('Biografia'),'rascunho');await interaction.click(screen.getByRole('button',{name:'Salvar perfil'}));expect(await screen.findByRole('alert')).toHaveTextContent(status===400?'Verifique os dados do perfil.':'Não foi possível atualizar o perfil. Tente novamente.');expect(screen.getByLabelText('Biografia')).toHaveValue('rascunho');expect(screen.queryByText('Perfil atualizado.')).not.toBeInTheDocument();});
-test('nome vazio e URL fora de HTTP são rejeitados antes de PATCH',async()=>{const {interaction,transport}=await open();await interaction.clear(await screen.findByLabelText('Nome de exibição'));await interaction.click(screen.getByRole('button',{name:'Salvar perfil'}));expect(await screen.findByRole('alert')).toHaveTextContent('Nome');expect(transport.mock.calls.some(([,init])=>init.method==='PATCH')).toBe(false);});
+test('nome vazio é rejeitado antes de PATCH',async()=>{const {interaction,transport}=await open();await interaction.clear(await screen.findByLabelText('Nome de exibição'));await interaction.click(screen.getByRole('button',{name:'Salvar perfil'}));expect(await screen.findByRole('alert')).toHaveTextContent('Nome');expect(transport.mock.calls.some(([,init])=>init.method==='PATCH')).toBe(false);});
 test('outro usuário não vê edição',async()=>{await open(undefined,true);expect(screen.queryByRole('button',{name:'Salvar perfil'})).not.toBeInTheDocument();});
 test('401 remove editor/sessão e não declara sucesso',async()=>{const {interaction}=await open(401);await interaction.type(await screen.findByLabelText('Biografia'),'rascunho');await interaction.click(screen.getByRole('button',{name:'Salvar perfil'}));expect(await screen.findByText('Sua sessão expirou. Entre novamente.')).toBeVisible();expect(screen.queryByRole('button',{name:'Salvar perfil'})).not.toBeInTheDocument();expect(screen.queryByText('Perfil atualizado.')).not.toBeInTheDocument();});
 test('PATCH tardio após logout não restaura perfil nem sessão',async()=>{

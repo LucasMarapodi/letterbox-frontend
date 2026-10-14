@@ -10,6 +10,7 @@ import { useSession } from '../session/SessionProvider';
 import { FavoritesSections } from '../components/FavoritesSections';
 import { FollowButton } from '../components/FollowButton';
 import { ConnectionsSections } from '../components/ConnectionsSections';
+import { ProfileEditor } from './ProfileEditor';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: string }): ReactElement {
@@ -33,6 +34,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
       <div><h2>{profile.user.displayName}</h2><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
       <FollowButton targetId={id} name={profile.user.displayName} onChanged={() => setConnectionsVersion((value) => value + 1)} />
     </section>
+    <ProfileEditor profile={profile.user} onSaved={(updated) => setState({ status: 'ready', profile: { ...profile, user: updated } })} />
     <section aria-label="Reviews do usuário"><h2>Reviews</h2>
       {profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
         <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>
