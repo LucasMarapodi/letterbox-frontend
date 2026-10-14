@@ -14,7 +14,7 @@ test('entrada padrão preserva capacidades HTTP ao montar provider sem override'
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only');
   await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   await screen.findByLabelText('Usuário conectado');
-  expect(screen.queryByRole('button',{name:'Notificações'})).not.toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Notificações'})).toBeVisible();
   expect(await screen.findByRole('region',{name:'Feed de reviews'})).toBeVisible();
   expect(screen.queryByText('Não foi possível carregar os favoritos.')).not.toBeInTheDocument();
   expect(transport).toHaveBeenCalledTimes(2);
