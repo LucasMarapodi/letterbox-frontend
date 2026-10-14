@@ -25,7 +25,7 @@ test('visitante/logout não autorizam User forjado; 401 limpa sessão e impede n
 });
 test.each([[400,'empty-text'],[404,'not-found']])('POST %s recebe erro tipado',async(status,code)=>{
   const session=createHttpSessionStore();session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
-  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{session,transport:async()=>Response.json({code:status===400?'invalid_fields':'not_found',message:'Seguro'},{status})}).community;
+  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{session,transport:async()=>Response.json({code:status===400?'validation_failed':'not_found',message:'Seguro'},{status})}).community;
   await expect(service.comment('r','texto',wireUser)).rejects.toMatchObject({code});
 });
 async function open(status?:number,visitor=false):Promise<{interaction:ReturnType<typeof userEvent.setup>;transport:ReturnType<typeof vi.fn<FetchTransport>>}>{
@@ -36,7 +36,7 @@ async function open(status?:number,visitor=false):Promise<{interaction:ReturnTyp
     if(url.endsWith('/comments')) {
       if(init.method==='POST'){
         if(status===0) throw new Error('offline');
-        if(status) return Response.json({code:status===400?'invalid_fields':'not_found',message:'Seguro'},{status});
+        if(status) return Response.json({code:status===400?'validation_failed':'not_found',message:'Seguro'},{status});
         sent=true;return Response.json(wireComment,{status:201});
       }
       return Response.json(sent?[wireComment]:[]);

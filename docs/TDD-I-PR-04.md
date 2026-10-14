@@ -11,3 +11,5 @@ RED: 8 falhas esperadas; commit 0738b61. GREEN: 340 testes, lint, tipos e build.
 RED: 5 falhas esperadas; commit 62b709e. GREEN: 345 testes, lint, tipos e build. Publicação com text/Bearer, review própria por wrapper, conflito 409 consulta registro existente, falha preserva rascunho e sucesso atualiza a lista pública por GET reviews sem duplicar ou sobrescrever a média.
 ## I-US-13
 RED: 7 falhas esperadas; commit 2cb5507. GREEN: 352 testes, lint, tipos e build. Leitura HTTP pública, PATCH somente text, projeção validada, ID/createdAt preservados; edição exclusiva do autor na UI e autorização Bearer no servidor. Mensagens distintas para 403, 404 e rede sem perder rascunho. Ajustadas as esperas da navegação e a seleção do texto público no teste.
+## I-US-14
+RED: 9 falhas esperadas; commit 39d5f29. GREEN: 361 testes, lint, tipos e build. Leitura pública, POST somente text/Bearer, 201 refresca lista sem duplicar, visitante não possui formulário, logout/401 revogam escrita. 400/404/rede preservam texto sem sucesso fictício. O double de 400 foi alinhado ao code validation_failed do contrato real antes da verificação final.

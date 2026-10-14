@@ -37,3 +37,9 @@ export function createHttpReviewService(getHttp: () => HttpAdapters): Pick<Commu
     editReview: (id, text) => communityRequest(() => getHttp().reviews.edit(id, { text }), 'empty-text'),
   };
 }
+export function createHttpCommentService(getHttp: () => HttpAdapters): Pick<CommunityService, 'getComments' | 'comment'> {
+  return {
+    getComments: (id) => getHttp().reviews.comments(id),
+    comment: (id, text) => communityRequest(() => getHttp().reviews.comment(id, { text }), 'empty-text'),
+  };
+}
