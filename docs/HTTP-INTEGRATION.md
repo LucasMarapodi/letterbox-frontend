@@ -1,6 +1,6 @@
 # Infraestrutura HTTP — terceira fase
 
-A I-PR-02 prepara transporte, contratos e adaptadores. A I-PR-03 ativou autenticação, a I-PR-04 jogos/opiniões e a I-PR-05 perfis/social no runtime produtivo. Dashboard/Comunidade/sino serão ativados na I-PR-06; a retirada final dos mocks pertence à I-PR-07. Isso não constitui integração completa da aplicação.
+A I-PR-02 prepara transporte/contratos; I-PR-03–06 ativam autenticação, jogos/opiniões, perfis/social e dashboard/Comunidade/sino no runtime produtivo. Retirada final dos mocks, E2E e relatório consolidado pertencem à I-PR-07. A fase completa ainda não está concluída.
 
 ## Autenticação ativada — I-PR-03
 
@@ -8,7 +8,17 @@ createDefaultApplicationServices é a entrada produtiva. Cadastro envia somente 
 
 O store publica mudanças sem divulgar credenciais a componentes. AuthService expõe apenas usuário confirmado, subscribe e versão; SessionProvider limpa UI em logout/401. Logout é assíncrono: captura token, limpa sessão e aborta requests privados imediatamente, depois tenta revogação. Falha de revogação é informada sem restaurar usuário. Respostas antigas não removem conta nova.
 
-Contexto e store compartilham versão; componentes privados usam essa versão nas suas keys para descartar estado anterior. O provider preserva a composição HTTP e as capacidades individuais. Notas, reviews/comentários, favoritos e relações estão ativados; dashboard/feed/notificações privados continuam bloqueados. Consultas públicas antigas da Comunidade ficam disponíveis até I-PR-06, sem receber identidade para fabricar perfil local.
+Contexto e store compartilham versão; componentes privados usam essa versão nas suas keys para descartar estado anterior. O provider preserva composição HTTP e capacidades individuais, incluindo dashboard/feed/notificações. User recebido pelos contratos legados não autoriza requests; a sessão HTTP fornece o token. Não se fabrica identidade ou evento local para os fluxos ativos.
+
+## Dashboard, Comunidade e sino — I-PR-06
+
+DashboardService.get retorna agregado tipado com favorites/feed. DashboardHome usa uma consulta privada e passa listas iniciais às seções. O catálogo continua público. FeedSection só consulta feed/following quando Atualizar feed ou retry é acionado; na primeira renderização usa o agregado. Nova visita à Home após seguir/favoritar/publicar obtém dashboard novo, sem cache de montagem anterior. A chave versão/ID descarta conteúdo pessoal em logout/troca.
+
+Consultas da Comunidade usam recent, most-commented e games/in-discussion públicos, sem Bearer. Período padrão 7d, seleção preservada entre rankings, query 24h/7d/30d. Contagem, ordem e lastCommentAt vêm do servidor; LastCommentTime exibe UTC, sem recalcular ranking ou excluir review antiga. Cleanup/chave da seleção ignoram respostas anteriores.
+
+Notificações usam GET notifications privado somente ao abrir/reabrir o modal. União new-review/review-comment validada, com actor e link da review. Fechar ignora retorno antigo; versão de sessão e 401 descartam sino/modal. Foco, Tab/Escape e navegação existentes permanecem. Não há eventos fabricados pelo Front, polling ou estado de lido.
+
+Validação: 398 testes, lint, tipos e build; API real e navegador com Ana/Bia, publicação/comentário de outra conta, feed atualizado, review antiga em ranking recente e sino com ambos os tipos. [Evidências e limites](I-PR-06.md).
 
 ## Perfis e social ativados — I-PR-05
 
