@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -32,7 +33,7 @@ async function open(failure?: number, other = false): Promise<ReturnType<typeof 
   const interaction = userEvent.setup();
   const review = other ? { ...wireReview, userId:'other', author:{...wireReview.author,id:'other',displayName:'Outro'} } : wireReview;
   const transport = withAuthentication(async(url, init) => {
-    if(new URL(url).pathname === '/api/v1/games') return Response.json([]);
+    if(new URL(url).pathname === '/api/v1/games') return Response.json(wirePage([]));
     if(url.endsWith('/comments')) return Response.json([]);
     if(init.method === 'PATCH') {
       if(failure === 0) throw new Error('offline');

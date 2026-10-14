@@ -1,5 +1,5 @@
 import type { Game, Rating, Review, User } from '../../src/models';
-import type { GameOpinions, GameQuery, GameService, PublicReview } from '../../src/services/contracts';
+import type { GameOpinions, GamePage, GameQuery, GameService, PublicReview } from '../../src/services/contracts';
 import { gameFixtures } from './games';
 import { ratingFixtures, reviewFixtures, userFixtures } from './opinions';
 
@@ -18,7 +18,7 @@ export function createMockGameService(options: MockGameOptions = {}): GameServic
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = structuredClone(options.users ?? userFixtures);
   return {
-    async list(query: GameQuery = {}): Promise<Game[]> {
+    async list(query: GameQuery = {}): Promise<GamePage> {
       if (error) throw error;
       const term: string = (query.term ?? '').trim().toLocaleLowerCase('pt-BR');
       const results: Game[] = games.filter((game) => game.title.toLocaleLowerCase('pt-BR').includes(term));
@@ -26,7 +26,8 @@ export function createMockGameService(options: MockGameOptions = {}): GameServic
         const direction: number = query.sort === 'name-desc' ? -1 : 1;
         results.sort((first, second) => direction * first.title.localeCompare(second.title, 'pt-BR'));
       }
-      return structuredClone(results);
+      const page = query.page ?? 1; const pageSize = query.pageSize ?? 20;
+      return { items: structuredClone(results.slice((page - 1) * pageSize, page * pageSize)), page, pageSize, hasNextPage: results.length > page * pageSize };
     },
     async getById(id): Promise<Game | null> {
       if (error) throw error;

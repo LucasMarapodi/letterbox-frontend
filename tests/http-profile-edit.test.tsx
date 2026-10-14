@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -12,7 +13,7 @@ const initial = {...wireUser,avatarUrl:'https://example.test/old.png'};
 async function open(status?:number,other=false){
   let profile: PublicUserResponse=initial;
   const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
-    if(new URL(url).pathname==='/api/v1/games')return Response.json([]);
+    if(new URL(url).pathname==='/api/v1/games')return Response.json(wirePage([]));
     if(new URL(url).pathname==='/api/v1/favorites')return Response.json({games:[],reviews:[]});
     if(url.endsWith('/follow/me'))return Response.json({following:false});
     if(url.endsWith('/profile')&&init.method==='PATCH'){

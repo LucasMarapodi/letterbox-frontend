@@ -1,9 +1,9 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import type { GameQuery } from '../contracts';
 import type { User } from '../../models';
-import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
+import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
 import { HttpFailure, createHttpClient, validateApiBaseUrl, type FetchTransport, type HttpRequest } from './client';
-import { decodeUser, decodeGame, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
+import { decodeUser, decodeGame, decodeGamePage, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
 export interface SessionSnapshot { token: string; user: User; expiresAt: string; version: number; signal: AbortSignal; }
 export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; updateUser(user: User): void; clear(): void; subscribe(listener: () => void): () => void; }
 export interface HttpAdapterConfig { apiBaseUrl: string; }
@@ -16,7 +16,7 @@ export interface HttpAdapters {
     logout(signal?: AbortSignal): Promise<void>;
   };
   games: {
-    list(query?: GameQuery, signal?: AbortSignal): Promise<GameResponse[]>;
+    list(query?: GameQuery, signal?: AbortSignal): Promise<GamePageResponse>;
     get(id: string, signal?: AbortSignal): Promise<GameResponse>;
     opinions(id: string, signal?: AbortSignal): Promise<GameOpinionsResponse>;
     reviews(id: string, signal?: AbortSignal): Promise<ReviewResponse[]>;
@@ -112,7 +112,7 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       },
     },
     games: {
-      list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort }, signal }, list(decodeGame)),
+      list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort, page: query?.page, pageSize: query?.pageSize }, signal }, decodeGamePage),
       get: (id, signal) => call({ path: ['games', id], signal }, decodeGame),
       opinions: (id, signal) => call({ path: ['games', id, 'opinions'], signal }, decodeOpinions),
       reviews: (id, signal) => call({ path: ['games', id, 'reviews'], signal }, list(decodeReview)),

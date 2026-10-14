@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -51,7 +52,7 @@ test('versão única e dados tardios de A não entram em B após logout', async 
   expect(Number(screen.getByLabelText('Versão da sessão').textContent)).toBe(session.version());
 });
 test('visitante não dispara consultas HTTP privadas', async()=>{
-  const transport=vi.fn<FetchTransport>().mockImplementation(async()=>Response.json([wireGame])); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
+  const transport=vi.fn<FetchTransport>().mockImplementation(async()=>Response.json(wirePage([wireGame]))); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
   await screen.findByRole('link',{name:wireGame.title}); expect(transport).toHaveBeenCalledTimes(1);
   expect(transport.mock.calls[0][0]).toContain('/api/v1/games'); expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
 });

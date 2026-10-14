@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -22,7 +23,7 @@ test('visitante rejeitado, erro 404 não vira null e resposta de A após troca p
 });
 async function open(failure=false){let game=false;let review=false;const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
  const path=new URL(url).pathname;
- if(path==='/api/v1/games')return Response.json([wireGame]);
+ if(path==='/api/v1/games')return Response.json(wirePage([wireGame]));
  if(path==='/api/v1/favorites')return Response.json({games:game?[wireGame]:[],reviews:review?[wireReview]:[]});
  if(path.includes('/favorites/')){const isGame=path.includes('/favorites/game/');const selected=isGame?game:review;const favorite={...wireFavorite,targetType:isGame?'game':'review',targetId:isGame?wireGame.id:wireReview.id};if(init.method==='GET')return Response.json({favorite:selected?favorite:null});if(failure)throw new Error('offline');if(isGame)game=init.method==='PUT';else review=init.method==='PUT';return init.method==='PUT'?Response.json(favorite):new Response(null,{status:204});}
  if(url.endsWith('/rating/me'))return Response.json({rating:null});if(url.endsWith('/reviews/me'))return Response.json({review:null});if(url.endsWith('/opinions'))return Response.json({averageRating:null,reviews:[wireReview]});

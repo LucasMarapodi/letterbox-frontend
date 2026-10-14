@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -19,7 +20,7 @@ test('visitante não envia identidade; 404 da relação é erro tipado',async()=
   await expect(service.setFollowing('other',true,wireUser)).rejects.toMatchObject({code:'session-required'});expect(transport).not.toHaveBeenCalled();session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});await expect(service.isFollowing('other',wireUser)).rejects.toMatchObject({code:'not-found'});
 });
 async function open(failure=false){let following=false;const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
-  if(new URL(url).pathname==='/api/v1/games')return Response.json([]);
+  if(new URL(url).pathname==='/api/v1/games')return Response.json(wirePage([]));
   if(url.endsWith('/follow/me'))return Response.json({following});
   if(url.endsWith('/follow')){if(failure)throw new Error('offline');following=init.method==='PUT';return following?Response.json({following}):new Response(null,{status:204});}
   if(url.endsWith('/followers'))return Response.json(following?[wireUser]:[]);

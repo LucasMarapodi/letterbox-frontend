@@ -3,6 +3,7 @@ import type { ReviewDetails, PublicComment, FavoriteLists, RankedReview, RankedG
 import type { NotificationItem } from '../notificationContracts';
 export type PublicUserResponse = User;
 export type GameResponse = Game;
+export interface GamePageResponse { items: GameResponse[]; page: number; pageSize: number; hasNextPage: boolean; }
 export type RatingResponse = Rating;
 export type FavoriteResponse = Favorite;
 export interface ReviewResponse extends ReviewDetails { game: { id: string; title: string; coverUrl: string | null }; }

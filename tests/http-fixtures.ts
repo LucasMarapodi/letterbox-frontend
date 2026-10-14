@@ -1,8 +1,10 @@
 import type { PublicUserResponse, GameResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse } from '../src/services/http/dtos';
 import type { FetchTransport } from '../src/services/http/client';
+import type { GamePageResponse } from '../src/services/http/dtos';
+export function wirePage(items: GameResponse[] = []): GamePageResponse { return { items, page: 1, pageSize: 20, hasNextPage: false }; }
 /** Isola casos de autenticação do catálogo público migrado em outra PR. */
 export function withCatalog(transport: FetchTransport): FetchTransport {
-  return (url, init) => new URL(url).pathname === '/api/v1/games' ? Promise.resolve(Response.json([])) : url.endsWith('/dashboard') ? Promise.resolve(Response.json({favorites:{games:[],reviews:[]},feed:[]})) : transport(url, init);
+  return (url, init) => new URL(url).pathname === '/api/v1/games' ? Promise.resolve(Response.json(wirePage())) : url.endsWith('/dashboard') ? Promise.resolve(Response.json({favorites:{games:[],reviews:[]},feed:[]})) : transport(url, init);
 }
 export function withAuthentication(transport: FetchTransport, options: { isolateDashboard?: boolean } = {}): FetchTransport {
   return (url, init) => url.endsWith('/auth/login') ? Promise.resolve(Response.json({ user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' })) : url.endsWith('/auth/me') ? Promise.resolve(Response.json(wireUser)) : url.endsWith('/dashboard') && options.isolateDashboard !== false ? Promise.resolve(Response.json({favorites:{games:[],reviews:[]},feed:[]})) : transport(url, init);

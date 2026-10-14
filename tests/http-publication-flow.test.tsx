@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -24,7 +25,7 @@ async function open(transport:FetchTransport):Promise<ReturnType<typeof userEven
 function backend(options:{conflict?:boolean;failure?:boolean;own?:boolean}={}):ReturnType<typeof vi.fn<FetchTransport>>{
   let published=Boolean(options.own);
   return vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
-    if(new URL(url).pathname==='/api/v1/games') return Response.json([wireGame]);
+    if(new URL(url).pathname==='/api/v1/games') return Response.json(wirePage([wireGame]));
     if(url.endsWith('/rating/me')) return Response.json({rating:null});
     if(url.endsWith('/reviews/me')) return Response.json({review:published?wireReview:null});
     if(url.endsWith('/reviews')&&init.method==='POST'){

@@ -9,7 +9,7 @@ function gameFixture(): Game {
 test('leitura assíncrona retorna jogos tipados', async () => {
   const game: Game = gameFixture();
   const service = createMockGameService({ games: [game] });
-  await expect(service.list()).resolves.toEqual([game]);
+  await expect(service.list()).resolves.toMatchObject({ items: [game] });
 });
 
 test('localiza por ID e representa jogo inexistente sem inventar dados', async () => {
@@ -33,40 +33,40 @@ test('isola cada instância, os dados recebidos e os objetos retornados', async 
   const second = createMockGameService({ games: seed });
   game.genres.push('Alteração externa');
   seed.length = 0;
-  const result: Game[] = await first.list();
+  const result: Game[] = (await first.list()).items;
   const returned: Game | undefined = result[0];
   expect(returned).toBeDefined();
   if (!returned) throw new Error('Fixture ausente.');
   returned.title = 'Alterado';
   returned.genres.push('Alteração no retorno');
   result.length = 0;
-  await expect(first.list()).resolves.toEqual([gameFixture()]);
+  await expect(first.list()).resolves.toMatchObject({ items: [gameFixture()] });
   await expect(second.getById('game-1')).resolves.toEqual(gameFixture());
 });
 
 test('instâncias padrão possuem fixtures independentes e determinísticas', async () => {
   const first = createMockGameService();
   const second = createMockGameService();
-  const original: Game[] = await second.list();
+  const original: Game[] = (await second.list()).items;
   expect(original.length).toBeGreaterThan(0);
-  const result: Game[] = await first.list();
+  const result: Game[] = (await first.list()).items;
   result.splice(0);
-  await expect(first.list()).resolves.toEqual(original);
-  await expect(second.list()).resolves.toEqual(original);
+  await expect(first.list()).resolves.toMatchObject({ items: original });
+  await expect(second.list()).resolves.toMatchObject({ items: original });
 });
 
 test('permite conjunto vazio explícito', async () => {
-  await expect(createMockGameService({ games: [] }).list()).resolves.toEqual([]);
+  await expect(createMockGameService({ games: [] }).list()).resolves.toMatchObject({ items: [] });
 });
 
 test('busca provisória filtra por trecho do nome sem diferenciar maiúsculas', async () => {
   const first: Game = gameFixture();
   const second: Game = { ...gameFixture(), id: 'game-2', title: 'Corrida' };
   const service = createMockGameService({ games: [first, second] });
-  await expect(service.list({ term: '  AVENTURA  ' })).resolves.toEqual([first]);
-  await expect(service.list({ term: 'inexistente' })).resolves.toEqual([]);
-  await expect(service.list({ term: '' })).resolves.toEqual([first, second]);
-  await expect(service.list({ term: '   ' })).resolves.toEqual([first, second]);
+  await expect(service.list({ term: '  AVENTURA  ' })).resolves.toMatchObject({ items: [first] });
+  await expect(service.list({ term: 'inexistente' })).resolves.toMatchObject({ items: [] });
+  await expect(service.list({ term: '' })).resolves.toMatchObject({ items: [first, second] });
+  await expect(service.list({ term: '   ' })).resolves.toMatchObject({ items: [first, second] });
 });
 
 test('ordena por nome nos dois sentidos sem alterar a origem e mantém o filtro', async () => {
@@ -75,8 +75,8 @@ test('ordena por nome nos dois sentidos sem alterar a origem e mantém o filtro'
   const other: Game = { ...gameFixture(), id: 'o', title: 'Outro' };
   const seed: Game[] = [zeta, other, alpha];
   const service = createMockGameService({ games: seed });
-  await expect(service.list({ term: 'game', sort: 'name-asc' })).resolves.toEqual([alpha, zeta]);
-  await expect(service.list({ term: 'game', sort: 'name-desc' })).resolves.toEqual([zeta, alpha]);
-  await expect(service.list()).resolves.toEqual(seed);
+  await expect(service.list({ term: 'game', sort: 'name-asc' })).resolves.toMatchObject({ items: [alpha, zeta] });
+  await expect(service.list({ term: 'game', sort: 'name-desc' })).resolves.toMatchObject({ items: [zeta, alpha] });
+  await expect(service.list()).resolves.toMatchObject({ items: seed });
   expect(seed).toEqual([zeta, other, alpha]);
 });

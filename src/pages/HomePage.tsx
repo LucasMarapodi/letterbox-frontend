@@ -1,26 +1,26 @@
 import type { FormEvent, ReactElement, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import type { Game } from '../models';
+import { useEffect, useRef, useState } from 'react';
 import { useServices } from '../services/ServiceProvider';
 import { GameCard } from '../components/GameCard';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
-import type { GameQuery, GameSort } from '../services/contracts';
+import type { GamePage, GameQuery, GameSort } from '../services/contracts';
 
-type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; games: Game[] };
+type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; data: GamePage };
 
 export function HomePage({ authenticated = false, favorites, feed }: { authenticated?: boolean; favorites?: ReactNode; feed?: ReactNode }): ReactElement {
   const { games } = useServices();
   const [state, setState] = useState<CatalogState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [term, setTerm] = useState<string>('');
-  const [query, setQuery] = useState<GameQuery>({ term: '', sort: 'name-asc' });
+  const explicitSort = useRef(false);
+  const [query, setQuery] = useState<GameQuery>({ term: '', sort: 'release-desc', page: 1, pageSize: 20 });
   useEffect(() => {
     let active: boolean = true;
     games.list(query).then(
-      (games) => { if (active) setState({ status: 'ready', games }); },
+      (data) => { if (active) setState({ status: 'ready', data }); },
       () => { if (active) setState({ status: 'error' }); },
     );
     return () => { active = false; };
@@ -29,20 +29,21 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
   function search(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     setState({ status: 'loading' });
-    setQuery((previous) => ({ ...previous, term }));
+    setQuery((previous) => ({ ...previous, term, page: 1, sort: explicitSort.current ? previous.sort : term.trim() ? 'name-asc' : 'release-desc' }));
   }
 
   function clearSearch(): void {
     setTerm('');
     setState({ status: 'loading' });
-    setQuery((previous) => ({ ...previous, term: '' }));
+    setQuery((previous) => ({ ...previous, term: '', sort: explicitSort.current ? previous.sort : 'release-desc', page: 1 }));
   }
 
   function changeSort(value: string): void {
-    if (value !== 'name-asc' && value !== 'name-desc') return;
+    if (value !== 'release-desc' && value !== 'name-asc' && value !== 'name-desc') return;
     const sort: GameSort = value;
+    explicitSort.current = true;
     setState({ status: 'loading' });
-    setQuery((previous) => ({ ...previous, sort }));
+    setQuery((previous) => ({ ...previous, sort, page: 1 }));
   }
 
   function retry(): void {
@@ -69,6 +70,7 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
     <div className="sort-field">
       <label htmlFor="game-sort">Ordenar por</label>{' '}
       <select id="game-sort" value={query.sort} onChange={(event) => changeSort(event.target.value)}>
+        <option value="release-desc">Recentes</option>
         <option value="name-asc">Nome: A–Z</option>
         <option value="name-desc">Nome: Z–A</option>
       </select>
@@ -78,12 +80,16 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
       <h2 id="catalog-title">Jogos</h2>
       {state.status === 'loading' && <LoadingState message="Carregando jogos…" />}
       {state.status === 'error' && <ErrorState message="Não foi possível carregar os jogos." onRetry={retry} />}
-      {state.status === 'ready' && (state.games.length
-        ? <div className="game-grid">{state.games.map((game) => <GameCard key={game.id} game={game} />)}</div>
+      {state.status === 'ready' && (state.data.items.length
+        ? <div className="game-grid">{state.data.items.map((game) => <GameCard key={game.id} game={game} />)}</div>
         : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />)}
+      {state.status === 'ready' && <nav className="catalog-pagination" aria-label="Páginas do catálogo">
+        <Button disabled={state.data.page <= 1} onClick={() => { setState({ status: 'loading' }); setQuery((current) => ({ ...current, page: state.data.page - 1 })); }}>Anterior</Button>
+        <span aria-live="polite">Página {state.data.page}</span>
+        <Button disabled={!state.data.hasNextPage} onClick={() => { setState({ status: 'loading' }); setQuery((current) => ({ ...current, page: state.data.page + 1 })); }}>Próxima</Button>
+      </nav>}
     </section>
     {favorites}
     {feed}
   </main>;
 }
-

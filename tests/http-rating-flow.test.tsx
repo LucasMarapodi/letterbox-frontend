@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -28,7 +29,7 @@ test('visitante não usa identidade arbitrária como autorização',async()=>{
 test('estrelas recuperam decimal e gravação refresca jogo e média HTTP',async()=>{
   let saved=false;
   const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
-    if(new URL(url).pathname==='/api/v1/games') return Response.json([wireGame]);
+    if(new URL(url).pathname==='/api/v1/games') return Response.json(wirePage([wireGame]));
     if(url.endsWith('/rating/me')) { if(init.method==='PUT') {saved=true; return Response.json({...wireRating,value:5});} return Response.json({rating:{...wireRating,value:4.5}}); }
     if(url.endsWith('/opinions')) return Response.json({averageRating:saved?5:0,reviews:[]});
     return Response.json({...wireGame,averageRating:saved?5:0});
