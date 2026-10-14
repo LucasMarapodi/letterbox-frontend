@@ -1,6 +1,6 @@
 # I-PR-07 — Runtime HTTP e entrega final
 
-Branch feat/integracao-pr-07-entrega, base e270e33. Estado em execução: US-22 e US-23 verificadas; relatório consolidado da US-24 em preparação. Sem merge e sem remoto configurado.
+Branch feat/integracao-pr-07-entrega, base e270e33. READY_LOCAL: I-US-22–24 concluídas, relatório consolidado dos 34 funcionais e health/OpenAPI em [RELATORIO-ENDPOINTS.md](RELATORIO-ENDPOINTS.md). Sem merge e sem remoto configurado.
 
 ## Executar a validação
 
@@ -24,3 +24,7 @@ O runner inicia Vite em 5174 e sua própria API em 5081, a partir do binário Re
 401 testes unitários/regressão, lint, tipos e build aprovados; E2E real aprovado. A fonte produtiva e o bundle não importam mocks, doubles ou FoundationPreview. Doubles preservados em tests; regras de negócio autoritativas permanecem nas suítes existentes de Back.
 
 Limites da fase: backend em memória, token simulado e catálogo IGDB fake de Back. Sessão do navegador permanece apenas em memória. SQL, JWT de produção e IGDB externa não foram introduzidos. Resultados internos de falha do Playwright não são distribuídos; somente chamadas redigidas e screenshots explícitas sem credenciais são versionadas.
+
+## Revisão final
+
+Retirada de mocks evita dados locais em falhas de API; os doubles preservam regressões isoladas fora de src. E2E real verifica as 34 operações por método/rota, duas contas e isolamento. Relatório distingue contratos, status observados e provas de UI/infraestrutura/permissões; nenhum funcional fica pendente. Limitações de memória/token simulado/IGDB fake e ausência de remoto são explícitas. Não houve alteração de Back, merge ou publicação remota.

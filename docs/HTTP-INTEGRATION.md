@@ -1,6 +1,6 @@
 # Infraestrutura HTTP — terceira fase
 
-A I-PR-02 prepara transporte/contratos; I-PR-03–06 ativam autenticação, jogos/opiniões, perfis/social e dashboard/Comunidade/sino no runtime produtivo. Retirada final dos mocks, E2E e relatório consolidado pertencem à I-PR-07. A fase completa ainda não está concluída.
+A I-PR-02 prepara transporte/contratos; I-PR-03–06 ativam autenticação, jogos/opiniões, perfis/social e dashboard/Comunidade/sino no runtime produtivo. I-PR-07 conclui runtime HTTP exclusivo, E2E real e relatório dos 34 funcionais. Entrega READY_LOCAL, sem remoto/merge. Veja I-PR-07.md e RELATORIO-ENDPOINTS.md.
 
 ## Autenticação ativada — I-PR-03
 
@@ -26,7 +26,7 @@ Perfil compõe GET users/{id} e reviews; somente 404 da primeira consulta retorn
 
 AuthService.editProfile envia PATCH somente dos campos alterados displayName/bio/avatarUrl. Nome: 1–100 caracteres após trim; biografia até 2000; avatar HTTP(S) até 2048. Campo omitido preserva; avatar null remove. Resposta validada atualiza o usuário confirmado no store e publica mudança para a navbar, mantendo token, versão e sinal. ID diferente é rejeitado; resposta tardia após logout/troca é cancelada. 400/rede mantêm valores; 401 limpa sessão e desmonta editor conforme isolamento global.
 
-Relação desembrulha following e usa PUT/DELETE sem body. Botão reflete resposta validada; sucesso remonta conexões para nova consulta. Visitante e titular não possuem controle de escrita para seguir a si mesmo. Favoritos consultam listas/wrappers privados e usam PUT/DELETE sem corpo; DELETE 204 vira null. Não há cache de listas ou dashboard: nova visita ao próprio perfil consulta dados atuais, descartando estado da montagem anterior. A Home não chama GET favorites; sua integração virá de dashboard na I-PR-06. Logout/troca de conta descarta estado e cancela requests antigos.
+Relação desembrulha following e usa PUT/DELETE sem body. Botão reflete resposta validada; sucesso remonta conexões para nova consulta. Visitante e titular não possuem controle de escrita para seguir a si mesmo. Favoritos consultam listas/wrappers privados e usam PUT/DELETE sem corpo; DELETE 204 vira null. Não há cache de listas ou dashboard: nova visita ao próprio perfil consulta dados atuais, descartando estado da montagem anterior. A Home não chama GET favorites; usa o agregado dashboard. Logout/troca de conta descarta estado e cancela requests antigos.
 
 Validação: 382 testes, lint, tipos e build; navegador/API reais com Bia/Ana e harness de duas contas novas. [Evidências e limites da I-PR-05](I-PR-05.md).
 
@@ -40,7 +40,7 @@ PUT de nota atualiza nota local validada e consulta jogo/opinions. POST de revie
 
 Validação: 361 testes, lint, tipos e build; navegador sem interceptações com duas contas, nota cinco ao reabrir, publicação/edição, comentário visível para visitante e origem de API indisponível sem fallback. Harness real redigido verifica status e CORS; detalhes e limites em [I-PR-04](I-PR-04.md).
 
-Cada próxima US deve reutilizar a mesma fábrica/store, implementar a ponte HTTP de seus métodos e habilitar sua capacidade somente após verificar o fluxo. Doubles legados são selecionados apenas em tests/setup.ts; App em execução não usa essa configuração de testes. createApplicationServices/mock continua temporariamente disponível para a suíte/consultas públicas, sem fallback de autenticação.
+Todos os fluxos produtivos usam a fábrica/store compartilhados. Doubles legados existem somente em tests/doubles e são selecionados em tests/setup.ts; App em execução não usa essa configuração. Seletores/fábricas mock foram removidos de src e do bundle.
 
 Validação de navegador em 13/10/2026: Vite http://127.0.0.1:5173 e API existente http://localhost:5080, origens distintas e sem proxy. Conta nova criada/duplicada, login de Ana e da nova conta, credenciais inválidas, logout, reload visitante e navbar sem dados privados mockados. Harness HTTP real verificou 201/409 no cadastro, 200 login/me, 204 logout com zero bytes e 401 do token revogado; headers CORS liberaram a origem do Vite. Nenhum código de Back foi alterado. .env local ignorado foi configurado para a porta de validação.
 
@@ -48,7 +48,7 @@ Validação de navegador em 13/10/2026: Vite http://127.0.0.1:5173 e API existen
 
 `runtime.ts` exporta `readHttpConfig`, `createHttpAdapters` e `createHttpSessionStore`. `readHttpConfig` recebe `apiBaseUrl` como unknown, exige URL absoluta HTTP(S), rejeita credenciais/query/fragmento e remove barras finais. A base é a origem/caminho de hospedagem, sem `/api/v1`; o cliente acrescenta esse prefixo. `.env.example` usa a porta 5207 do perfil HTTP de Back; ajustar ao endereço efetivamente executado. Configuração inválida interrompe a fábrica HTTP sem recorrer a mocks.
 
-Uma instância de `createHttpAdapters(config, options)` cria um único cliente e uma sessão compartilhada para auth, games, reviews, profiles, social, community e notifications. `options.transport` permite doubles definidos em tests; nenhuma fixture de negócio existe nesses módulos HTTP. As telas continuam acessando serviços por `ServiceProvider`; a adaptação dos contratos da UI e ativação de cada domínio será feita na sua PR, preservando esse provider. A fábrica não instancia transportes fake nem seleciona fallback em produção.
+Uma instância de `createHttpAdapters(config, options)` cria um único cliente e uma sessão compartilhada para auth, games, reviews, profiles, social, community e notifications. `options.transport` permite doubles definidos em tests; nenhuma fixture de negócio existe nesses módulos HTTP. As telas continuam acessando serviços por `ServiceProvider`; os contratos da UI são adaptados pelas pontes HTTP preservando esse provider. A fábrica não instancia transportes fake nem seleciona fallback em produção.
 
 As portas HTTP distinguem consultas do endpoint das composições da UI: `profiles.profile` consulta usuário/reviews, `profiles.connections` consulta followers/following. Não existe request com entidade User como autorização. Request DTOs são reconstruídos com campos permitidos. Relações/favoritos e logout não enviam body. PATCH de perfil preserva omitido versus avatarUrl null.
 

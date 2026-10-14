@@ -19,3 +19,7 @@ GREEN: Playwright 1.64.1 fixado; Chromium instalado. Uma jornada de duas contas 
 409 de cadastro pela UI; 401 privado pela UI após revogação real e reinício; 403 de edição e 409 de review por cliente de permissões contra a API real (controles proibidos não são fabricados na UI). CORS de todas as respostas observadas, origem rejeitada e quatro preflights verificados. Latência de rede via CDP, sem substituição de resposta: logout aborta notificações pendentes. Host próprio desligado causa erro em nova busca sem fixtures; reinício recupera catálogo e invalida a sessão anterior.
 
 Evidências exportadas contêm somente método/rota anonimizada/status/origem da observação; trace/vídeo/screenshots automáticas desativados. Resultados internos do runner, inclusive error-context, ficam ignorados e não são evidência publicável. API :5080 do desenvolvimento e código Back não são alterados.
+
+## I-US-24
+
+Entrega documental baseada no E2E e capturas reais da US-23; sem RED artificial. Relatório de 36 entradas revisado: 34 funcionais com sucesso browser; health/OpenAPI infrastructure. Status observados e verificações diretas de permissões ficam separados do inventário de status do contrato. Chamador/momento/request/DTO/cenário por endpoint, resumo das sete PRs e limitações explícitas. Versão entregue em docs/RELATORIO-ENDPOINTS.md, também atualizada em terceira-fase. Sem lacuna funcional de consumo identificada; publicação remota indisponível por ausência de remoto.
