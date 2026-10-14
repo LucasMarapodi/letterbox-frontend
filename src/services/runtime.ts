@@ -2,6 +2,7 @@ import type { GameService } from './contracts';
 import type { AuthService } from './authContracts';
 import type { CommunityService } from './communityContracts';
 import type { NotificationService } from './notificationContracts';
+import type { DashboardService } from './dashboardContracts';
 import { createMockServices } from '../mocks/services';
 import { createMockGameService } from '../mocks/gameService';
 import { createMockNotificationService } from '../mocks/notificationService';
@@ -16,7 +17,7 @@ import { createHttpRatingService, createHttpPublishingService, createHttpReviewS
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'dashboard' | 'feed' | 'notifications';
-export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
+export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; dashboard?: DashboardService; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
 export interface ServiceConfig { apiBaseUrl: string; implementation: 'mock' | 'custom'; }
 export function readServiceConfig(input: { apiBaseUrl?: unknown; implementation?: unknown } = {}): ServiceConfig {
   const implementation = input.implementation ?? 'mock';
