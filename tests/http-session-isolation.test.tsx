@@ -21,12 +21,13 @@ test('autenticação HTTP não consulta nem exibe dados privados de mocks não m
   await interaction.type(screen.getByLabelText('E-mail'),'a@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   expect(await screen.findByLabelText('Usuário conectado')).toHaveTextContent('Ana API');
   expect(favorites).not.toHaveBeenCalled(); expect(feed).not.toHaveBeenCalled(); expect(notifications).not.toHaveBeenCalled();
-  expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument(); expect(screen.queryByRole('button',{name:'Notificações'})).not.toBeInTheDocument();
+  expect(await screen.findByRole('region',{name:'Jogos favoritos'})).toBeVisible(); expect(screen.queryByRole('button',{name:'Notificações'})).not.toBeInTheDocument();
   expect(adapters.privateFeatures?.opinions).toBe(false);
 });
 test('serviços privados ainda não migrados não aceitam identidade de usuário para gravar em mocks', async () => {
   const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'});
-  for (const operation of [() => adapters.community.getFeed(userA), () => adapters.notifications.list(userA)]) {
+  await expect(adapters.community.getFeed(userA)).rejects.toMatchObject({code:'session-required'});
+  for (const operation of [() => adapters.notifications.list(userA)]) {
     await expect(operation()).rejects.toMatchObject({kind:'configuration'});
   }
 });

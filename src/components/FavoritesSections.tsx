@@ -8,16 +8,16 @@ import { GameCard } from './GameCard';
 import { EmptyState, ErrorState, LoadingState } from './Feedback';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; lists: FavoriteLists };
-export function FavoritesSections(): ReactElement | null {
+export function FavoritesSections({ initialLists }: { initialLists?: FavoriteLists } = {}): ReactElement | null {
   const { community } = useServices();
   const { user } = useSession();
-  const [state, setState] = useState<State>({ status: 'loading' });
+  const [state, setState] = useState<State>(() => initialLists ? { status: 'ready', lists: initialLists } : { status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
-    if (user) void community.getFavorites(user).then((lists) => { if (active) setState({ status: 'ready', lists }); }, () => { if (active) setState({ status: 'error' }); });
+    if (user && initialLists === undefined) void community.getFavorites(user).then((lists) => { if (active) setState({ status: 'ready', lists }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
-  }, [user, attempt]);
+  }, [user, attempt, initialLists]);
   if (!user) return null;
   if (state.status === 'loading') return <LoadingState message="Carregando favoritos…" />;
   if (state.status === 'error') return <ErrorState message="Não foi possível carregar os favoritos." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;

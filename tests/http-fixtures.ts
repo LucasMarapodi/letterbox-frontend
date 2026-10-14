@@ -2,10 +2,10 @@ import type { PublicUserResponse, GameResponse, ReviewResponse, CommentResponse,
 import type { FetchTransport } from '../src/services/http/client';
 /** Isola casos de autenticação do catálogo público migrado em outra PR. */
 export function withCatalog(transport: FetchTransport): FetchTransport {
-  return (url, init) => new URL(url).pathname === '/api/v1/games' ? Promise.resolve(Response.json([])) : transport(url, init);
+  return (url, init) => new URL(url).pathname === '/api/v1/games' ? Promise.resolve(Response.json([])) : url.endsWith('/dashboard') ? Promise.resolve(Response.json({favorites:{games:[],reviews:[]},feed:[]})) : transport(url, init);
 }
-export function withAuthentication(transport: FetchTransport): FetchTransport {
-  return (url, init) => url.endsWith('/auth/login') ? Promise.resolve(Response.json({ user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' })) : url.endsWith('/auth/me') ? Promise.resolve(Response.json(wireUser)) : transport(url, init);
+export function withAuthentication(transport: FetchTransport, options: { isolateDashboard?: boolean } = {}): FetchTransport {
+  return (url, init) => url.endsWith('/auth/login') ? Promise.resolve(Response.json({ user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' })) : url.endsWith('/auth/me') ? Promise.resolve(Response.json(wireUser)) : url.endsWith('/dashboard') && options.isolateDashboard !== false ? Promise.resolve(Response.json({favorites:{games:[],reviews:[]},feed:[]})) : transport(url, init);
 }
 export const wireUser: PublicUserResponse = { id: 'u%2F1', username: 'ana', displayName: 'Ana', bio: '', avatarUrl: null };
 export const wireGame: GameResponse = { id: 'game%2F42', title: 'Jogo HTTP', summary: '', coverUrl: null, genres: ['RPG'], platforms: ['PC'], releaseDate: '2024-02-29', averageRating: 4.5 };

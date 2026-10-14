@@ -14,6 +14,7 @@ import { createHttpGameService } from './http/gameService';
 import { createHttpProfileService } from './http/profileService';
 import { createHttpFollowService, createHttpFavoriteService } from './http/socialService';
 import { createHttpRatingService, createHttpPublishingService, createHttpReviewService, createHttpCommentService } from './http/opinionService';
+import { communityRequest } from './http/opinionService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'dashboard' | 'feed' | 'notifications';
@@ -41,7 +42,8 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
   const unavailable = async (): Promise<never> => { throw new HttpFailure('configuration'); };
   return {
     ...previous, auth: createHttpAuthService(getHttp, session), games: createHttpGameService(getHttp), http: getHttp,
-    privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: true, follows: true, dashboard: false, feed: false, notifications: false },
+    privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: true, follows: true, dashboard: true, feed: true, notifications: false },
+    dashboard: { get: () => communityRequest(() => getHttp().community.dashboard()) },
     community: {
       ...previous.community,
       ...createHttpProfileService(getHttp),
@@ -51,7 +53,7 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
       ...createHttpCommentService(getHttp),
       ...createHttpFollowService(getHttp),
       ...createHttpFavoriteService(getHttp),
-      getFeed: unavailable,
+      getFeed: () => communityRequest(() => getHttp().community.feed()),
     },
     notifications: { list: unavailable },
   };

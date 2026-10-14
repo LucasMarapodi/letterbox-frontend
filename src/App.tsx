@@ -17,6 +17,7 @@ import { FeedSection } from './components/FeedSection';
 import { NotificationBell } from './components/NotificationBell';
 import type { ApplicationServices } from './services/runtime';
 import { CommunityPage } from './pages/CommunityPage';
+import { DashboardHome } from './pages/DashboardHome';
 
 export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
@@ -42,7 +43,7 @@ function ApplicationRoutes(): ReactElement {
     </header>
     {notice && <p className="session-notice" role="alert">{notice}</p>}
     <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
-      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user && privateFeatures?.favorites !== false && privateFeatures?.dashboard !== false ? <FavoritesSections key={`favorites-${version}-${user.id}`} /> : null} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
+      <Route path="/" element={user && privateFeatures?.dashboard === true ? <DashboardHome key={`${version}-${user.id}`} /> : <HomePage authenticated={Boolean(user)} favorites={user && privateFeatures?.favorites !== false && privateFeatures?.dashboard !== false ? <FavoritesSections key={`favorites-${version}-${user.id}`} /> : null} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
       <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
