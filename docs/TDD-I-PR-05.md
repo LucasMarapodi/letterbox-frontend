@@ -10,3 +10,6 @@ RED: 7 falhas e 1 aprovado; commit 68cb661. GREEN: 374 testes, lint, tipos e bui
 
 ## I-US-17
 RED: 4 falhas esperadas; commit d98b9c6. GREEN: 378 testes, lint, tipos e build. following false/true, PUT repetido idempotente, DELETE 204, corpos ausentes e token da sessão; resposta controla botão, conexões refrescadas e erro preserva estado. Cobertura dos privados ainda bloqueados foi limitada aos domínios pendentes.
+
+## I-US-18
+RED: 4 falhas esperadas; commit 3cf10e2. GREEN: 382 testes, lint, tipos e build. Favoritos pessoais, wrappers null, PUT/DELETE sem body, dois tipos e DELETE 204. Lista consultada novamente ao visitar próprio perfil após inclusão/remoção, sem cache de dashboard ou GET favorites na Home. Resposta de A após troca para B cancelada. Doubles do perfil fornecem listas vazias válidas para isolar cenários de edição.

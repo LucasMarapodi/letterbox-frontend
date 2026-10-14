@@ -7,3 +7,10 @@ export function createHttpFollowService(getHttp: () => HttpAdapters): Pick<Commu
     setFollowing: (id, selected) => communityRequest(() => getHttp().social.setFollowing(id, selected)),
   };
 }
+export function createHttpFavoriteService(getHttp: () => HttpAdapters): Pick<CommunityService, 'getFavorites' | 'getFavorite' | 'setFavorite'> {
+  return {
+    getFavorites: () => communityRequest(() => getHttp().social.favorites()),
+    getFavorite: (kind, id) => communityRequest(() => getHttp().social.favorite(kind, id)),
+    setFavorite: (kind, id, selected) => communityRequest(() => getHttp().social.setFavorite(kind, id, selected)),
+  };
+}

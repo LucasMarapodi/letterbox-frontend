@@ -11,11 +11,11 @@ import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAd
 import { createHttpAuthService } from './http/authService';
 import { createHttpGameService } from './http/gameService';
 import { createHttpProfileService } from './http/profileService';
-import { createHttpFollowService } from './http/socialService';
+import { createHttpFollowService, createHttpFavoriteService } from './http/socialService';
 import { createHttpRatingService, createHttpPublishingService, createHttpReviewService, createHttpCommentService } from './http/opinionService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
-export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'feed' | 'notifications';
+export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'dashboard' | 'feed' | 'notifications';
 export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
 export interface ServiceConfig { apiBaseUrl: string; implementation: 'mock' | 'custom'; }
 export function readServiceConfig(input: { apiBaseUrl?: unknown; implementation?: unknown } = {}): ServiceConfig {
@@ -40,7 +40,7 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
   const unavailable = async (): Promise<never> => { throw new HttpFailure('configuration'); };
   return {
     ...previous, auth: createHttpAuthService(getHttp, session), games: createHttpGameService(getHttp), http: getHttp,
-    privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: false, follows: true, feed: false, notifications: false },
+    privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: true, follows: true, dashboard: false, feed: false, notifications: false },
     community: {
       ...previous.community,
       ...createHttpProfileService(getHttp),
@@ -49,7 +49,8 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
       ...createHttpReviewService(getHttp),
       ...createHttpCommentService(getHttp),
       ...createHttpFollowService(getHttp),
-      getFavorites: unavailable, getFavorite: unavailable, setFavorite: unavailable, getFeed: unavailable,
+      ...createHttpFavoriteService(getHttp),
+      getFeed: unavailable,
     },
     notifications: { list: unavailable },
   };

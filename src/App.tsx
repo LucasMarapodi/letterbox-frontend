@@ -42,7 +42,7 @@ function ApplicationRoutes(): ReactElement {
     </header>
     {notice && <p className="session-notice" role="alert">{notice}</p>}
     <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
-      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user && privateFeatures?.favorites !== false ? <FavoritesSections key={`favorites-${version}-${user.id}`} /> : null} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
+      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user && privateFeatures?.favorites !== false && privateFeatures?.dashboard !== false ? <FavoritesSections key={`favorites-${version}-${user.id}`} /> : null} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
       <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
