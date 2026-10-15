@@ -8,11 +8,11 @@ import { createMockCommunityService } from './doubles/communityService';
 import type { PublicComment } from '../src/services/communityContracts';
 import type { Comment } from '../src/models';
 
-const comment: PublicComment = { id: 'comment-1', reviewId: 1, userId: 2, text: 'Uma ótima descoberta.', createdAt: '2026-01-03T12:00:00Z', author: { id: 2, displayName: 'Leo', avatarUrl: null } };
+const comment: PublicComment = { id: 1, reviewId: 1, parentCommentId: null, likeCount: 0, userId: 2, text: 'Uma ótima descoberta.', createdAt: '2026-01-03T12:00:00Z', author: { id: 2, displayName: 'Leo', avatarUrl: null } };
 afterEach(() => vi.restoreAllMocks());
 function open(): void { render(<MemoryRouter initialEntries={['/reviews/1']}><AppRoutes /></MemoryRouter>); }
 test('serviço retorna somente comentários da review solicitada e isola retornos', async () => {
-  const comments: Comment[] = [comment, { ...comment, id: 'outro', reviewId: 2, text: 'Outra discussão' }];
+  const comments: Comment[] = [comment, { ...comment, id: 2, reviewId: 2, text: 'Outra discussão' }];
   const service = createMockCommunityService({ comments });
   const result = await service.getComments(1);
   expect(result).toEqual([expect.objectContaining({ text: comment.text, author: { id: 2, displayName: 'Leo', avatarUrl: null } })]);

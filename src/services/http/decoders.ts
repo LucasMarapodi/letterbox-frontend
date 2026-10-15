@@ -33,6 +33,7 @@ function favoriteTargetId(value: unknown): number {
 }
 function score(value: unknown): number { return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 5 ? value : fail(); }
 function count(value: unknown): number { return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : fail(); }
+function likeCount(value: unknown): number { return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 2_147_483_647 ? value : fail(); }
 function date(value: unknown): string {
   const result = text(value);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(result)) return fail();
@@ -57,7 +58,7 @@ export function decodeReview(value: unknown): ReviewResponse {
   return { id: localId(item.id), userId: localId(item.userId), gameId: localId(item.gameId), text: text(item.text), createdAt: instant(item.createdAt), updatedAt: nullable(item.updatedAt, instant), author: author(item.author), game: { id: localId(game.id), title: text(game.title), coverUrl: nullable(game.coverUrl, text) } };
 }
 export function decodeComment(value: unknown): CommentResponse {
-  const item = publicRecord(value); return { id: id(item.id), userId: localId(item.userId), reviewId: localId(item.reviewId), text: text(item.text), createdAt: instant(item.createdAt), author: author(item.author) };
+  const item = publicRecord(value); return { id: localId(item.id), userId: localId(item.userId), reviewId: localId(item.reviewId), parentCommentId: nullable(item.parentCommentId, localId), likeCount: likeCount(item.likeCount), text: text(item.text), createdAt: instant(item.createdAt), author: author(item.author) };
 }
 export function decodeRating(value: unknown): RatingResponse {
   const item = publicRecord(value); return { id: localId(item.id), userId: localId(item.userId), gameId: localId(item.gameId), value: score(item.value) };
@@ -71,7 +72,7 @@ export function decodeNotification(value: unknown): NotificationResponse {
   const item = publicRecord(value);
   const base = { id: id(item.id), userId: localId(item.userId), actorId: localId(item.actorId), reviewId: localId(item.reviewId), createdAt: instant(item.createdAt), actor: author(item.actor) };
   if (item.type === 'new-review' && !('commentId' in item)) return { ...base, type: 'new-review' };
-  if (item.type === 'review-comment') return { ...base, type: 'review-comment', commentId: id(item.commentId) };
+  if (item.type === 'review-comment') return { ...base, type: 'review-comment', commentId: localId(item.commentId) };
   return fail();
 }
 export function decodeLogin(value: unknown): LoginResponse { const item = record(value); return { token: id(item.token), expiresAt: instant(item.expiresAt), user: decodeUser(item.user) }; }

@@ -61,8 +61,8 @@ test('lista e publicação aceitam o contrato novo; notificação numérica abre
   await interaction.type(await screen.findByLabelText('Seu comentário'), created.text);
   await interaction.click(screen.getByRole('button', { name: 'Publicar comentário' }));
   expect(await screen.findByText('Comentário publicado.')).toBeVisible();
-  expect(await within(comments).findByText(created.text)).toBeVisible();
-  const request = transport.mock.calls.find(([, init]) => init.method === 'POST');
+  expect(await within(screen.getByRole('region', { name: 'Comentários' })).findByText(created.text)).toBeVisible();
+  const request = transport.mock.calls.find(([url, init]) => url.endsWith('/comments') && init.method === 'POST');
   expect(request?.[1].body).toBe(JSON.stringify({ text: created.text }));
   await interaction.click(screen.getByRole('button', { name: 'Notificações' }));
   const dialog = await screen.findByRole('dialog');

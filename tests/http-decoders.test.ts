@@ -23,9 +23,9 @@ test('login mantém token separado do usuário e projeções públicas excluem s
 });
 test('união discriminada de eventos não introduz read e exige commentId somente no evento correto', () => {
   expect(decodeNotification(wireNotification)).toEqual(wireNotification);
-  expect(decodeNotification({ ...wireNotification, type: 'review-comment', commentId: 'c' })).toMatchObject({ type: 'review-comment', commentId: 'c' });
+  expect(decodeNotification({ ...wireNotification, type: 'review-comment', commentId: 81 })).toMatchObject({ type: 'review-comment', commentId: 81 });
   expect(decodeNotification(wireNotification)).not.toHaveProperty('read');
-  for (const malformed of [{ ...wireNotification, type: 'unknown' }, { ...wireNotification, type: 'review-comment' }, { ...wireNotification, commentId: 'c' }, { ...wireNotification, type: 'review-comment', commentId: null }]) expect(() => decodeNotification(malformed)).toThrow();
+  for (const malformed of [{ ...wireNotification, type: 'unknown' }, { ...wireNotification, type: 'review-comment' }, { ...wireNotification, commentId: 81 }, { ...wireNotification, type: 'review-comment', commentId: null }]) expect(() => decodeNotification(malformed)).toThrow();
 });
 test('compõe perfil conexões favoritos dashboard opiniões e rankings validados', () => {
   const lists = { games: [wireGame], reviews: [wireReview] };
