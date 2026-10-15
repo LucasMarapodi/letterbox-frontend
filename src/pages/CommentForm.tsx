@@ -18,6 +18,7 @@ function CommentControl({ reviewId, onSaved }: CommentFormProps): ReactElement {
       return 'Não foi possível publicar o comentário. Tente novamente.';
     }} onSubmit={async (text) => {
       if (!user) return;
+      setSuccess(false);
       await community.comment(reviewId, text, user);
       setSuccess(true); setVersion((value) => value + 1); onSaved();
     }} />

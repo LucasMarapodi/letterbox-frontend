@@ -7,6 +7,7 @@ interface SessionContextValue {
   signIn(credentials: LoginCredentials): Promise<User>;
   signOut(): Promise<void>;
   notice: string | null;
+  signingOut: boolean;
   version: number;
   authService: AuthService;
 }
@@ -18,6 +19,8 @@ export function SessionProvider({ children, service }: SessionProviderProps): Re
   const userRef = useRef(user);
   const [notice, setNotice] = useState<string | null>(null);
   const requestVersion = useRef(0);
+  const logoutRequest = useRef<number | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const [version, setVersion] = useState(() => service.sessionVersion?.() ?? 0);
   function applyUser(next: User | null): void { userRef.current = next; setUser(next); }
   useEffect(() => service.subscribe?.(() => {
@@ -28,6 +31,7 @@ export function SessionProvider({ children, service }: SessionProviderProps): Re
   }), [service]);
   async function signIn(credentials: LoginCredentials): Promise<User> {
     const request = ++requestVersion.current;
+    logoutRequest.current = null; setSigningOut(false);
     setVersion(service.sessionVersion?.() ?? request);
     setNotice(null); applyUser(null);
     const result: User = await service.login(credentials);
@@ -36,12 +40,17 @@ export function SessionProvider({ children, service }: SessionProviderProps): Re
     return result;
   }
   async function signOut(): Promise<void> {
-    const request = ++requestVersion.current; applyUser(null); setNotice(null);
+    if (logoutRequest.current !== null) return;
+    // A limpeza local não espera a rede; a trava pertence a esta operação.
+    const request = ++requestVersion.current;
+    logoutRequest.current = request; setSigningOut(true);
+    applyUser(null); setNotice(null);
     setVersion(service.sessionVersion?.() ?? request);
     try { await service.logout?.(); }
     catch { if (request === requestVersion.current) setNotice('Você saiu deste dispositivo, mas não foi possível confirmar a revogação na API.'); }
+    finally { if (logoutRequest.current === request) { logoutRequest.current = null; setSigningOut(false); } }
   }
-  const value: SessionContextValue = { user, notice, version, signIn, signOut, authService: service };
+  const value: SessionContextValue = { user, notice, signingOut, version, signIn, signOut, authService: service };
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 

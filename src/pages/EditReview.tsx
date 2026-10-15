@@ -17,6 +17,7 @@ function EditControl({ review, onSaved }: { review: ReviewDetails; onSaved(revie
       return 'Não foi possível salvar a review. Tente novamente.';
     }} onSubmit={async (text) => {
       if (!user) return;
+      setSuccess(false);
       const updated = await community.editReview(review.id, text, user);
       onSaved({ ...review, ...updated }); setSuccess(true);
     }} />

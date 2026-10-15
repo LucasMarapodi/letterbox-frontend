@@ -106,13 +106,14 @@ test.each(['comentário', 'editar review'])('%s: nova tentativa pendente/fracass
   const success = name === 'comentário' ? 'Comentário publicado.' : 'Review atualizada.';
   await screen.findByText(success);
   response = deferred<Response>();
+  await interaction.clear(screen.getByLabelText(item.fields[0].label));
   await interaction.type(screen.getByLabelText(item.fields[0].label), 'Nova versão');
   await interaction.click(screen.getByRole('button', { name: item.button }));
   expect(screen.queryByText(success)).not.toBeInTheDocument();
   await act(async () => { response.resolve(Response.json({ code: 'internal_error', message: 'Falha.' }, { status: 500 })); await response.promise; });
   await screen.findByRole('alert');
   expect(screen.queryByText(success)).not.toBeInTheDocument();
-  expect(screen.getByLabelText(item.fields[0].label)).toHaveValue(expect.stringContaining('Nova versão'));
+  expect(screen.getByLabelText(item.fields[0].label)).toHaveValue('Nova versão');
 });
 
 test('logout informa revogação pendente sem bloquear novo login; resposta antiga não afeta nova sessão', async () => {
@@ -137,4 +138,50 @@ test('logout informa revogação pendente sem bloquear novo login; resposta anti
   await act(async () => { pending.resolve(Response.json({ code: 'internal_error', message: 'Falha.' }, { status: 500 })); await pending.promise; });
   expect(screen.getByLabelText('Usuário conectado')).toHaveTextContent('Ana');
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
+
+test('ações em alvos independentes continuam disponíveis durante envio e erro do primeiro', async () => {
+  const first = deferred<Response>(); const second = deferred<Response>();
+  const transport = vi.fn<FetchTransport>().mockImplementation((url, init) => init.method === 'PUT' ? url.endsWith('/primeiro') ? first.promise : second.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
+  render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}><FavoriteButton kind="game" targetId="primeiro" /><FavoriteButton kind="review" targetId="segundo" /></SessionProvider></ServiceProvider></MemoryRouter>);
+  const firstButton = await screen.findByRole('button', { name: 'Favoritar jogo' });
+  const secondButton = await screen.findByRole('button', { name: 'Favoritar review' });
+  act(() => { fireEvent.click(firstButton); fireEvent.click(firstButton); });
+  expect(secondButton).toBeEnabled();
+  act(() => { fireEvent.click(secondButton); fireEvent.click(secondButton); });
+  expect(transport.mock.calls.filter(([, init]) => init.method === 'PUT')).toHaveLength(2);
+  await act(async () => { first.resolve(Response.json({ code: 'internal_error', message: 'Falha.' }, { status: 500 })); await first.promise; });
+  expect(screen.getByRole('button', { name: 'Favoritar jogo' })).toBeEnabled();
+  expect(secondButton).toBeDisabled();
+  await act(async () => { second.resolve(Response.json({ ...wireFavorite, targetType: 'review', targetId: 'segundo' })); await second.promise; });
+  expect(screen.getByRole('button', { name: 'Remover review dos favoritos' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Favoritar jogo' })).toHaveAttribute('aria-pressed', 'false');
+});
+
+test.each([204, 500])('logout %s finaliza andamento e uma sessão posterior pode sair novamente', async status => {
+  let pending = deferred<Response>();
+  const transport = vi.fn<FetchTransport>().mockImplementation(url => url.endsWith('/auth/logout') ? pending.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
+  render(<MemoryRouter><AppRoutes adapters={adapters} /></MemoryRouter>);
+  const interaction = userEvent.setup();
+  await interaction.click(screen.getByRole('button', { name: 'Sair' }));
+  expect(screen.getByText('Encerrando sessão…')).toBeVisible();
+  await act(async () => { pending.resolve(status === 204 ? new Response(null, { status }) : Response.json({ code: 'internal_error', message: 'Falha.' }, { status })); await pending.promise; });
+  expect(screen.queryByText('Encerrando sessão…')).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument();
+  if (status === 500) expect(screen.getByRole('alert')).toHaveTextContent('Você saiu deste dispositivo');
+  await interaction.click(screen.getByRole('link', { name: 'Entrar' }));
+  await interaction.type(screen.getByLabelText('E-mail'), 'test@example.test');
+  await interaction.type(screen.getByLabelText('Senha'), 'test-only');
+  await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  await screen.findByLabelText('Usuário conectado');
+  pending = deferred<Response>();
+  await interaction.click(screen.getByRole('button', { name: 'Sair' }));
+  expect(transport.mock.calls.filter(([url]) => url.endsWith('/auth/logout'))).toHaveLength(2);
+  expect(screen.getByText('Encerrando sessão…')).toBeVisible();
+  await act(async () => { pending.resolve(new Response(null, { status: 204 })); await pending.promise; });
+  expect(screen.queryByText('Encerrando sessão…')).not.toBeInTheDocument();
 });
