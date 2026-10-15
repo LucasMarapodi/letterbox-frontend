@@ -7,6 +7,7 @@ export type GameId = LocalId;
 export type ReviewId = LocalId;
 export type RatingId = LocalId;
 export type CommentId = LocalId;
+export type FavoriteId = LocalId;
 export function isLocalId(value: unknown): value is LocalId {
   return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 2_147_483_647;
 }
@@ -62,7 +63,7 @@ export interface Comment {
 }
 
 export interface Favorite {
-  id: Id;
+  id: FavoriteId;
   userId: UserId;
   targetType: 'game' | 'review';
   targetId: GameId | ReviewId;

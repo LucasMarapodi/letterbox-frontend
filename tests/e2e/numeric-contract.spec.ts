@@ -10,6 +10,8 @@ const review = { ...wireReview, userId: 42, gameId: 12, author: { ...wireReview.
 let server: Server;
 let storageUnavailable = true;
 let savedRating = 3;
+let gameFavorite = true;
+let reviewFavorite = true;
 const paths: string[] = [];
 test.beforeAll(async () => {
   // Contratos P-PR-01/02 sintéticos; nenhuma credencial/conta real.
@@ -37,8 +39,16 @@ test.beforeAll(async () => {
       body = request.method === 'PUT' ? rating : { rating };
     }
     else if (path.endsWith('/reviews/me')) body = { review };
-    else if (path === '/api/v1/favorites/game/12') body = { favorite: { id: 'favorite-test', userId: 42, targetType: 'game', targetId: '12' } };
-    else if (path === '/api/v1/favorites/review/55') body = { favorite: { id: 'favorite-review', userId: 42, targetType: 'review', targetId: '55' } };
+    else if (path === '/api/v1/favorites/game/12' || path === '/api/v1/favorites/review/55') {
+      const isGame = path.includes('/game/');
+      if (request.method === 'DELETE') {
+        if (isGame) gameFavorite = false; else reviewFavorite = false;
+        response.statusCode = 204; response.end(); return;
+      }
+      if (request.method === 'PUT') { if (isGame) gameFavorite = true; else reviewFavorite = true; }
+      const favorite = { id: isGame ? 91 : 92, userId: 42, targetType: isGame ? 'game' : 'review', targetId: isGame ? 12 : 55 };
+      body = request.method === 'PUT' ? favorite : { favorite: (isGame ? gameFavorite : reviewFavorite) ? favorite : null };
+    }
     else if (path.includes('/favorites/')) body = { favorite: null };
     else if (path.endsWith('/dashboard')) body = { favorites: { games: [game], reviews: [] }, feed: [review] };
     else if (path.endsWith('/favorites')) body = { games: [game], reviews: [] };
@@ -53,7 +63,7 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => { await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve())); });
 
-test('contrato P-PR-03: identidade, nota, review, favorito decimal e autoria numéricos', async ({ page }) => {
+test('contrato P-PR-05: favoritos de jogo/review numéricos com inclusão e remoção', async ({ page }) => {
   await page.goto('/cadastro');
   await page.getByLabel('Nome', { exact: true }).fill('Conta de teste');
   await page.getByLabel('E-mail', { exact: true }).fill('test@example.test');
@@ -75,6 +85,9 @@ test('contrato P-PR-03: identidade, nota, review, favorito decimal e autoria num
   await page.getByRole('button', { name: 'Salvar nota', exact: true }).click();
   await expect(page.getByText('Nota 5 salva.', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Remover jogo dos favoritos' })).toBeVisible();
+  await page.getByRole('button', { name: 'Remover jogo dos favoritos', exact: true }).click();
+  await page.getByRole('button', { name: 'Favoritar jogo', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Remover jogo dos favoritos', exact: true })).toHaveAttribute('aria-pressed', 'true');
   expect(paths).toContain('/api/v1/games/12');
   expect(paths.some(path => path.includes('345447'))).toBe(false);
   await page.getByRole('link', { name: 'Meu perfil' }).click();
@@ -83,10 +96,14 @@ test('contrato P-PR-03: identidade, nota, review, favorito decimal e autoria num
   await expect(page.getByRole('form', { name: 'Salvar review', exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/reviews\/55$/);
   await expect(page.getByRole('button', { name: 'Remover review dos favoritos', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Remover review dos favoritos', exact: true }).click();
+  await page.getByRole('button', { name: 'Favoritar review', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Remover review dos favoritos', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await page.getByLabel('Sua review', { exact: true }).fill('Review numérica editada');
   await page.getByRole('button', { name: 'Salvar review', exact: true }).click();
   await expect(page.getByText('Review atualizada.', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Seu comentário', { exact: true })).toHaveCount(0);
   await mkdir('docs/evidence', { recursive: true });
-  await page.screenshot({ path: 'docs/evidence/numeric-opinions-owner.png', fullPage: true });
+  await page.getByRole('heading', { name: 'Review', exact: true }).click();
+  await page.screenshot({ path: 'docs/evidence/numeric-favorites-owner.png', fullPage: true });
 });

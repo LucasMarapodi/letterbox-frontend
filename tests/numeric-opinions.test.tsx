@@ -26,8 +26,8 @@ test.each([0, -1, 1.5, 2_147_483_648, '55', 'review-55'])('rejeita ID de review/
   expect(() => decodeNotification({ ...wireNotification, reviewId: id })).toThrow();
 });
 
-test('favorito mantém ID próprio textual e normaliza targetId decimal da review', () => {
-  expect(decodeFavorite({ ...wireFavorite, targetType: 'review', targetId: '55' })).toMatchObject({ id: wireFavorite.id, targetId: 55 });
+test('favorito preserva ID próprio e alvo numéricos da review', () => {
+  expect(decodeFavorite({ ...wireFavorite, targetType: 'review', targetId: 55 })).toMatchObject({ id: wireFavorite.id, targetId: 55 });
 });
 
 test.each(['0', '-1', '1.5', '01', '1e2', '2147483648', 'review-55', 'game%2F42'])('rota de review inválida %s não consulta a API', id => {
@@ -37,7 +37,7 @@ test.each(['0', '-1', '1.5', '01', '1e2', '2147483648', 'review-55', 'game%2F42'
   expect(transport).not.toHaveBeenCalled();
 });
 
-test('respostas numéricas de nota, publicação e edição são aceitas; favorito consulta ID decimal', async () => {
+test('respostas numéricas de nota, publicação e edição são aceitas; favorito consulta ID local', async () => {
   let saved = false;
   let text = 'Review numérica';
   const transport = vi.fn<FetchTransport>().mockImplementation(withAuthentication(async (url, init) => {
@@ -51,7 +51,7 @@ test('respostas numéricas de nota, publicação e edição são aceitas; favori
       if (init.method === 'PATCH') text = 'Review editada';
       return Response.json({ ...review, text });
     }
-    if (path === '/api/v1/favorites/review/55') return Response.json({ favorite: { ...wireFavorite, targetType: 'review', targetId: '55' } });
+    if (path === '/api/v1/favorites/review/55') return Response.json({ favorite: { ...wireFavorite, targetType: 'review', targetId: 55 } });
     if (path.includes('/favorites/')) return Response.json({ favorite: null });
     if (path.endsWith('/comments')) return Response.json([]);
     throw new Error(`Consulta inesperada: ${path}`);

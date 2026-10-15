@@ -10,7 +10,7 @@ test('jogo local e igdbId permanecem numéricos e distintos das referências de 
   expect(decodeGame({ ...wireGame, id: 12, igdbId: 345447 })).toMatchObject({ id: 12, igdbId: 345447 });
   expect(decodeReview({ ...wireReview, gameId: 12, game: { ...wireReview.game, id: 12 } })).toMatchObject({ gameId: 12, game: { id: 12 } });
   expect(decodeRating({ ...wireRating, gameId: 12 }).gameId).toBe(12);
-  expect(decodeFavorite({ ...wireFavorite, targetType: 'game', targetId: '12' }).targetId).toBe(12);
+  expect(decodeFavorite({ ...wireFavorite, targetType: 'game', targetId: 12 }).targetId).toBe(12);
 });
 test.each([0, -1, 1.5, 2_147_483_648, '12', 'igdb-12'])('ID local inválido %j não é convertido para jogo', id => {
   expect(() => decodeGame({ ...wireGame, id, igdbId: 345447 })).toThrow();
