@@ -5,7 +5,7 @@ import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
-import { decodeUser, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeGame } from '../src/services/http/decoders';
+import { decodeUser, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin } from '../src/services/http/decoders';
 import { wireUser, wireReview, wireComment, wireRating, wireFavorite, wireNotification, wireGame, wirePage } from './http-fixtures';
 
 const numericUser = { ...wireUser, id: 42 };
@@ -22,8 +22,8 @@ test('identidade numérica da API usa números consistentes em todas as projeç�
 test.each([0, -1, 1.5, NaN, Infinity, 2_147_483_648, null, true, {}, '42', 'u%2F1', ''])('identidade numérica inválida %j é rejeitada', id => {
   expect(() => decodeUser({ ...numericUser, id })).toThrow();
 });
-test('compatibilidade de identidade não aceita token ou ID de jogo numéricos', () => {
-  expect(() => decodeGame({ ...wireGame, id: 42 })).toThrow();
+test('IDs próprios de review e tokens continuam textuais', () => {
+  expect(() => decodeReview({ ...numericReview, id: 42 })).toThrow();
   expect(() => decodeLogin({ user: numericUser, token: 42, expiresAt: '2080-01-01T00:00:00Z' })).toThrow();
 });
 test('login numérico confirma me, abre dashboard e mantém perfil próprio/edição de review acessíveis', async () => {
