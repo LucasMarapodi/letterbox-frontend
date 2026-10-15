@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
@@ -46,7 +46,7 @@ test('login numérico confirma me, abre dashboard e mantém perfil próprio/edi�
   await interaction.type(screen.getByLabelText('Senha'), 'test-only');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   expect(await screen.findByLabelText('Usuário conectado')).toHaveTextContent('Ana');
-  expect(screen.queryByRole('form', { name: 'Login' })).not.toBeInTheDocument();
+  await waitFor(() => expect(screen.queryByRole('form', { name: 'Login' })).not.toBeInTheDocument());
   expect(screen.getByRole('link', { name: 'Meu perfil' })).toHaveAttribute('href', '/perfil/42');
   expect(adapters.auth.sessionUser?.()?.id).toBe(42);
   expect(transport.mock.calls.filter(([url]) => url.endsWith('/auth/me'))).toHaveLength(1);
@@ -59,7 +59,7 @@ test('login numérico confirma me, abre dashboard e mantém perfil próprio/edi�
 });
 
 test.each(['login', 'register'] as const)('storage_unavailable em %s é reconhecido sem criar sessão e permite retry', async operation => {
-  const transport = vi.fn<FetchTransport>().mockResolvedValue(Response.json({ code: 'storage_unavailable', message: 'Armazenamento indisponível.' }, { status: 503 }));
+  const transport = vi.fn<FetchTransport>().mockImplementation(async () => Response.json({ code: 'storage_unavailable', message: 'Armazenamento indisponível.' }, { status: 503 }));
   const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
   const input = { name: 'Teste', email: 'test@example.test', password: 'test-only' };
   await expect(adapters.auth[operation](input)).rejects.toMatchObject({ code: 'storage-unavailable' });
@@ -73,4 +73,11 @@ test.each(['login', 'register'] as const)('storage_unavailable em %s é reconhec
   expect(await screen.findByRole('alert')).toHaveTextContent('O armazenamento está temporariamente indisponível. Tente novamente.');
   expect(screen.getByLabelText('Senha')).toHaveValue('test-only');
   expect(screen.getByRole('button', { name: operation === 'login' ? 'Entrar' : 'Criar conta' })).toBeEnabled();
+});
+
+test('storage_unavailable na confirmação me elimina token ainda não confirmado', async () => {
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: async url => url.endsWith('/auth/login') ? Response.json({ token: 'test-only', expiresAt: '2080-01-01T00:00:00Z', user: numericUser }) : Response.json({ code: 'storage_unavailable', message: 'Armazenamento indisponível.' }, { status: 503 }) });
+  await expect(adapters.auth.login({ email: 'test@example.test', password: 'test-only' })).rejects.toMatchObject({ code: 'storage-unavailable' });
+  expect(adapters.http?.().session.current()).toBeNull();
+  expect(adapters.auth.sessionUser?.()).toBeNull();
 });
