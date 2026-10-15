@@ -13,7 +13,7 @@ test('somente períodos documentados são aceitos', () => {
 });
 test.each<[RankingPeriod, number]>([['24h', 24], ['7d', 168], ['30d', 720]])('janela %s inclui limites e normaliza fuso, exclui antes e futuro', (period, hours) => {
   const now = Date.parse('2026-10-11T12:00:00Z');
-  const base: Comment = { id: 'now', reviewId: 'review-1', userId: 2, text: 'Comentário', createdAt: '2026-10-11T09:00:00-03:00' };
+  const base: Comment = { id: 'now', reviewId: 1, userId: 2, text: 'Comentário', createdAt: '2026-10-11T09:00:00-03:00' };
   const comments = [base, { ...base, id: 'boundary', createdAt: new Date(now - hours * 3600000).toISOString() }, { ...base, id: 'old', createdAt: new Date(now - hours * 3600000 - 1).toISOString() }, { ...base, id: 'future', createdAt: new Date(now + 1).toISOString() }];
   expect(commentsInPeriod(comments, period, () => new Date(now)).map((comment) => comment.id)).toEqual(['now', 'boundary']);
 });

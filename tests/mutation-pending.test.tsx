@@ -33,8 +33,8 @@ const cases: MutationCase[] = [
   { name: 'publicar review', endpoint: '/games/1/reviews', method: 'POST', render: saved => <PublishReview gameId={1} onSaved={saved} />, fields: [{ label: 'Sua review', value: 'Rascunho' }], button: 'Publicar review', pending: 'Publicando…', result: wireReview },
   { name: 'editar review', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}`, method: 'PATCH', render: saved => <EditReview review={wireReview} onSaved={saved} />, fields: [{ label: 'Sua review', value: 'Rascunho' }], button: 'Salvar review', pending: 'Salvando…', result: { ...wireReview, text: 'Rascunho' } },
   { name: 'nota', endpoint: '/games/1/rating/me', method: 'PUT', render: saved => <RatingForm gameId={1} onSaved={saved} />, fields: [], button: 'Salvar nota', pending: 'Salvando…', result: wireRating },
-  { name: 'comentário', endpoint: '/reviews/r/comments', method: 'POST', render: saved => <CommentForm reviewId="r" authorId={2} onSaved={saved} />, fields: [{ label: 'Seu comentário', value: 'Rascunho' }], button: 'Publicar comentário', pending: 'Publicando…', result: wireComment },
-  ...(['game', 'review'] as const).map(kind => ({ name: `favorito ${kind}`, endpoint: `/favorites/${kind}/${kind === 'game' ? 1 : 'g'}`, method: 'PUT', render: () => <FavoriteButton kind={kind} targetId={kind === 'game' ? 1 : 'g'} />, fields: [], button: `Favoritar ${kind === 'game' ? 'jogo' : 'review'}`, pending: 'Atualizando favorito…', result: { ...wireFavorite, targetType: kind, targetId: kind === 'game' ? '1' : 'g' } })),
+  { name: 'comentário', endpoint: '/reviews/55/comments', method: 'POST', render: saved => <CommentForm reviewId={55} authorId={2} onSaved={saved} />, fields: [{ label: 'Seu comentário', value: 'Rascunho' }], button: 'Publicar comentário', pending: 'Publicando…', result: wireComment },
+  ...(['game', 'review'] as const).map(kind => ({ name: `favorito ${kind}`, endpoint: `/favorites/${kind}/${kind === 'game' ? 1 : 55}`, method: 'PUT', render: () => <FavoriteButton kind={kind} targetId={kind === 'game' ? 1 : 55} />, fields: [], button: `Favoritar ${kind === 'game' ? 'jogo' : 'review'}`, pending: 'Atualizando favorito…', result: { ...wireFavorite, targetType: kind, targetId: kind === 'game' ? '1' : '55' } })),
   { name: 'seguir', endpoint: '/users/2/follow', method: 'PUT', render: saved => <FollowButton targetId={2} name="Outro" onChanged={saved} />, fields: [], button: 'Seguir Outro', pending: 'Atualizando relação…', result: { following: true } },
 ];
 function readBody(path: string): unknown {
@@ -145,7 +145,7 @@ test('ações em alvos independentes continuam disponíveis durante envio e erro
   const transport = vi.fn<FetchTransport>().mockImplementation((url, init) => init.method === 'PUT' ? url.endsWith('/1') ? first.promise : second.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
   const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
-  render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}><FavoriteButton kind="game" targetId={1} /><FavoriteButton kind="review" targetId="segundo" /></SessionProvider></ServiceProvider></MemoryRouter>);
+  render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}><FavoriteButton kind="game" targetId={1} /><FavoriteButton kind="review" targetId={56} /></SessionProvider></ServiceProvider></MemoryRouter>);
   const firstButton = await screen.findByRole('button', { name: 'Favoritar jogo' });
   const secondButton = await screen.findByRole('button', { name: 'Favoritar review' });
   act(() => { fireEvent.click(firstButton); fireEvent.click(firstButton); });
@@ -155,7 +155,7 @@ test('ações em alvos independentes continuam disponíveis durante envio e erro
   await act(async () => { first.resolve(Response.json({ code: 'internal_error', message: 'Falha.' }, { status: 500 })); await first.promise; });
   expect(screen.getByRole('button', { name: 'Favoritar jogo' })).toBeEnabled();
   expect(secondButton).toBeDisabled();
-  await act(async () => { second.resolve(Response.json({ ...wireFavorite, targetType: 'review', targetId: 'segundo' })); await second.promise; });
+  await act(async () => { second.resolve(Response.json({ ...wireFavorite, targetType: 'review', targetId: '56' })); await second.promise; });
   expect(screen.getByRole('button', { name: 'Remover review dos favoritos' })).toBeEnabled();
   expect(screen.getByRole('button', { name: 'Favoritar jogo' })).toHaveAttribute('aria-pressed', 'false');
 });

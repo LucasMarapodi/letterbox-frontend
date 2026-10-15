@@ -33,7 +33,7 @@ test('URL antiga de notificações é tratada como inexistente', () => {
 });
 const parameterCases: ParameterCase[] = [
   { path: '/jogos/42', value: 'ID do jogo: 42' },
-  { path: '/reviews/review-42', value: 'ID da review: review-42' },
+  { path: '/reviews/42', value: 'ID da review: 42' },
   { path: '/perfil/42', value: 'ID do usuário: 42' },
 ];
 
@@ -57,12 +57,7 @@ test.each(opaqueIds)('rota de jogo rejeita identificador legado %s', id => {
   expect(screen.getByText('Jogo não encontrado.')).toBeVisible();
 });
 
-interface OpaqueRouteCase { prefix: string; label: string; }
-const opaqueRoutes: OpaqueRouteCase[] = [
-  { prefix: '/reviews', label: 'ID da review' },
-];
-
-test.each(opaqueRoutes)('preserva percentuais literais ao abrir diretamente $prefix', ({ prefix, label }) => {
-  render(<MemoryRouter initialEntries={[`${prefix}/item%252F42/`]}><AppRoutes /></MemoryRouter>);
-  expect(screen.getByText(`${label}: item%2F42`)).toBeVisible();
+test('rota de review rejeita identificador legado com percentual literal', () => {
+  render(<MemoryRouter initialEntries={['/reviews/item%252F42/']}><AppRoutes /></MemoryRouter>);
+  expect(screen.getByText('Review não encontrada.')).toBeVisible();
 });

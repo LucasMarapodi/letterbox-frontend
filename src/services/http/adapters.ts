@@ -1,21 +1,13 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import type { GameQuery } from '../contracts';
-import { isLocalId, type User, type UserId, type GameId } from '../../models';
+import { isLocalId, type User, type UserId, type GameId, type ReviewId } from '../../models';
 import { catalogKey, createCatalogStore, type CatalogMetadata, type CatalogStore } from '../catalogMetadata';
 import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
 import { HttpFailure, createHttpClient, validateApiBaseUrl, type FetchTransport, type HttpRequest } from './client';
 import { decodeUser, decodeGame, decodeGamePage, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
-function localPathId(id: UserId | GameId): string {
+function localPathId(id: UserId | GameId | ReviewId): string {
   if (!isLocalId(id)) throw new HttpFailure('configuration');
   return String(id);
-}
-function favoritePathId(kind: FavoriteKind, id: string | GameId): string {
-  if (kind === 'game') {
-    if (!isLocalId(id)) throw new HttpFailure('configuration');
-    return String(id);
-  }
-  if (typeof id !== 'string') throw new HttpFailure('configuration');
-  return id;
 }
 export interface SessionSnapshot { token: string; user: User; expiresAt: string; version: number; signal: AbortSignal; }
 export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; updateUser(user: User): void; clear(): void; subscribe(listener: () => void): () => void; }
@@ -40,10 +32,10 @@ export interface HttpAdapters {
     publish(id: GameId, input: TextRequest, signal?: AbortSignal): Promise<ReviewResponse>;
   };
   reviews: {
-    get(id: string, signal?: AbortSignal): Promise<ReviewResponse>;
-    edit(id: string, input: TextRequest, signal?: AbortSignal): Promise<ReviewResponse>;
-    comments(id: string, signal?: AbortSignal): Promise<CommentResponse[]>;
-    comment(id: string, input: TextRequest, signal?: AbortSignal): Promise<CommentResponse>;
+    get(id: ReviewId, signal?: AbortSignal): Promise<ReviewResponse>;
+    edit(id: ReviewId, input: TextRequest, signal?: AbortSignal): Promise<ReviewResponse>;
+    comments(id: ReviewId, signal?: AbortSignal): Promise<CommentResponse[]>;
+    comment(id: ReviewId, input: TextRequest, signal?: AbortSignal): Promise<CommentResponse>;
   };
   profiles: {
     get(id: UserId, signal?: AbortSignal): Promise<PublicUserResponse>;
@@ -56,8 +48,8 @@ export interface HttpAdapters {
   };
   social: {
     favorites(signal?: AbortSignal): Promise<FavoriteListsResponse>;
-    favorite(kind: FavoriteKind, id: string | GameId, signal?: AbortSignal): Promise<FavoriteResponse | null>;
-    setFavorite(kind: FavoriteKind, id: string | GameId, selected: boolean, signal?: AbortSignal): Promise<FavoriteResponse | null>;
+    favorite(kind: FavoriteKind, id: ReviewId | GameId, signal?: AbortSignal): Promise<FavoriteResponse | null>;
+    setFavorite(kind: FavoriteKind, id: ReviewId | GameId, selected: boolean, signal?: AbortSignal): Promise<FavoriteResponse | null>;
     isFollowing(id: UserId, signal?: AbortSignal): Promise<boolean>;
     setFollowing(id: UserId, selected: boolean, signal?: AbortSignal): Promise<boolean>;
   };
@@ -143,10 +135,10 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       publish: (id, input, signal) => call({ method: 'POST', path: ['games', localPathId(id), 'reviews'], body: { text: input.text }, signal }, decodeReview, true),
     },
     reviews: {
-      get: (id, signal) => call({ path: ['reviews', id], signal }, decodeReview),
-      edit: (id, input, signal) => call({ method: 'PATCH', path: ['reviews', id], body: { text: input.text }, signal }, decodeReview, true),
-      comments: (id, signal) => call({ path: ['reviews', id, 'comments'], signal }, list(decodeComment)),
-      comment: (id, input, signal) => call({ method: 'POST', path: ['reviews', id, 'comments'], body: { text: input.text }, signal }, decodeComment, true),
+      get: (id, signal) => call({ path: ['reviews', localPathId(id)], signal }, decodeReview),
+      edit: (id, input, signal) => call({ method: 'PATCH', path: ['reviews', localPathId(id)], body: { text: input.text }, signal }, decodeReview, true),
+      comments: (id, signal) => call({ path: ['reviews', localPathId(id), 'comments'], signal }, list(decodeComment)),
+      comment: (id, input, signal) => call({ method: 'POST', path: ['reviews', localPathId(id), 'comments'], body: { text: input.text }, signal }, decodeComment, true),
     },
     profiles: {
       get: getUser, reviews: userReviews, followers, following,
@@ -156,10 +148,10 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
     },
     social: {
       favorites: (signal) => call({ path: ['favorites'], signal }, decodeFavoriteLists, true),
-      favorite: (kind, id, signal) => call({ path: ['favorites', kind, favoritePathId(kind, id)], signal }, unwrapFavorite, true),
+      favorite: (kind, id, signal) => call({ path: ['favorites', kind, localPathId(id)], signal }, unwrapFavorite, true),
       async setFavorite(kind, id, selected, signal) {
-        if (selected) return call({ method: 'PUT', path: ['favorites', kind, favoritePathId(kind, id)], signal }, decodeFavorite, true);
-        await call({ method: 'DELETE', path: ['favorites', kind, favoritePathId(kind, id)], signal }, decodeVoid, true); return null;
+        if (selected) return call({ method: 'PUT', path: ['favorites', kind, localPathId(id)], signal }, decodeFavorite, true);
+        await call({ method: 'DELETE', path: ['favorites', kind, localPathId(id)], signal }, decodeVoid, true); return null;
       },
       isFollowing: (id, signal) => call({ path: ['users', localPathId(id), 'follow', 'me'], signal }, unwrapFollowing, true),
       async setFollowing(id, selected, signal) {

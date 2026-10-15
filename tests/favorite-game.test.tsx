@@ -23,7 +23,7 @@ test('favorito exige sessão e jogo existente', async () => {
   const service = createMockCommunityService();
   await expect(service.setFavorite('game', 1, true, null)).rejects.toMatchObject({ code: 'session-required' });
   await expect(service.getFavorite('game', 1, null)).rejects.toMatchObject({ code: 'session-required' });
-  await expect(service.setFavorite('game', 'ausente', true, ana)).rejects.toMatchObject({ code: 'not-found' });
+  await expect(service.setFavorite('game', 999, true, ana)).rejects.toMatchObject({ code: 'not-found' });
 });
 async function open(): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();

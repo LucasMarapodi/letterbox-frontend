@@ -57,7 +57,7 @@ test('falha de nota é apresentada e mantém a escolha', async () => {
   expect(screen.getByRole('radio', { name: '5 estrelas' })).toBeChecked();
 });
 test('estrelas permitem seleção por teclado e envio da nota escolhida', async () => {
-  const save = vi.spyOn(community, 'rate').mockResolvedValue({ id: 'rating-new', gameId: 1, userId: ana.id, value: 3 });
+  const save = vi.spyOn(community, 'rate').mockResolvedValue({ id: 99, gameId: 1, userId: ana.id, value: 3 });
   const interaction = userEvent.setup();
   render(<MemoryRouter><SessionProvider service={{ async login() { return ana; }, async register() { return ana; } }}><RatingExample /></SessionProvider></MemoryRouter>);
   await interaction.click(screen.getByRole('button', { name: 'Iniciar sessão' }));
@@ -95,7 +95,7 @@ test('reabrir jogo recupera cinco estrelas e reenviar mantém a nota', async () 
   expect(await screen.findByText('Nota 5 salva.')).toBeVisible();
 });
 test('erro ao consultar nota bloqueia envio e permite recuperar a nota', async () => {
-  vi.spyOn(community, 'getRating').mockRejectedValueOnce(new Error('Falha')).mockResolvedValueOnce({ id: 'r1', userId: ana.id, gameId: 1, value: 5 });
+  vi.spyOn(community, 'getRating').mockRejectedValueOnce(new Error('Falha')).mockResolvedValueOnce({ id: 99, userId: ana.id, gameId: 1, value: 5 });
   const save = vi.spyOn(community, 'rate');
   const interaction = userEvent.setup();
   render(<MemoryRouter><SessionProvider service={{ async login() { return ana; }, async register() { return ana; } }}><RatingExample /></SessionProvider></MemoryRouter>);

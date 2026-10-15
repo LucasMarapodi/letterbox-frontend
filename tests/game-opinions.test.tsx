@@ -12,7 +12,7 @@ vi.mock('../src/services', () => ({ services: {
   games: { list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
 } } satisfies { services: Services }));
 
-const review: PublicReview = { id: 'review%2F1', gameId: 1, userId: 1, text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 1, displayName: 'Ana', avatarUrl: null } };
+const review: PublicReview = { id: 1, gameId: 1, userId: 1, text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 1, displayName: 'Ana', avatarUrl: null } };
 
 beforeEach(() => {
   vi.mocked(services.games.list).mockReset().mockResolvedValue(gamePage([]));
@@ -41,7 +41,7 @@ test('a página exibe a média fornecida sem calculá-la a partir das reviews', 
   renderGame();
   expect(await screen.findByText('Nota média: 4,25 de 5')).toBeVisible();
   expect(screen.getByText(review.text)).toBeVisible();
-  expect(screen.getByRole('link', { name: 'Review de Ana' })).toHaveAttribute('href', '/reviews/review%252F1');
+  expect(screen.getByRole('link', { name: 'Review de Ana' })).toHaveAttribute('href', '/reviews/1');
   expect(screen.getByRole('link', { name: 'Ana' })).toHaveAttribute('href', '/perfil/1');
 });
 
@@ -51,7 +51,7 @@ test('o link da review navega até seu conteúdo com ID preservado', async () =>
   renderGame();
   await user.click(await screen.findByRole('link', { name: 'Review de Ana' }));
   expect(screen.getByRole('heading', { name: 'Review', level: 1 })).toBeVisible();
-  expect(screen.getByText('ID da review: review%2F1')).toBeVisible();
+  expect(screen.getByText('ID da review: 1')).toBeVisible();
 });
 
 test('o link do autor navega ao perfil público com ID preservado', async () => {

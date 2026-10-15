@@ -36,7 +36,7 @@ test('sino abre modal nomeado sem mudar URL e exibe eventos pessoais na ordem do
   expect(items.map((item) => item.textContent)).toEqual([
     expect.stringContaining('Leo comentou na sua review'), expect.stringContaining('Leo publicou uma nova review'),
   ]);
-  expect(items[0]).toHaveAttribute('href', '/reviews/review-1');
+  expect(items[0]).toHaveAttribute('href', '/reviews/1');
   expect(within(dialog).getByText(/03\/01\/2026/)).toBeVisible();
 });
 test('carregamento e vazio ficam no modal e fechar descarta consulta pendente', async () => {
@@ -65,6 +65,6 @@ test('selecionar notificação fecha modal e abre review correta', async () => {
   await interaction.click(screen.getByRole('button', { name: 'Notificações' }));
   await interaction.click(await within(screen.getByRole('dialog')).findByRole('link', { name: /Leo publicou uma nova review/ }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  expect(screen.getByLabelText('Endereço atual')).toHaveTextContent('/reviews/review-2');
+  expect(screen.getByLabelText('Endereço atual')).toHaveTextContent('/reviews/2');
   expect(await screen.findByText('Um mundo pequeno, mas cheio de detalhes para descobrir.')).toBeVisible();
 });

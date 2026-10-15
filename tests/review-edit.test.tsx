@@ -11,20 +11,20 @@ const author: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avat
 afterEach(() => vi.restoreAllMocks());
 test('edição pelo autor mantém ID quantidade e data de criação', async () => {
   const service = createMockCommunityService();
-  const original = await service.getReview('review-1');
-  const updated = await service.editReview('review-1', ' Texto atualizado ', author);
+  const original = await service.getReview(1);
+  const updated = await service.editReview(1, ' Texto atualizado ', author);
   expect(updated).toMatchObject({ id: original?.id, createdAt: original?.createdAt, text: 'Texto atualizado' });
   expect(updated.updatedAt).not.toBeNull();
   expect((await service.getOpinions(1)).reviews).toHaveLength(2);
-  expect((await service.getReview('review-1'))?.text).toBe('Texto atualizado');
+  expect((await service.getReview(1))?.text).toBe('Texto atualizado');
 });
 test.each([null, { ...author, id: 2 }])('edição rejeita visitante ou outro usuário %s', async (user) => {
-  await expect(createMockCommunityService().editReview('review-1', 'Novo', user)).rejects.toMatchObject({ code: user ? 'forbidden' : 'session-required' });
+  await expect(createMockCommunityService().editReview(1, 'Novo', user)).rejects.toMatchObject({ code: user ? 'forbidden' : 'session-required' });
 });
 test('edição rejeita texto vazio e ID inexistente', async () => {
   const service = createMockCommunityService();
-  await expect(service.editReview('review-1', '  ', author)).rejects.toMatchObject({ code: 'empty-text' });
-  await expect(service.editReview('ausente', 'Novo', author)).rejects.toMatchObject({ code: 'not-found' });
+  await expect(service.editReview(1, '  ', author)).rejects.toMatchObject({ code: 'empty-text' });
+  await expect(service.editReview(999, 'Novo', author)).rejects.toMatchObject({ code: 'not-found' });
 });
 async function openAuthenticated(user: User = author): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();
@@ -53,7 +53,7 @@ test('outro usuário não recebe controle de edição', async () => {
   expect(screen.queryByLabelText('Sua review')).not.toBeInTheDocument();
 });
 test('visitante lê sem controle de edição', async () => {
-  render(<MemoryRouter initialEntries={['/reviews/review-1']}><AppRoutes /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/reviews/1']}><AppRoutes /></MemoryRouter>);
   await screen.findByText(/A exploração convida/);
   expect(screen.queryByLabelText('Sua review')).not.toBeInTheDocument();
 });

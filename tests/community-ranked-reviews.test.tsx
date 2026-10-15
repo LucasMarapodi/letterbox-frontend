@@ -12,9 +12,9 @@ afterEach(() => vi.restoreAllMocks());
 function service(): ReturnType<typeof createMockCommunityService> { return createMockCommunityService({ reviews: rankingReviews, comments: rankingComments, clock: () => new Date(rankingNow) }); }
 test('ranking conta comentários elegíveis em reviews antigas com desempates e períodos', async () => {
   const mock = service();
-  expect((await mock.getMostCommented('24h')).map((item) => [item.review.id, item.commentCount])).toEqual([['a',1],['c',1],['b',1]]);
-  expect((await mock.getMostCommented('7d')).map((item) => [item.review.id, item.commentCount])).toEqual([['a',2],['b',2],['c',1]]);
-  expect((await mock.getMostCommented('30d')).map((item) => [item.review.id, item.commentCount])).toEqual([['a',2],['c',2],['b',2]]);
+  expect((await mock.getMostCommented('24h')).map((item) => [item.review.id, item.commentCount])).toEqual([[1,1],[3,1],[2,1]]);
+  expect((await mock.getMostCommented('7d')).map((item) => [item.review.id, item.commentCount])).toEqual([[1,2],[2,2],[3,1]]);
+  expect((await mock.getMostCommented('30d')).map((item) => [item.review.id, item.commentCount])).toEqual([[1,2],[3,2],[2,2]]);
   expect(await createMockCommunityService({ comments: [], clock: () => new Date(rankingNow) }).getMostCommented('7d')).toEqual([]);
 });
 async function open(): Promise<ReturnType<typeof userEvent.setup>> {

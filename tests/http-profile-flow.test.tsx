@@ -19,7 +19,7 @@ test('somente 404 do usuário significa perfil ausente; lista 404/rede não vira
 function open(transport:FetchTransport):void{render(<MemoryRouter initialEntries={['/perfil/1']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport})}/></MemoryRouter>);}
 test('visitante vê perfil/reviews/links da API e lista vazia válida',async()=>{
   open(async(url)=>Response.json(url.endsWith('/reviews')?[wireReview]:url.endsWith('/followers')?[{...wireUser,id:2,displayName:'Outro'}]:url.endsWith('/following')?[]:wireUser));
-  expect(await screen.findByRole('heading',{name:'Ana',level:2})).toBeVisible();expect(screen.getByRole('link',{name:'Ler review de Jogo HTTP'})).toHaveAttribute('href','/reviews/r%2F1');expect(await screen.findByRole('link',{name:'Outro'})).toHaveAttribute('href','/perfil/2');expect(screen.getByText('Nenhuma pessoa seguida.')).toBeVisible();
+  expect(await screen.findByRole('heading',{name:'Ana',level:2})).toBeVisible();expect(screen.getByRole('link',{name:'Ler review de Jogo HTTP'})).toHaveAttribute('href','/reviews/55');expect(await screen.findByRole('link',{name:'Outro'})).toHaveAttribute('href','/perfil/2');expect(screen.getByText('Nenhuma pessoa seguida.')).toBeVisible();
 });
 test('erro parcial de conexões mantém perfil e mostra falha apropriada',async()=>{
   open(async(url)=>{if(url.endsWith('/following'))throw new Error('offline');return Response.json(url.endsWith('/reviews')?[]:url.endsWith('/followers')?[]:wireUser);});

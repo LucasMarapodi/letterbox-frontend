@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
+import { useLocalRouteId } from '../routing/useLocalRouteId';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { useServices } from '../services/ServiceProvider';
 import type { ReviewDetails } from '../services/communityContracts';
@@ -12,7 +12,7 @@ import { FavoriteButton } from '../components/FavoriteButton';
 import { CatalogNotice } from '../components/CatalogNotice';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; review: ReviewDetails | null };
-function ReviewContent({ id }: { id: string }): ReactElement {
+function ReviewContent({ id }: { id: number }): ReactElement {
   const { community } = useServices();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -27,7 +27,7 @@ function ReviewContent({ id }: { id: string }): ReactElement {
   const review = state.review;
   if (!review) return <EmptyState region="Conteúdo da review" message="Review não encontrada." />;
   return <QueryRegion label="Conteúdo da review" busy={false}><article className="review-card">
-    <CatalogNotice paths={[[ 'reviews', id ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
+    <CatalogNotice paths={[[ 'reviews', String(id) ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
     <h2>Review de <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link></h2>
     <Link to={`/jogos/${encodeRouteId(review.game.id)}`}>{review.game.title}</Link>
     <p><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></p>
@@ -39,6 +39,6 @@ function ReviewContent({ id }: { id: string }): ReactElement {
   </article></QueryRegion>;
 }
 export function ReviewPage(): ReactElement {
-  const id = useOpaqueRouteId('reviewId');
+  const id = useLocalRouteId('reviewId');
   return <main><h1>Review</h1><p>ID da review: {id}</p>{id ? <ReviewContent key={id} id={id} /> : <EmptyState region="Conteúdo da review" message="Review não encontrada." />}</main>;
 }

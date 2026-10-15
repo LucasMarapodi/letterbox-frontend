@@ -14,20 +14,20 @@ async function openProfile(options: { reviews?: ReviewResponse[]; favorites?: Fe
   const transport = vi.fn<FetchTransport>().mockImplementation(withAuthentication(async (url, init) => {
     const path = new URL(url).pathname;
     if (path === '/api/v1/favorites') return options.favorites ? options.favorites(url, init) : Response.json({ games: [wireGame], reviews });
-    if (path === '/api/v1/favorites/review/r%2F1') {
+    if (path === '/api/v1/favorites/review/55') {
       const favorite = { id: 'favorite-review', userId: wireUser.id, targetType: 'review', targetId: wireReview.id };
       if (init.method === 'GET') return Response.json({ favorite: reviews.length ? favorite : null });
       reviews = init.method === 'PUT' ? [wireReview] : [];
       return init.method === 'PUT' ? Response.json(favorite) : new Response(null, { status: 204 });
     }
-    if (path === '/api/v1/reviews/r%2F1') return Response.json(wireReview);
+    if (path === '/api/v1/reviews/55') return Response.json(wireReview);
     if (path.endsWith('/reviews') || path.endsWith('/followers') || path.endsWith('/following') || path.endsWith('/comments')) return Response.json([]);
     return Response.json({ ...wireUser, id: options.profileId ?? wireUser.id });
   }));
   const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
   if (!options.visitor) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[`/perfil/${options.profileId ?? wireUser.id}`]}>
-    <AppRoutes adapters={adapters} /><Link to="/reviews/r%2F1">Abrir review de teste</Link>
+    <AppRoutes adapters={adapters} /><Link to="/reviews/55">Abrir review de teste</Link>
   </MemoryRouter>);
   await screen.findByRole('heading', { name: 'Ana', level: 2 });
   return { interaction: userEvent.setup(), transport };
@@ -43,13 +43,13 @@ test('perfil com reviews favoritas vazias não monta seção, título ou mensage
 });
 
 test.each([1, 2])('perfil mostra seção, conteúdo e links com %i reviews favoritas', async count => {
-  const reviews = Array.from({ length: count }, (_, index) => ({ ...wireReview, id: `review/${index}`, text: `Texto favorito ${index}` }));
+  const reviews = Array.from({ length: count }, (_, index) => ({ ...wireReview, id: index + 1, text: `Texto favorito ${index}` }));
   await openProfile({ reviews });
   const region = await screen.findByRole('region', { name: 'Reviews favoritas' });
   expect(within(region).getByRole('heading', { name: 'Reviews favoritas' })).toBeVisible();
   expect(within(region).getAllByRole('link')).toHaveLength(count);
   for (const [index, link] of within(region).getAllByRole('link').entries()) {
-    expect(link).toHaveAttribute('href', `/reviews/review%2F${index}`);
+    expect(link).toHaveAttribute('href', `/reviews/${index + 1}`);
     expect(within(region).getByText(`Texto favorito ${index}`)).toBeVisible();
   }
 });

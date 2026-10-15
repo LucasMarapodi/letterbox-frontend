@@ -14,20 +14,20 @@ test('comentários públicos e POST com apenas text/Bearer usam DTO validado',as
   const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
   expect(await service.getComments(wireReview.id)).toEqual([wireComment]); expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
   expect(await service.comment(wireReview.id,wireComment.text,{...wireUser,id: 999})).toEqual(wireComment);
-  expect(transport.mock.calls[1][0].endsWith('/reviews/r%2F1/comments')).toBe(true); expect(transport.mock.calls[1][1]).toMatchObject({method:'POST',body:'{"text":"Comentário"}',headers:{Authorization:'Bearer test-only'}});
+  expect(transport.mock.calls[1][0].endsWith('/reviews/55/comments')).toBe(true); expect(transport.mock.calls[1][1]).toMatchObject({method:'POST',body:'{"text":"Comentário"}',headers:{Authorization:'Bearer test-only'}});
 });
 test('visitante/logout não autorizam User forjado; 401 limpa sessão e impede nova escrita',async()=>{
   const session=createHttpSessionStore(); const transport=vi.fn<FetchTransport>().mockResolvedValue(Response.json({code:'unauthorized',message:'Seguro'},{status:401}));
   const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
-  await expect(service.comment('r','texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(transport).not.toHaveBeenCalled();
+  await expect(service.comment(55,'texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(transport).not.toHaveBeenCalled();
   session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
-  await expect(service.comment('r','texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(session.current()).toBeNull();
-  await expect(service.comment('r','texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(transport).toHaveBeenCalledTimes(1);
+  await expect(service.comment(55,'texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(session.current()).toBeNull();
+  await expect(service.comment(55,'texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(transport).toHaveBeenCalledTimes(1);
 });
 test.each([[400,'empty-text'],[404,'not-found']])('POST %s recebe erro tipado',async(status,code)=>{
   const session=createHttpSessionStore();session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
   const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{session,transport:async()=>Response.json({code:status===400?'validation_failed':'not_found',message:'Seguro'},{status})}).community;
-  await expect(service.comment('r','texto',wireUser)).rejects.toMatchObject({code});
+  await expect(service.comment(55,'texto',wireUser)).rejects.toMatchObject({code});
 });
 async function open(status?:number,visitor=false):Promise<{interaction:ReturnType<typeof userEvent.setup>;transport:ReturnType<typeof vi.fn<FetchTransport>>}>{
   let sent=false;
@@ -44,7 +44,7 @@ async function open(status?:number,visitor=false):Promise<{interaction:ReturnTyp
     }
     return Response.json({...wireReview,userId: 2,author:{...wireReview.author,id: 2,displayName:'Outro'}});
   }));
-  const interaction=userEvent.setup();render(<MemoryRouter initialEntries={[visitor?'/reviews/r%2F1':'/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
+  const interaction=userEvent.setup();render(<MemoryRouter initialEntries={[visitor?'/reviews/55':'/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
   if(!visitor){await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await interaction.click(await screen.findByRole('link',{name:'Review de exemplo'}));}
   await screen.findByRole('heading',{name:'Review de Outro'});return {interaction,transport};
 }

@@ -10,7 +10,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = options.userStore?.users ?? structuredClone(options.users ?? userFixtures);
   const comments: Comment[] = structuredClone(options.comments ?? [
-    { id: 'comment-1', reviewId: 'review-1', userId: 2, text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
+    { id: 'comment-1', reviewId: 1, userId: 2, text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
   ]);
   let sequence = 1;
   const favorites: Favorite[] = [];
@@ -35,16 +35,16 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       return structuredClone(reviews.map((review) => {
         const activity = eligible.filter((comment) => comment.reviewId === review.id).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
         return { review: reviewDetails(review), commentCount: activity.length, lastCommentAt: activity[0]?.createdAt ?? '' };
-      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || a.review.id.localeCompare(b.review.id)));
+      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || (a.review.id - b.review.id)));
     },
     async getRecentReviews() {
-      return structuredClone([...reviews].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id)).map(reviewDetails));
+      return structuredClone([...reviews].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || (left.id - right.id)).map(reviewDetails));
     },
     async getFeed(user) {
       if (!user) throw new CommunityError('session-required');
       const followed = new Set(follows.filter((relation) => relation.followerId === user.id).map((relation) => relation.followedId));
       return structuredClone(reviews.filter((review) => followed.has(review.userId))
-        .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id))
+        .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || (left.id - right.id))
         .map((review) => {
           const author = users.find((item) => item.id === review.userId);
           const game = gameFixtures.find((item) => item.id === review.gameId);
@@ -149,8 +149,8 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       if (!user) throw new CommunityError('session-required');
       if (!text.trim()) throw new CommunityError('empty-text');
       if (reviews.some((review) => review.gameId === gameId && review.userId === user.id)) throw new CommunityError('duplicate-review');
-      while (reviews.some((review) => review.id === `mock-review-${sequence}`)) sequence++;
-      const review: Review = { id: `mock-review-${sequence++}`, gameId, userId: user.id, text: text.trim(), createdAt: new Date().toISOString(), updatedAt: null };
+      while (reviews.some((review) => review.id === sequence)) sequence++;
+      const review: Review = { id: sequence++, gameId, userId: user.id, text: text.trim(), createdAt: new Date().toISOString(), updatedAt: null };
       reviews.push(review);
       if (!users.some((item) => item.id === user.id)) users.push(structuredClone(user));
       return structuredClone(review);
@@ -166,7 +166,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     if (!Number.isFinite(value) || value < 0 || value > 5) throw new CommunityError('invalid-rating');
     let rating = ratings.find((item) => item.gameId === gameId && item.userId === user.id);
     if (rating) rating.value = value;
-    else { rating = { id: `mock-rating-${ratings.length + 1}`, gameId, userId: user.id, value }; ratings.push(rating); }
+    else { rating = { id: ratings.length + 1, gameId, userId: user.id, value }; ratings.push(rating); }
     return structuredClone(rating);
   } };
 }

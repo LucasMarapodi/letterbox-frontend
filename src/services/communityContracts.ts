@@ -1,4 +1,4 @@
-import type { Id, UserId, GameId, Rating, User, Review, Comment, Favorite, Game } from '../models';
+import type { ReviewId, UserId, GameId, Rating, User, Review, Comment, Favorite, Game } from '../models';
 import type { GameOpinions, PublicReview } from './contracts';
 export interface ReviewDetails extends PublicReview { game: { id: GameId; title: string }; }
 export interface PublicComment extends Comment { author: Pick<User, 'id' | 'displayName' | 'avatarUrl'>; }
@@ -24,16 +24,16 @@ export interface CommunityService {
   isFollowing(targetId: UserId, user: User | null): Promise<boolean>;
   setFollowing(targetId: UserId, selected: boolean, user: User | null): Promise<void | boolean>;
   getFavorites(user: User | null): Promise<FavoriteLists>;
-  getFavorite(kind: FavoriteKind, targetId: Id | GameId, user: User | null): Promise<Favorite | null>;
-  setFavorite(kind: FavoriteKind, targetId: Id | GameId, selected: boolean, user: User | null): Promise<Favorite | null>;
+  getFavorite(kind: FavoriteKind, targetId: ReviewId | GameId, user: User | null): Promise<Favorite | null>;
+  setFavorite(kind: FavoriteKind, targetId: ReviewId | GameId, selected: boolean, user: User | null): Promise<Favorite | null>;
   getProfile(id: UserId, sessionUser?: User | null): Promise<PublicProfile | null>;
   rate(gameId: GameId, value: number, user: User | null): Promise<Rating>;
   getRating(gameId: GameId, user: User | null): Promise<Rating | null>;
   publish(gameId: GameId, text: string, user: User | null): Promise<Review>;
   findOwnReview(gameId: GameId, user: User): Promise<Review | null>;
   getOpinions(gameId: GameId): Promise<GameOpinions>;
-  getReview(id: Id): Promise<ReviewDetails | null>;
-  editReview(id: Id, text: string, user: User | null): Promise<Review>;
-  getComments(reviewId: Id): Promise<PublicComment[]>;
-  comment(reviewId: Id, text: string, user: User | null): Promise<Comment>;
+  getReview(id: ReviewId): Promise<ReviewDetails | null>;
+  editReview(id: ReviewId, text: string, user: User | null): Promise<Review>;
+  getComments(reviewId: ReviewId): Promise<PublicComment[]>;
+  comment(reviewId: ReviewId, text: string, user: User | null): Promise<Comment>;
 }

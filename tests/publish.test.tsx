@@ -56,12 +56,12 @@ test('formulário rejeita espaços sem envio e preserva texto quando envio falha
 });
 test('publicação válida aparece e encaminha para edição', async () => {
   vi.spyOn(community, 'findOwnReview').mockResolvedValue(null);
-  vi.spyOn(community, 'publish').mockResolvedValue({ id: 'nova', gameId: 1, userId: author.id, text: 'Opinião nova', createdAt: '2026-01-01', updatedAt: null });
+  vi.spyOn(community, 'publish').mockResolvedValue({ id: 99, gameId: 1, userId: author.id, text: 'Opinião nova', createdAt: '2026-01-01', updatedAt: null });
   const interaction = await openGame();
   await interaction.type(await screen.findByLabelText('Sua review'), 'Opinião nova');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   expect(await screen.findByText('Review publicada.')).toBeVisible();
-  expect(screen.getByRole('link', { name: 'Editar minha review' })).toHaveAttribute('href', '/reviews/nova');
+  expect(screen.getByRole('link', { name: 'Editar minha review' })).toHaveAttribute('href', '/reviews/99');
 });
 test('visitante não tem formulário de publicação', async () => {
   render(<MemoryRouter initialEntries={['/jogos/1']}><AppRoutes /></MemoryRouter>);

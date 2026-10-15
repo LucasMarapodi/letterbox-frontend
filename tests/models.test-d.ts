@@ -15,9 +15,9 @@ test('representa usuários e jogos com contratos provisórios verificáveis', ()
 });
 
 test('representa notas, reviews e comentários sem exigir nota junto à review', () => {
-  const rating = { id: 'rating-1', userId: 1, gameId: 1, value: 0 } satisfies Rating;
-  const review = { id: 'review-1', userId: 1, gameId: 1, text: 'Gostei.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null } satisfies Review;
-  const comment = { id: 'comment-1', userId: 2, reviewId: 'review-1', text: 'Concordo.', createdAt: '2026-01-02T00:00:00Z' } satisfies Comment;
+  const rating = { id: 1, userId: 1, gameId: 1, value: 0 } satisfies Rating;
+  const review = { id: 1, userId: 1, gameId: 1, text: 'Gostei.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null } satisfies Review;
+  const comment = { id: 'comment-1', userId: 2, reviewId: 1, text: 'Concordo.', createdAt: '2026-01-02T00:00:00Z' } satisfies Comment;
   expectTypeOf(rating).toExtend<Rating>();
   expectTypeOf(review).toExtend<Review>();
   expectTypeOf(comment).toExtend<Comment>();
@@ -25,8 +25,8 @@ test('representa notas, reviews e comentários sem exigir nota junto à review',
   const invalidRating: Rating = { ...rating, value: '5' };
   // @ts-expect-error Texto da review deve ser string.
   const invalidReview: Review = { ...review, text: null };
-  // @ts-expect-error Comentário pertence a uma review por identificador string.
-  const invalidComment: Comment = { ...comment, reviewId: 42 };
+  // @ts-expect-error Comentário pertence a uma review por identificador numérico.
+  const invalidComment: Comment = { ...comment, reviewId: '42' };
   void invalidRating;
   void invalidReview;
   void invalidComment;
@@ -34,8 +34,8 @@ test('representa notas, reviews e comentários sem exigir nota junto à review',
 
 test('distingue favoritos e os dois eventos de notificação previstos', () => {
   const gameFavorite = { id: 'favorite-1', userId: 1, targetType: 'game', targetId: 1 } satisfies Favorite;
-  const reviewFavorite = { ...gameFavorite, id: 'favorite-2', targetType: 'review', targetId: 'review-1' } satisfies Favorite;
-  const reviewNotification = { id: 'notification-1', userId: 1, actorId: 2, type: 'new-review', reviewId: 'review-1', createdAt: '2026-01-01T00:00:00Z', read: false } satisfies Notification;
+  const reviewFavorite = { ...gameFavorite, id: 'favorite-2', targetType: 'review', targetId: 1 } satisfies Favorite;
+  const reviewNotification = { id: 'notification-1', userId: 1, actorId: 2, type: 'new-review', reviewId: 1, createdAt: '2026-01-01T00:00:00Z', read: false } satisfies Notification;
   const commentNotification = { ...reviewNotification, type: 'review-comment', commentId: 'comment-1' } satisfies Notification;
   expectTypeOf(gameFavorite).toExtend<Favorite>();
   expectTypeOf(reviewFavorite).toExtend<Favorite>();

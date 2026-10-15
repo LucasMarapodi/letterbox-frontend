@@ -32,8 +32,8 @@ interface QueryCase { route: string; endpoint: string; region: string; authentic
 const cases: QueryCase[] = [
   { route: '/', endpoint: '/games', region: 'Jogos' },
   { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}`, region: 'Informações do jogo' },
-  { route: '/reviews/review', endpoint: '/reviews/review', region: 'Conteúdo da review' },
-  { route: '/reviews/review', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}/comments`, region: 'Comentários' },
+  { route: '/reviews/55', endpoint: '/reviews/55', region: 'Conteúdo da review' },
+  { route: '/reviews/55', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}/comments`, region: 'Comentários' },
   { route: profileRoute, endpoint: `/users/${encodeURIComponent(wireUser.id)}`, region: 'Informações do perfil' },
   { route: '/', endpoint: '/dashboard', region: 'Seu dashboard', authenticated: true },
   { route: '/', endpoint: '/feed/following', region: 'Feed de reviews', authenticated: true, action: 'Atualizar feed' },
@@ -75,8 +75,8 @@ test('nova consulta de opiniões esconde resultado anterior antes de receber res
 test('comentários: troca de alvo ignora resposta anterior e desmontagem ignora retorno pendente', async () => {
   const old = deferred<Response>(); const latest = deferred<Response>();
   const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: async (url) => url.includes('/antiga/') ? old.promise : latest.promise });
-  const view = render(<MemoryRouter><ServiceProvider value={adapters}><CommentsSection reviewId="antiga" /></ServiceProvider></MemoryRouter>);
-  view.rerender(<MemoryRouter><ServiceProvider value={adapters}><CommentsSection reviewId="atual" /></ServiceProvider></MemoryRouter>);
+  const view = render(<MemoryRouter><ServiceProvider value={adapters}><CommentsSection reviewId={1} /></ServiceProvider></MemoryRouter>);
+  view.rerender(<MemoryRouter><ServiceProvider value={adapters}><CommentsSection reviewId={2} /></ServiceProvider></MemoryRouter>);
   await act(async () => { old.resolve(Response.json([])); await old.promise; });
   expect(screen.getByRole('region', { name: 'Comentários' })).toHaveAttribute('aria-busy', 'true');
   expect(screen.queryByText('Nenhum comentário nesta review.')).not.toBeInTheDocument();

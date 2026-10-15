@@ -1,9 +1,11 @@
 /** Identificador opaco retornado pela API. */
 export type Id = string;
-/** PK local de usuário/jogo gerada pelo PostgreSQL (int positivo). */
+/** PK local gerada pelo PostgreSQL (int positivo). */
 export type LocalId = number;
 export type UserId = LocalId;
 export type GameId = LocalId;
+export type ReviewId = LocalId;
+export type RatingId = LocalId;
 export function isLocalId(value: unknown): value is LocalId {
   return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 2_147_483_647;
 }
@@ -32,7 +34,7 @@ export interface Game {
 }
 
 export interface Rating {
-  id: Id;
+  id: RatingId;
   userId: UserId;
   gameId: GameId;
   /** Faixa do produto: 0–5. Incrementos e validação pertencem às US futuras. */
@@ -40,7 +42,7 @@ export interface Rating {
 }
 
 export interface Review {
-  id: Id;
+  id: ReviewId;
   userId: UserId;
   gameId: GameId;
   text: string;
@@ -51,7 +53,7 @@ export interface Review {
 export interface Comment {
   id: Id;
   userId: UserId;
-  reviewId: Id;
+  reviewId: ReviewId;
   text: string;
   createdAt: DateTime;
 }
@@ -60,14 +62,14 @@ export interface Favorite {
   id: Id;
   userId: UserId;
   targetType: 'game' | 'review';
-  targetId: GameId | Id;
+  targetId: GameId | ReviewId;
 }
 
 interface NotificationBase {
   id: Id;
   userId: UserId;
   actorId: UserId;
-  reviewId: Id;
+  reviewId: ReviewId;
   createdAt: DateTime;
   read: boolean;
 }
