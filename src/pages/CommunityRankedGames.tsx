@@ -11,10 +11,11 @@ export function CommunityRankedGames({ period }: { period: RankingPeriod }): Rea
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
+    setState({ status: 'loading' });
     void community.getGamesInDiscussion(period).then((items) => { if (active) setState({ status: 'ready', items }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [community, period, attempt]);
-  return <section aria-label="Jogos em discussão"><h2>Jogos em discussão</h2>
+  return <section aria-label="Jogos em discussão" aria-busy={state.status === 'loading'}><h2>Jogos em discussão</h2>
     {state.status === 'ready' && <CatalogNotice paths={[['community', 'games', 'in-discussion']]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'loading' && <LoadingState message="Carregando jogos em discussão…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar os jogos em discussão." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}

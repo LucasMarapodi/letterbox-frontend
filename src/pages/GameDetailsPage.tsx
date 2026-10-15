@@ -26,13 +26,15 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   const { games } = useServices();
   const [state, setState] = useState<GameState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
+  const [refreshing, setRefreshing] = useState(false);
   const [opinionsVersion, setOpinionsVersion] = useState(0);
   const [reviewsVersion, setReviewsVersion] = useState(0);
   useEffect(() => {
     let active: boolean = true;
+    setRefreshing(true);
     games.getById(id).then(
-      (game) => { if (active) setState({ status: 'ready', game }); },
-      () => { if (active) setState({ status: 'error' }); },
+      (game) => { if (active) { setState({ status: 'ready', game }); setRefreshing(false); } },
+      () => { if (active) { setState({ status: 'error' }); setRefreshing(false); } },
     );
     return () => { active = false; };
   }, [id, attempt]);
@@ -42,12 +44,14 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     setAttempt((previous) => previous + 1);
   }
 
-  if (state.status === 'loading') return <LoadingState message="Carregando jogo…" />;
-  if (state.status === 'error') return <ErrorState message="Não foi possível carregar o jogo." onRetry={retry} />;
+  if (state.status === 'loading') return <LoadingState region="Informações do jogo" message="Carregando jogo…" />;
+  if (state.status === 'error') return <ErrorState region="Informações do jogo" message="Não foi possível carregar o jogo." onRetry={retry} />;
   const game: Game | null = state.game;
-  if (!game) return <EmptyState message="Jogo não encontrado." />;
+  if (!game) return <EmptyState region="Informações do jogo" message="Jogo não encontrado." />;
   return <section className="game-information" aria-labelledby="game-title">
     <CatalogNotice paths={[[ 'games', id ], ['games', id, 'opinions'], ['games', id, 'reviews']]} onRetry={retry} />
+    <div className="game-facts" role="region" aria-label="Informações do jogo" aria-busy={refreshing}>
+    {refreshing ? <LoadingState message="Carregando informações do jogo…" /> : <>
     <aside className="game-poster" aria-label="Capa do jogo">
       <GameCover title={game.title} src={game.coverUrl} className="details-cover" />
     </aside>
@@ -59,6 +63,8 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
       <dt>Plataformas</dt><dd>{game.platforms.length ? game.platforms.join(', ') : 'Plataformas não informadas.'}</dd>
       <dt>Lançamento</dt><dd>{releaseLabel(game.releaseDate)}</dd>
     </dl>
+    </div>
+    </>}
     </div>
     <aside className="game-actions" aria-label="Avaliar e publicar">
     <FavoriteButton kind="game" targetId={id} />
@@ -76,6 +82,6 @@ export function GameDetailsPage(): ReactElement {
   return <main className="game-details-page">
     <h1 className="game-page-label">Detalhes do jogo</h1>
     <p className="game-id">ID do jogo: {id}</p>
-    {id ? <GameDetailsContent key={id} id={id} /> : <EmptyState message="Jogo não encontrado." />}
+    {id ? <GameDetailsContent key={id} id={id} /> : <EmptyState region="Informações do jogo" message="Jogo não encontrado." />}
   </main>;
 }

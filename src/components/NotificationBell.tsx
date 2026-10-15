@@ -6,7 +6,7 @@ import type { NotificationItem } from '../services/notificationContracts';
 import { useSession } from '../session/SessionProvider';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { Avatar } from './Avatar';
-import { EmptyState, ErrorState, LoadingState } from './Feedback';
+import { EmptyState, ErrorState, LoadingState, QueryRegion } from './Feedback';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NotificationItem[] };
 function NotificationModal({ onClose, trigger }: { onClose: () => void; trigger: HTMLButtonElement | null }): ReactElement {
@@ -40,16 +40,19 @@ function NotificationModal({ onClose, trigger }: { onClose: () => void; trigger:
   }, [onClose, trigger]);
   useEffect(() => {
     let active = true;
+    setState({ status: 'loading' });
     void notifications.list(user).then((items) => { if (active) setState({ status: 'ready', items }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [user, attempt]);
   return createPortal(<div className="modal-backdrop"><section ref={dialogRef} className="notification-modal" role="dialog" aria-modal="true" aria-labelledby="notifications-title">
     <div className="modal-heading"><h2 id="notifications-title">Notificações</h2><button ref={closeRef} type="button" aria-label="Fechar notificações" onClick={onClose}>×</button></div>
+    <QueryRegion label="Dados de notificações" busy={state.status === 'loading'}>
     {state.status === 'loading' && <LoadingState message="Carregando notificações…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar as notificações." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'ready' && (state.items.length ? <ul className="notification-list">{state.items.map((item) => <li key={item.id}>
       <Link to={`/reviews/${encodeRouteId(item.reviewId)}`} onClick={onClose}><Avatar name={item.actor.displayName} src={item.actor.avatarUrl} /><div><span>{item.actor.displayName} {item.type === 'new-review' ? 'publicou uma nova review' : 'comentou na sua review'}</span><time dateTime={item.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }).format(new Date(item.createdAt))}</time></div></Link>
     </li>)}</ul> : <EmptyState message="Nenhuma notificação." />)}
+    </QueryRegion>
   </section></div>, document.body);
 }
 function SessionBell(): ReactElement {
@@ -64,4 +67,3 @@ export function NotificationBell(): ReactElement | null {
   const { user } = useSession();
   return user ? <SessionBell key={user.id} /> : null;
 }
-

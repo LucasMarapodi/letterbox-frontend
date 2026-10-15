@@ -217,3 +217,4 @@ button:hover:not(:disabled) { background: #90e8bb; }
 @media (max-width: 700px) { .favorites-sections { grid-template-columns: 1fr; } }
 .catalog-pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; padding: 1rem; border: 1px solid #33464b; border-radius: 1.5rem; }
 .catalog-notice { border: 1px solid #796849; background: #252c25; color: #e2d0a3; border-radius: 1rem; padding: 0.8rem 1rem; margin: 1rem 0; grid-column: 1 / -1; }
+.game-facts { display: contents; } .game-facts > [role="status"] { grid-column: 1 / 3; }

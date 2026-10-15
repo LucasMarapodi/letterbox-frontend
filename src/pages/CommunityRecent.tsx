@@ -11,10 +11,11 @@ export function CommunityRecent(): ReactElement {
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
+    setState({ status: 'loading' });
     void community.getRecentReviews().then((reviews) => { if (active) setState({ status: 'ready', reviews }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [community, attempt]);
-  return <section aria-label="Reviews recentes"><h2>Reviews recentes</h2>
+  return <section aria-label="Reviews recentes" aria-busy={state.status === 'loading'}><h2>Reviews recentes</h2>
     {state.status === 'ready' && <CatalogNotice paths={[['community', 'reviews', 'recent']]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'loading' && <LoadingState message="Carregando reviews recentes…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar as reviews recentes." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}

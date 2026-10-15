@@ -11,10 +11,11 @@ export function CommunityRankedReviews({ period }: { period: RankingPeriod }): R
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
+    setState({ status: 'loading' });
     void community.getMostCommented(period).then((items) => { if (active) setState({ status: 'ready', items }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [community, period, attempt]);
-  return <section aria-label="Reviews mais comentadas"><h2>Reviews mais comentadas</h2>
+  return <section aria-label="Reviews mais comentadas" aria-busy={state.status === 'loading'}><h2>Reviews mais comentadas</h2>
     {state.status === 'ready' && <CatalogNotice paths={[['community', 'reviews', 'most-commented']]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'loading' && <LoadingState message="Carregando reviews mais comentadas…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar as reviews mais comentadas." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
