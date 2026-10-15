@@ -9,24 +9,24 @@ import { GameCard } from './GameCard';
 import { EmptyState, ErrorState, LoadingState } from './Feedback';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; lists: FavoriteLists };
-export function FavoritesSections({ initialLists }: { initialLists?: FavoriteLists } = {}): ReactElement | null {
+export function FavoritesSections(): ReactElement | null {
   const { community } = useServices();
   const { user } = useSession();
-  const [state, setState] = useState<State>(() => initialLists ? { status: 'ready', lists: initialLists } : { status: 'loading' });
+  const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
-    if (user && initialLists === undefined) {
+    if (user) {
       setState({ status: 'loading' });
       void community.getFavorites(user).then((lists) => { if (active) setState({ status: 'ready', lists }); }, () => { if (active) setState({ status: 'error' }); });
     }
     return () => { active = false; };
-  }, [user, attempt, initialLists]);
+  }, [user, attempt]);
   if (!user) return null;
   if (state.status === 'loading') return <LoadingState region="Favoritos" message="Carregando favoritos…" />;
   if (state.status === 'error') return <ErrorState region="Favoritos" message="Não foi possível carregar os favoritos." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
   return <div className="favorites-sections" role="region" aria-label="Favoritos" aria-busy={false}>
-    {initialLists === undefined && <CatalogNotice paths={[[ 'favorites' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
+    <CatalogNotice paths={[[ 'favorites' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
     <section aria-label="Jogos favoritos"><h2>Jogos favoritos</h2>
       {state.lists.games.length ? <div className="game-grid">{state.lists.games.map((game) => <GameCard key={game.id} game={game} />)}</div> : <EmptyState message="Nenhum jogo favorito." />}
     </section>

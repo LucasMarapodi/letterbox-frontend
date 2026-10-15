@@ -2,7 +2,6 @@ import { useEffect, useState, type ReactElement } from 'react';
 import type { PersonalDashboard } from '../services/dashboardContracts';
 import { useServices } from '../services/ServiceProvider';
 import { HomePage } from './HomePage';
-import { FavoritesSections } from '../components/FavoritesSections';
 import { FeedSection } from '../components/FeedSection';
 import { LoadingState, ErrorState, QueryRegion } from '../components/Feedback';
 import { CatalogNotice } from '../components/CatalogNotice';
@@ -17,9 +16,9 @@ export function DashboardHome(): ReactElement {
     if (dashboard) void dashboard.get().then((data) => { if (active) setState({ status: 'ready', data }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [dashboard, attempt]);
-  return <HomePage authenticated favorites={<QueryRegion label="Seu dashboard" busy={state.status === 'loading'}>
+  return <HomePage authenticated feed={<QueryRegion label="Seu dashboard" busy={state.status === 'loading'}>
     {state.status === 'loading' && <LoadingState message="Carregando seu dashboard…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar seu dashboard." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
-    {state.status === 'ready' && <><CatalogNotice paths={[[ 'dashboard' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} /><FavoritesSections initialLists={state.data.favorites} /><FeedSection initialReviews={state.data.feed} /></>}
+    {state.status === 'ready' && <><CatalogNotice paths={[[ 'dashboard' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} /><FeedSection initialReviews={state.data.feed} /></>}
   </QueryRegion>} />;
 }

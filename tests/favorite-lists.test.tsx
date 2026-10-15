@@ -18,6 +18,7 @@ async function login(): Promise<ReturnType<typeof userEvent.setup>> {
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByRole('link', { name: 'Review de exemplo' });
+  await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
   return interaction;
 }
 test('consulta separa tipos, isola usuários, clona dados e reflete remoção', async () => {
@@ -36,7 +37,7 @@ test('consulta separa tipos, isola usuários, clona dados e reflete remoção', 
   expect(await service.getFavorites(ana)).toEqual({ games: [], reviews: [] });
   await expect(service.getFavorites(null)).rejects.toMatchObject({ code: 'session-required' });
 });
-test('Home e próprio perfil mostram tipos separados com destinos corretos', async () => {
+test('próprio perfil mostra tipos separados com destinos corretos', async () => {
   const service = createMockCommunityService();
   await service.setFavorite('game', 1, true, ana);
   await service.setFavorite('review', 'review-2', true, ana);
@@ -56,6 +57,8 @@ test('consulta novamente após remoção e apresenta vazio', async () => {
   vi.spyOn(community, 'getFavorites').mockImplementation(service.getFavorites);
   const interaction = await login();
   await screen.findByRole('region', { name: 'Jogos favoritos' });
+  await interaction.click(screen.getByRole('link', { name: 'Outro perfil' }));
+  await screen.findByRole('heading', { name: 'Leo' });
   await service.setFavorite('game', 1, false, ana);
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
   expect(await screen.findByText('Nenhum jogo favorito.')).toBeVisible();

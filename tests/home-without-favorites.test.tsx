@@ -10,8 +10,8 @@ import { wireGame, wirePage, wireReview, wireUser, withAuthentication } from './
 
 function expectNoFavorites(): void {
   for (const name of ['Favoritos', 'Jogos favoritos', 'Reviews favoritas']) {
-    expect(screen.queryByRole('region', { name, exact: true })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name, exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name })).not.toBeInTheDocument();
   }
   for (const text of ['Carregando favoritos…', 'Não foi possível carregar os favoritos.', 'Nenhum jogo favorito.', 'Nenhuma review favorita.']) {
     expect(screen.queryByText(text)).not.toBeInTheDocument();
@@ -41,10 +41,10 @@ async function open(options: { dashboard: boolean; login?: boolean; empty?: bool
   if (options.login) {
     await interaction.type(screen.getByLabelText('E-mail', { exact: true }), 'test@example.test');
     await interaction.type(screen.getByLabelText('Senha', { exact: true }), 'test-only');
-    await interaction.click(screen.getByRole('button', { name: 'Entrar', exact: true }));
+    await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   }
   await screen.findByRole('link', { name: 'Meu perfil' });
-  await within(await screen.findByRole('region', { name: 'Jogos', exact: true })).findByRole('link', { name: wireGame.title });
+  await within(await screen.findByRole('region', { name: 'Jogos' })).findByRole('link', { name: wireGame.title });
   return { interaction, transport };
 }
 
@@ -86,10 +86,10 @@ test.each([true, false])('busca, ordenação, paginação e atualização do fee
   const { interaction, transport } = await open({ dashboard });
   await screen.findByRole('button', { name: 'Atualizar feed' });
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'aventura');
-  await interaction.click(screen.getByRole('button', { name: 'Buscar', exact: true }));
-  await within(screen.getByRole('region', { name: 'Jogos', exact: true })).findByRole('link', { name: wireGame.title });
+  await interaction.click(screen.getByRole('button', { name: 'Buscar' }));
+  await within(screen.getByRole('region', { name: 'Jogos' })).findByRole('link', { name: wireGame.title });
   await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
-  await within(screen.getByRole('region', { name: 'Jogos', exact: true })).findByRole('link', { name: wireGame.title });
+  await within(screen.getByRole('region', { name: 'Jogos' })).findByRole('link', { name: wireGame.title });
   await interaction.click(screen.getByRole('button', { name: 'Próxima' }));
   expect(await screen.findByText('Página 2')).toBeVisible();
   const lastCatalogCall = transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/games').at(-1);
