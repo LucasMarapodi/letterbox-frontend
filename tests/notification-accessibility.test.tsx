@@ -82,7 +82,7 @@ test('troca de conta fecha modal e ignora resposta da conta anterior', async () 
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   await interaction.click(screen.getByRole('button', { name: 'Notificações' }));
   expect(await within(screen.getByRole('dialog')).findByText('Nenhuma notificação.')).toBeVisible();
-  await act(async () => { pending.resolve([{ id: 'old', userId: 1, actorId: 2, reviewId: 1, createdAt: '2026-01-01T12:00:00Z', type: 'new-review', actor: { id: 2, displayName: 'Evento antigo', avatarUrl: null } }]); await pending.promise; });
+  await act(async () => { pending.resolve([{ id: 1, userId: 1, actorId: 2, reviewId: 1, createdAt: '2026-01-01T12:00:00Z', type: 'new-review', actor: { id: 2, displayName: 'Evento antigo', avatarUrl: null } }]); await pending.promise; });
   expect(screen.queryByText(/Evento antigo/)).not.toBeInTheDocument();
   expect(notifications.list).toHaveBeenLastCalledWith(userFixtures[1]);
 });

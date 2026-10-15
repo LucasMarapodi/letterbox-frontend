@@ -15,4 +15,4 @@ export const wireReview: ReviewResponse = { id: 55, userId: wireUser.id, gameId:
 export const wireComment: CommentResponse = { id: 81, userId: wireUser.id, reviewId: wireReview.id, parentCommentId: null, likeCount: 0, text: 'Comentário', createdAt: wireReview.createdAt, author: wireReview.author };
 export const wireRating: RatingResponse = { id: 77, userId: wireUser.id, gameId: wireGame.id, value: 0 };
 export const wireFavorite: FavoriteResponse = { id: 91, userId: wireUser.id, targetType: 'game', targetId: wireGame.id };
-export const wireNotification: NotificationResponse = { id: 'n', userId: 2, actorId: wireUser.id, reviewId: wireReview.id, createdAt: wireReview.createdAt, actor: wireReview.author, type: 'new-review' };
+export const wireNotification: NotificationResponse = { id: 91, userId: 2, actorId: wireUser.id, reviewId: wireReview.id, createdAt: wireReview.createdAt, actor: wireReview.author, type: 'new-review' };
