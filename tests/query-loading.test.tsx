@@ -9,6 +9,7 @@ import { wireGame, wirePage, wireReview, wireUser } from './http-fixtures';
 import { deferred } from './fixtures';
 import { ServiceProvider } from '../src/services/ServiceProvider';
 import { GameOpinionsSection } from '../src/pages/GameOpinionsSection';
+import { CommentsSection } from '../src/pages/CommentsSection';
 
 function body(path: string): unknown {
   if (path.endsWith('/auth/login')) return { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' };
@@ -35,6 +36,7 @@ const cases: QueryCase[] = [
   { route: '/reviews/review', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}/comments`, region: 'Comentários' },
   { route: profileRoute, endpoint: `/users/${encodeURIComponent(wireUser.id)}`, region: 'Informações do perfil' },
   { route: '/', endpoint: '/dashboard', region: 'Seu dashboard', authenticated: true },
+  { route: '/', endpoint: '/feed/following', region: 'Feed de reviews', authenticated: true, action: 'Atualizar feed' },
   { route: profileRoute, endpoint: '/favorites', region: 'Favoritos', authenticated: true },
   { route: profileRoute, endpoint: `/users/${encodeURIComponent(wireUser.id)}/followers`, region: 'Conexões' },
   { route: '/comunidade', endpoint: '/community/reviews/recent', region: 'Reviews recentes' },
@@ -42,8 +44,9 @@ const cases: QueryCase[] = [
   { route: '/comunidade', endpoint: '/community/games/in-discussion', region: 'Jogos em discussão', action: 'Jogos em discussão' },
   { route: '/', endpoint: '/notifications', region: 'Dados de notificações', authenticated: true, action: 'Notificações' },
   { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/rating/me`, region: 'Nota pessoal', authenticated: true },
-  { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/reviews/me`, region: 'Sua review', authenticated: true },
+  { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/reviews/me`, region: 'Consulta da sua review', authenticated: true },
   { route: gameRoute, endpoint: `/favorites/game/${encodeURIComponent(wireGame.id)}`, region: 'Favorito pessoal', authenticated: true },
+  { route: '/perfil/outro', endpoint: '/users/outro/follow/me', region: 'Relação pessoal', authenticated: true },
 ];
 test.each(cases)('região $region anuncia pendência e não fica busy após resposta', async ({ route, endpoint, region, authenticated, action }) => {
   const pending = deferred<Response>();
@@ -57,6 +60,29 @@ test.each(cases)('região $region anuncia pendência e não fica busy após resp
   expect(area.querySelector('[role="status"]')).not.toBeNull();
   await act(async () => { pending.resolve(Response.json(body(`/api/v1${endpoint}`))); await pending.promise; });
   await waitFor(() => expect(screen.getByRole('region', { name: region })).toHaveAttribute('aria-busy', 'false'));
+});
+test('nova consulta de opiniões esconde resultado anterior antes de receber resposta', async () => {
+  const pending = deferred<Response>();
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: async (url) => url.includes('/primeiro/') ? Response.json({ averageRating: 4, reviews: [] }) : pending.promise });
+  const view = render(<MemoryRouter><ServiceProvider value={adapters}><GameOpinionsSection gameId="primeiro" /></ServiceProvider></MemoryRouter>);
+  await screen.findByText('Nota média: 4 de 5');
+  view.rerender(<MemoryRouter><ServiceProvider value={adapters}><GameOpinionsSection gameId="segundo" /></ServiceProvider></MemoryRouter>);
+  expect(screen.queryByText('Nota média: 4 de 5')).not.toBeInTheDocument();
+  expect(screen.getByText('Carregando avaliações…')).toBeVisible();
+  await act(async () => { pending.resolve(Response.json({ averageRating: null, reviews: [] })); await pending.promise; });
+  expect(await screen.findByText('Ainda sem avaliações.')).toBeVisible();
+});
+test('comentários: troca de alvo ignora resposta anterior e desmontagem ignora retorno pendente', async () => {
+  const old = deferred<Response>(); const latest = deferred<Response>();
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: async (url) => url.includes('/antiga/') ? old.promise : latest.promise });
+  const view = render(<MemoryRouter><ServiceProvider value={adapters}><CommentsSection reviewId="antiga" /></ServiceProvider></MemoryRouter>);
+  view.rerender(<MemoryRouter><ServiceProvider value={adapters}><CommentsSection reviewId="atual" /></ServiceProvider></MemoryRouter>);
+  await act(async () => { old.resolve(Response.json([])); await old.promise; });
+  expect(screen.getByRole('region', { name: 'Comentários' })).toHaveAttribute('aria-busy', 'true');
+  expect(screen.queryByText('Nenhum comentário nesta review.')).not.toBeInTheDocument();
+  view.unmount();
+  await act(async () => { latest.resolve(Response.json([])); await latest.promise; });
+  expect(screen.queryByRole('region', { name: 'Comentários' })).not.toBeInTheDocument();
 });
 test('atualização de reviews esconde lista/vazio anterior; média é independente', async () => {
   const pending = deferred<Response>();
