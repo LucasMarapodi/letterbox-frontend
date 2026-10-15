@@ -59,7 +59,8 @@ test('consulta novamente após remoção e apresenta vazio', async () => {
   await service.setFavorite('game', 1, false, ana);
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
   expect(await screen.findByText('Nenhum jogo favorito.')).toBeVisible();
-  expect(screen.getByText('Nenhuma review favorita.')).toBeVisible();
+  expect(screen.queryByRole('region', { name: 'Reviews favoritas' })).not.toBeInTheDocument();
+  expect(screen.queryByText('Nenhuma review favorita.')).not.toBeInTheDocument();
 });
 test('perfil de terceiros e visitantes não expõem favoritos', async () => {
   const get = vi.spyOn(community, 'getFavorites').mockResolvedValue({ games: [], reviews: [] });
