@@ -21,7 +21,7 @@ async function open(status?:number,other=false){
       profile={...wireUser,displayName:'Ana atualizada',bio:'Nova bio',avatarUrl:null};return Response.json(profile);
     }
     if(url.endsWith('/reviews')||url.endsWith('/followers')||url.endsWith('/following'))return Response.json([]);
-    return Response.json(other?{...profile,id:'other'}:profile);
+    return Response.json(other?{...profile,id: 2}:profile);
   }));
   const interaction=userEvent.setup();render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport})}/></MemoryRouter>);
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await interaction.click(await screen.findByRole('link',{name:other?'Perfil de exemplo':'Meu perfil'}));await screen.findByRole('heading',{name:'Ana',level:2});return {interaction,transport};

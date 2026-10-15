@@ -37,7 +37,7 @@ export function RegisterPage(): ReactElement {
       setPassword('');
       navigate('/login', { replace: true, state: { registrationComplete: true } });
     } catch (error: unknown) {
-      setFeedback({ status: 'error', message: error instanceof AuthError && error.code === 'duplicate-email'
+      setFeedback({ status: 'error', message: error instanceof AuthError && error.code === 'storage-unavailable' ? 'O armazenamento está temporariamente indisponível. Tente novamente.' : error instanceof AuthError && error.code === 'duplicate-email'
         ? 'Este e-mail já está cadastrado.' : error instanceof AuthError && error.code === 'invalid-fields' ? 'Os dados do cadastro são inválidos. Confira os campos.' : 'Não foi possível criar a conta. Tente novamente.' });
     } finally { sending.current = false; }
   }
@@ -58,4 +58,3 @@ export function RegisterPage(): ReactElement {
     <p>Já tem conta? <Link to="/login">Entrar</Link></p>
   </main>;
 }
-

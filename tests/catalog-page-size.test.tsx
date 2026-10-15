@@ -11,7 +11,7 @@ import { deferred } from './fixtures';
 
 function pageFor(query: URLSearchParams, count = 1): GamePageResponse {
   const page = Number(query.get('page') ?? 1);
-  return { items: Array.from({ length: count }, (_, index) => ({ ...wireGame, id: `igdb-${index}`, title: `Jogo ${index}` })), page, pageSize: Number(query.get('pageSize') ?? 20), hasNextPage: page < 3 };
+  return { items: Array.from({ length: count }, (_, index) => ({ ...wireGame, id: index + 1, title: `Jogo ${index}` })), page, pageSize: Number(query.get('pageSize') ?? 20), hasNextPage: page < 3 };
 }
 async function open(authenticated = false, respond: (query: URLSearchParams) => Promise<Response> = async query => Response.json(pageFor(query))) {
   const transport = vi.fn<FetchTransport>().mockImplementation(withAuthentication(async url => {

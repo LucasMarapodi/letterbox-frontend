@@ -7,7 +7,7 @@ import { AuthError, type AuthService } from '../src/services/authContracts';
 import type { User } from '../src/models';
 import { deferred } from './fixtures';
 
-const user: User = { id: 'new-user', displayName: 'Nova Pessoa', username: 'mock-user', avatarUrl: null, bio: '' };
+const user: User = { id: 3, displayName: 'Nova Pessoa', username: 'mock-user', avatarUrl: null, bio: '' };
 function renderRegister(register: AuthService['register']): void {
   const authService: AuthService = { register, login: vi.fn<AuthService['login']>().mockResolvedValue(user) };
   render(<MemoryRouter initialEntries={['/cadastro']}><AppRoutes authService={authService} /></MemoryRouter>);

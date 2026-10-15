@@ -22,7 +22,7 @@ export function FoundationPreview({ gameService = services.games }: FoundationPr
 
   useEffect(() => {
     let active: boolean = true;
-    gameService.getById('game-1').then(
+    gameService.getById(1).then(
       (game) => { if (active) setState({ status: 'ready', game }); },
       () => { if (active) setState({ status: 'error' }); },
     );

@@ -4,7 +4,7 @@ import { Avatar } from '../components/Avatar';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { useServices } from '../services/ServiceProvider';
 import type { PublicProfile } from '../services/communityContracts';
-import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
+import { useLocalRouteId } from '../routing/useLocalRouteId';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { useSession } from '../session/SessionProvider';
 import { FavoritesSections } from '../components/FavoritesSections';
@@ -14,7 +14,7 @@ import { ProfileEditor } from './ProfileEditor';
 import { CatalogNotice } from '../components/CatalogNotice';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
-function ProfileContent({ id }: { id: string }): ReactElement {
+function ProfileContent({ id }: { id: number }): ReactElement {
   const { community, privateFeatures } = useServices();
   const { user, version } = useSession();
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
@@ -32,7 +32,7 @@ function ProfileContent({ id }: { id: string }): ReactElement {
   const profile = state.profile;
   if (!profile) return <EmptyState region="Informações do perfil" message="Perfil não encontrado." />;
   return <>
-    <CatalogNotice paths={[[ 'users', id, 'reviews' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
+    <CatalogNotice paths={[[ 'users', String(id), 'reviews' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
     <section className="profile-overview" aria-label="Informações do perfil" aria-busy={refreshing}>
       {refreshing ? <LoadingState message="Carregando perfil…" /> : <>
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
@@ -53,6 +53,6 @@ function ProfileContent({ id }: { id: string }): ReactElement {
   </>;
 }
 export function ProfilePage(): ReactElement {
-  const id = useOpaqueRouteId('userId');
+  const id = useLocalRouteId('userId');
   return <main><h1>Perfil público</h1><p className="game-id">ID do usuário: {id}</p>{id ? <ProfileContent key={id} id={id} /> : <EmptyState region="Informações do perfil" message="Perfil não encontrado." />}</main>;
 }

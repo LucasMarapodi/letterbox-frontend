@@ -8,7 +8,7 @@ import type { FetchTransport } from '../src/services/http/client';
 import { wireGame } from './http-fixtures';
 import { deferred } from './fixtures';
 
-const page = (number = 1, hasNextPage = false, title = 'Página real') => ({ items: [{ ...wireGame, id: 'igdb-42', title }], page: number, pageSize: 20, hasNextPage });
+const page = (number = 1, hasNextPage = false, title = 'Página real') => ({ items: [{ ...wireGame, id: 42, title }], page: number, pageSize: 20, hasNextPage });
 function mount(transport: FetchTransport): void {
   render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /></MemoryRouter>);
 }
@@ -23,12 +23,12 @@ test('Home recente, próximo/anterior, filtro e ordenação resetam página; ID 
   const user = userEvent.setup();
   const transport = vi.fn<FetchTransport>().mockImplementation(async (url) => {
     const uri = new URL(url);
-    if (uri.pathname !== '/api/v1/games') return Response.json({ ...wireGame, id: 'igdb-42' });
+    if (uri.pathname !== '/api/v1/games') return Response.json({ ...wireGame, id: 42 });
     const number = Number(uri.searchParams.get('page') ?? 1);
     return Response.json(page(number, number === 1, `Jogo ${number}`));
   });
   mount(transport);
-  expect(await screen.findByRole('link', { name: 'Jogo 1' })).toHaveAttribute('href', '/jogos/igdb-42');
+  expect(await screen.findByRole('link', { name: 'Jogo 1' })).toHaveAttribute('href', '/jogos/42');
   expect(screen.getByLabelText('Ordenar por')).toHaveValue('release-desc');
   expect(screen.getByRole('button', { name: 'Anterior' })).toBeDisabled();
   await user.click(screen.getByRole('button', { name: 'Próxima' }));

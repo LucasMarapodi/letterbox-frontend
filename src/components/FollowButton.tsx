@@ -5,7 +5,7 @@ import { useSession } from '../session/SessionProvider';
 import { Button } from './Button';
 import { ErrorState, LoadingState } from './Feedback';
 
-interface FollowProps { targetId: string; name: string; onChanged?: () => void; }
+interface FollowProps { targetId: number; name: string; onChanged?: () => void; }
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; following: boolean };
 function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement {
   const { community } = useServices();

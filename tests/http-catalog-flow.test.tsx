@@ -12,16 +12,16 @@ test('catálogo envia filtros e IDs opacos ao HTTP sem Bearer',async()=>{
   const games=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport}).games;
   expect(await games.list({term:'a & b',sort:'name-desc'})).toEqual(wirePage([wireGame]));
   expect(await games.getById(wireGame.id)).toEqual(wireGame);
-  expect(transport.mock.calls.map(([url])=>url)).toEqual(['http://localhost:5207/api/v1/games?term=a+%26+b&sort=name-desc','http://localhost:5207/api/v1/games/game%252F42']);
+  expect(transport.mock.calls.map(([url])=>url)).toEqual(['http://localhost:5207/api/v1/games?term=a+%26+b&sort=name-desc','http://localhost:5207/api/v1/games/12']);
   for(const [,request] of transport.mock.calls) expect(request.headers).not.toHaveProperty('Authorization');
 });
 test('404 de detalhe vira null, mas rede/500/contrato não viram ausência',async()=>{
   const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json({code:'not_found',message:'Seguro'},{status:404})).mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(Response.json({code:'internal_error',message:'Seguro'},{status:500})).mockResolvedValueOnce(Response.json({invalid:true}));
   const games=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport}).games;
-  expect(await games.getById('missing')).toBeNull();
-  await expect(games.getById('g')).rejects.toMatchObject({kind:'network'});
-  await expect(games.getById('g')).rejects.toMatchObject({status:500});
-  await expect(games.getById('g')).rejects.toMatchObject({kind:'contract'});
+  expect(await games.getById(99)).toBeNull();
+  await expect(games.getById(99)).rejects.toMatchObject({kind:'network'});
+  await expect(games.getById(99)).rejects.toMatchObject({status:500});
+  await expect(games.getById(99)).rejects.toMatchObject({kind:'contract'});
 });
 test('Home busca/ordena e abre detalhes/opiniões reais com zero e capa ausente',async()=>{
   const transport=vi.fn<FetchTransport>().mockImplementation(async(url)=>Response.json(url.includes('/opinions')?{averageRating:0,reviews:[wireReview]}:new URL(url).pathname==='/api/v1/games'?wirePage([wireGame]):wireGame));

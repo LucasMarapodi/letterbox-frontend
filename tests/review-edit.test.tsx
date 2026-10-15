@@ -7,7 +7,7 @@ import { createMockCommunityService } from './doubles/communityService';
 import { community } from '../src/services/community';
 import type { User } from '../src/models';
 
-const author: User = { id: 'user-1', displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
+const author: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
 afterEach(() => vi.restoreAllMocks());
 test('edição pelo autor mantém ID quantidade e data de criação', async () => {
   const service = createMockCommunityService();
@@ -15,10 +15,10 @@ test('edição pelo autor mantém ID quantidade e data de criação', async () =
   const updated = await service.editReview('review-1', ' Texto atualizado ', author);
   expect(updated).toMatchObject({ id: original?.id, createdAt: original?.createdAt, text: 'Texto atualizado' });
   expect(updated.updatedAt).not.toBeNull();
-  expect((await service.getOpinions('game-1')).reviews).toHaveLength(2);
+  expect((await service.getOpinions(1)).reviews).toHaveLength(2);
   expect((await service.getReview('review-1'))?.text).toBe('Texto atualizado');
 });
-test.each([null, { ...author, id: 'user-2' }])('edição rejeita visitante ou outro usuário %s', async (user) => {
+test.each([null, { ...author, id: 2 }])('edição rejeita visitante ou outro usuário %s', async (user) => {
   await expect(createMockCommunityService().editReview('review-1', 'Novo', user)).rejects.toMatchObject({ code: user ? 'forbidden' : 'session-required' });
 });
 test('edição rejeita texto vazio e ID inexistente', async () => {
@@ -48,7 +48,7 @@ test('autor recebe conteúdo existente e falha preserva rascunho', async () => {
   expect(input).toHaveValue('Rascunho atualizado');
 });
 test('outro usuário não recebe controle de edição', async () => {
-  await openAuthenticated({ ...author, id: 'user-2' });
+  await openAuthenticated({ ...author, id: 2 });
   await screen.findByText(/A exploração convida/);
   expect(screen.queryByLabelText('Sua review')).not.toBeInTheDocument();
 });

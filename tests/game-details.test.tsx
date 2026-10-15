@@ -19,7 +19,7 @@ beforeEach(() => {
   vi.mocked(services.games.getOpinions).mockReset().mockResolvedValue({ averageRating: null, reviews: [] });
 });
 
-function renderDetails(id: string = 'game-1'): void {
+function renderDetails(id: number = 1): void {
   render(<MemoryRouter initialEntries={[`/jogos/${encodeURIComponent(id)}`]}><AppRoutes /></MemoryRouter>);
 }
 
@@ -33,7 +33,7 @@ test('visitante consulta todos os campos do jogo completo sem sessão', async ()
   expect(screen.getByText('Aventura')).toBeVisible();
   expect(screen.getByText('PC')).toBeVisible();
   expect(screen.getByText('12/04/2024')).toBeVisible();
-  expect(services.games.getById).toHaveBeenCalledWith('game-1');
+  expect(services.games.getById).toHaveBeenCalledWith(1);
 });
 
 test('jogo parcial mostra alternativas para os campos ausentes', async () => {
@@ -57,7 +57,7 @@ test('detalhes mostram Sem capa quando a URL da imagem falha', async () => {
 });
 
 test('jogo inexistente é distinto de dados parciais', async () => {
-  renderDetails('inexistente');
+  renderDetails(999);
   expect(await screen.findByText('Jogo não encontrado.')).toBeVisible();
   expect(screen.queryByText('Descrição indisponível.')).not.toBeInTheDocument();
 });
@@ -83,7 +83,7 @@ test('erro do serviço não é tratado como inexistência e permite recuperaçã
 });
 
 test('o ID com %2F literal chega intacto à consulta do serviço', async () => {
-  const id: string = 'game%2F42';
+  const id = 42;
   vi.mocked(services.games.getById).mockResolvedValueOnce(makeGame({ id }));
   renderDetails(id);
   await screen.findByRole('heading', { name: 'Jogo público' });
@@ -93,14 +93,14 @@ test('o ID com %2F literal chega intacto à consulta do serviço', async () => {
 test('trocar o ID carrega o novo jogo e ignora a resposta antiga', async () => {
   const user = userEvent.setup();
   const pending = deferred<Game | null>();
-  vi.mocked(services.games.getById).mockReturnValueOnce(pending.promise).mockResolvedValueOnce(makeGame({ id: 'game-2', title: 'Novo jogo' }));
-  render(<MemoryRouter initialEntries={['/jogos/game-1']}>
-    <Link to="/jogos/game-2">Outro jogo</Link><AppRoutes />
+  vi.mocked(services.games.getById).mockReturnValueOnce(pending.promise).mockResolvedValueOnce(makeGame({ id: 2, title: 'Novo jogo' }));
+  render(<MemoryRouter initialEntries={['/jogos/1']}>
+    <Link to="/jogos/2">Outro jogo</Link><AppRoutes />
   </MemoryRouter>);
   await user.click(screen.getByRole('link', { name: 'Outro jogo' }));
   await screen.findByRole('heading', { name: 'Novo jogo' });
   await act(async () => { pending.resolve(makeGame()); await pending.promise; });
   expect(screen.getByRole('heading', { name: 'Novo jogo' })).toBeVisible();
   expect(screen.queryByRole('heading', { name: 'Jogo público' })).not.toBeInTheDocument();
-  expect(services.games.getById).toHaveBeenLastCalledWith('game-2');
+  expect(services.games.getById).toHaveBeenLastCalledWith(2);
 });

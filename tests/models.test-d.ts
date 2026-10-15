@@ -2,12 +2,12 @@ import { expectTypeOf, test } from 'vitest';
 import type { User, Game, Rating, Review, Comment, Favorite, Notification } from '../src/models';
 
 test('representa usuários e jogos com contratos provisórios verificáveis', () => {
-  const user = { id: 'user-1', username: 'jogador', displayName: 'Jogador', bio: '', avatarUrl: null } satisfies User;
-  const game = { id: 'game-1', title: 'Jogo de exemplo', summary: 'Uma aventura.', coverUrl: null, genres: ['Aventura'], platforms: ['PC'], releaseDate: null, averageRating: null } satisfies Game;
+  const user = { id: 1, username: 'jogador', displayName: 'Jogador', bio: '', avatarUrl: null } satisfies User;
+  const game = { id: 1, igdbId: 345447, title: 'Jogo de exemplo', summary: 'Uma aventura.', coverUrl: null, genres: ['Aventura'], platforms: ['PC'], releaseDate: null, averageRating: null } satisfies Game;
   expectTypeOf(user).toExtend<User>();
   expectTypeOf(game).toExtend<Game>();
-  // @ts-expect-error O identificador provisório deve ser string.
-  const invalidUser: User = { ...user, id: 1 };
+  // @ts-expect-error O identificador de usuário deve ser numérico.
+  const invalidUser: User = { ...user, id: '1' };
   // @ts-expect-error Gêneros são uma lista de nomes, não uma string.
   const invalidGame: Game = { ...game, genres: 'Aventura' };
   void invalidUser;
@@ -15,9 +15,9 @@ test('representa usuários e jogos com contratos provisórios verificáveis', ()
 });
 
 test('representa notas, reviews e comentários sem exigir nota junto à review', () => {
-  const rating = { id: 'rating-1', userId: 'user-1', gameId: 'game-1', value: 0 } satisfies Rating;
-  const review = { id: 'review-1', userId: 'user-1', gameId: 'game-1', text: 'Gostei.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null } satisfies Review;
-  const comment = { id: 'comment-1', userId: 'user-2', reviewId: 'review-1', text: 'Concordo.', createdAt: '2026-01-02T00:00:00Z' } satisfies Comment;
+  const rating = { id: 'rating-1', userId: 1, gameId: 1, value: 0 } satisfies Rating;
+  const review = { id: 'review-1', userId: 1, gameId: 1, text: 'Gostei.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null } satisfies Review;
+  const comment = { id: 'comment-1', userId: 2, reviewId: 'review-1', text: 'Concordo.', createdAt: '2026-01-02T00:00:00Z' } satisfies Comment;
   expectTypeOf(rating).toExtend<Rating>();
   expectTypeOf(review).toExtend<Review>();
   expectTypeOf(comment).toExtend<Comment>();
@@ -33,9 +33,9 @@ test('representa notas, reviews e comentários sem exigir nota junto à review',
 });
 
 test('distingue favoritos e os dois eventos de notificação previstos', () => {
-  const gameFavorite = { id: 'favorite-1', userId: 'user-1', targetType: 'game', targetId: 'game-1' } satisfies Favorite;
+  const gameFavorite = { id: 'favorite-1', userId: 1, targetType: 'game', targetId: 1 } satisfies Favorite;
   const reviewFavorite = { ...gameFavorite, id: 'favorite-2', targetType: 'review', targetId: 'review-1' } satisfies Favorite;
-  const reviewNotification = { id: 'notification-1', userId: 'user-1', actorId: 'user-2', type: 'new-review', reviewId: 'review-1', createdAt: '2026-01-01T00:00:00Z', read: false } satisfies Notification;
+  const reviewNotification = { id: 'notification-1', userId: 1, actorId: 2, type: 'new-review', reviewId: 'review-1', createdAt: '2026-01-01T00:00:00Z', read: false } satisfies Notification;
   const commentNotification = { ...reviewNotification, type: 'review-comment', commentId: 'comment-1' } satisfies Notification;
   expectTypeOf(gameFavorite).toExtend<Favorite>();
   expectTypeOf(reviewFavorite).toExtend<Favorite>();

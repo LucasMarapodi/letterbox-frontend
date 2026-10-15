@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
-import type { Game, Id } from '../models';
-import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
+import type { Game, GameId } from '../models';
+import { useLocalRouteId } from '../routing/useLocalRouteId';
 import { useServices } from '../services/ServiceProvider';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
@@ -12,7 +12,7 @@ import { FavoriteButton } from '../components/FavoriteButton';
 import { CatalogNotice } from '../components/CatalogNotice';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
-interface GameDetailsContentProps { id: Id; }
+interface GameDetailsContentProps { id: GameId; }
 
 function releaseLabel(value: string | null): string {
   if (!value) return 'Lançamento não informado.';
@@ -49,7 +49,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   const game: Game | null = state.game;
   if (!game) return <EmptyState region="Informações do jogo" message="Jogo não encontrado." />;
   return <section className="game-information" aria-labelledby="game-title">
-    <CatalogNotice paths={[[ 'games', id ], ['games', id, 'opinions'], ['games', id, 'reviews']]} onRetry={retry} />
+    <CatalogNotice paths={[[ 'games', String(id) ], ['games', String(id), 'opinions'], ['games', String(id), 'reviews']]} onRetry={retry} />
     <div className="game-facts" role="region" aria-label="Informações do jogo" aria-busy={refreshing}>
     {refreshing ? <LoadingState message="Carregando informações do jogo…" /> : <>
     <aside className="game-poster" aria-label="Capa do jogo">
@@ -78,7 +78,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
 }
 
 export function GameDetailsPage(): ReactElement {
-  const id: Id | undefined = useOpaqueRouteId('gameId');
+  const id: GameId | undefined = useLocalRouteId('gameId');
   return <main className="game-details-page">
     <h1 className="game-page-label">Detalhes do jogo</h1>
     <p className="game-id">ID do jogo: {id}</p>

@@ -8,6 +8,7 @@ export function createHttpRegistration(getAdapters: () => HttpAdapters): AuthSer
   return async (input) => {
     try { return await getAdapters().auth.register(input); }
     catch (error: unknown) {
+      if (error instanceof HttpFailure && error.status === 503 && error.code === 'storage_unavailable') throw new AuthError('storage-unavailable');
       if (error instanceof HttpFailure && error.status === 400) throw new AuthError('invalid-fields');
       if (error instanceof HttpFailure && error.status === 409) throw new AuthError('duplicate-email');
       throw error;
@@ -32,7 +33,11 @@ export function createHttpAuthService(getAdapters: () => HttpAdapters, session: 
       if (!confirmedUser || version !== confirmedVersion) throw new HttpFailure('http', 401, 'unauthorized');
       let user: User;
       try { user = await getAdapters().profiles.edit(input); }
-      catch (error: unknown) { if (error instanceof HttpFailure && error.kind === 'http' && error.status === 400) throw new AuthError('invalid-fields'); throw error; }
+      catch (error: unknown) {
+        if (error instanceof HttpFailure && error.status === 503 && error.code === 'storage_unavailable') throw new AuthError('storage-unavailable');
+        if (error instanceof HttpFailure && error.kind === 'http' && error.status === 400) throw new AuthError('invalid-fields');
+        throw error;
+      }
       if (session.version() !== version) throw new HttpFailure('cancelled');
       session.updateUser(user);
       return user;
@@ -63,6 +68,7 @@ export function createHttpAuthService(getAdapters: () => HttpAdapters, session: 
       } catch (error: unknown) {
         if (attempt !== sequence) throw new HttpFailure('cancelled');
         if (http.session.version() === ownedVersion) http.session.clear();
+        if (error instanceof HttpFailure && error.status === 503 && error.code === 'storage_unavailable') throw new AuthError('storage-unavailable');
         throw error;
       } finally { if (attempt === sequence) controller = null; }
     },

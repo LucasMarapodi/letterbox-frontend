@@ -10,8 +10,8 @@ import { createHttpSessionStore } from '../src/services/http/adapters';
 import type { FetchTransport } from '../src/services/http/client';
 import { wireUser, wireNotification, wireGame, withCatalog } from './http-fixtures';
 import { deferred } from './fixtures';
-const userA = { ...wireUser, id: 'user-1', displayName: 'Ana API' };
-const userB = { ...wireUser, id: 'user-b', displayName: 'Bia API' };
+const userA = { ...wireUser, id: 1, displayName: 'Ana API' };
+const userB = { ...wireUser, id: 2, displayName: 'Bia API' };
 const loginA = { user: userA, token: 'test-a', expiresAt: '2080-01-01T00:00:00Z' };
 const loginB = { user: userB, token: 'test-b', expiresAt: loginA.expiresAt };
 test('autenticação usa dashboard e não consulta favoritos/feed/notificações separadamente', async () => {

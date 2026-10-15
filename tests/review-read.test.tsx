@@ -9,7 +9,7 @@ import type { ReviewDetails } from '../src/services/communityContracts';
 import { deferred } from './fixtures';
 import { encodeRouteId } from '../src/routing/encodeRouteId';
 
-const review: ReviewDetails = { id: 'review%2F42', userId: 'ana/.', gameId: '..', text: 'Review completa pública', createdAt: '2026-01-02T12:00:00Z', updatedAt: null, author: { id: 'ana/.', displayName: 'Ana', avatarUrl: null }, game: { id: '..', title: 'Jogo da review' } };
+const review: ReviewDetails = { id: 'review%2F42', userId: 42, gameId: 12, text: 'Review completa pública', createdAt: '2026-01-02T12:00:00Z', updatedAt: null, author: { id: 42, displayName: 'Ana', avatarUrl: null }, game: { id: 12, title: 'Jogo da review' } };
 afterEach(() => vi.restoreAllMocks());
 function open(): void { render(<MemoryRouter initialEntries={[`/reviews/${encodeRouteId(review.id)}`]}><AppRoutes /></MemoryRouter>); }
 test('leitura pública preserva ID opaco e mostra autor jogo data e links', async () => {
@@ -37,6 +37,6 @@ test('carregamento e erro oferecem nova tentativa', async () => {
 });
 test('serviço lê review com dados públicos e retorna null para ID ausente', async () => {
   const service = createMockCommunityService();
-  expect(await service.getReview('review-1')).toMatchObject({ id: 'review-1', author: { id: 'user-1' }, game: { id: 'game-1' } });
+  expect(await service.getReview('review-1')).toMatchObject({ id: 'review-1', author: { id: 1 }, game: { id: 1 } });
   expect(await service.getReview('ausente')).toBeNull();
 });

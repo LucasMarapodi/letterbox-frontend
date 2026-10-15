@@ -1,10 +1,22 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import type { GameQuery } from '../contracts';
-import type { User } from '../../models';
+import { isLocalId, type User, type UserId, type GameId } from '../../models';
 import { catalogKey, createCatalogStore, type CatalogMetadata, type CatalogStore } from '../catalogMetadata';
 import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
 import { HttpFailure, createHttpClient, validateApiBaseUrl, type FetchTransport, type HttpRequest } from './client';
 import { decodeUser, decodeGame, decodeGamePage, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
+function localPathId(id: UserId | GameId): string {
+  if (!isLocalId(id)) throw new HttpFailure('configuration');
+  return String(id);
+}
+function favoritePathId(kind: FavoriteKind, id: string | GameId): string {
+  if (kind === 'game') {
+    if (!isLocalId(id)) throw new HttpFailure('configuration');
+    return String(id);
+  }
+  if (typeof id !== 'string') throw new HttpFailure('configuration');
+  return id;
+}
 export interface SessionSnapshot { token: string; user: User; expiresAt: string; version: number; signal: AbortSignal; }
 export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; updateUser(user: User): void; clear(): void; subscribe(listener: () => void): () => void; }
 export interface HttpAdapterConfig { apiBaseUrl: string; }
@@ -19,13 +31,13 @@ export interface HttpAdapters {
   };
   games: {
     list(query?: GameQuery, signal?: AbortSignal): Promise<GamePageResponse>;
-    get(id: string, signal?: AbortSignal): Promise<GameResponse>;
-    opinions(id: string, signal?: AbortSignal): Promise<GameOpinionsResponse>;
-    reviews(id: string, signal?: AbortSignal): Promise<ReviewResponse[]>;
-    myRating(id: string, signal?: AbortSignal): Promise<RatingResponse | null>;
-    rate(id: string, input: RatingRequest, signal?: AbortSignal): Promise<RatingResponse>;
-    myReview(id: string, signal?: AbortSignal): Promise<ReviewResponse | null>;
-    publish(id: string, input: TextRequest, signal?: AbortSignal): Promise<ReviewResponse>;
+    get(id: GameId, signal?: AbortSignal): Promise<GameResponse>;
+    opinions(id: GameId, signal?: AbortSignal): Promise<GameOpinionsResponse>;
+    reviews(id: GameId, signal?: AbortSignal): Promise<ReviewResponse[]>;
+    myRating(id: GameId, signal?: AbortSignal): Promise<RatingResponse | null>;
+    rate(id: GameId, input: RatingRequest, signal?: AbortSignal): Promise<RatingResponse>;
+    myReview(id: GameId, signal?: AbortSignal): Promise<ReviewResponse | null>;
+    publish(id: GameId, input: TextRequest, signal?: AbortSignal): Promise<ReviewResponse>;
   };
   reviews: {
     get(id: string, signal?: AbortSignal): Promise<ReviewResponse>;
@@ -34,20 +46,20 @@ export interface HttpAdapters {
     comment(id: string, input: TextRequest, signal?: AbortSignal): Promise<CommentResponse>;
   };
   profiles: {
-    get(id: string, signal?: AbortSignal): Promise<PublicUserResponse>;
-    reviews(id: string, signal?: AbortSignal): Promise<ReviewResponse[]>;
-    profile(id: string, signal?: AbortSignal): Promise<PublicProfile>;
+    get(id: UserId, signal?: AbortSignal): Promise<PublicUserResponse>;
+    reviews(id: UserId, signal?: AbortSignal): Promise<ReviewResponse[]>;
+    profile(id: UserId, signal?: AbortSignal): Promise<PublicProfile>;
     edit(input: ProfilePatchRequest, signal?: AbortSignal): Promise<PublicUserResponse>;
-    followers(id: string, signal?: AbortSignal): Promise<PublicUserResponse[]>;
-    following(id: string, signal?: AbortSignal): Promise<PublicUserResponse[]>;
-    connections(id: string, signal?: AbortSignal): Promise<Connections>;
+    followers(id: UserId, signal?: AbortSignal): Promise<PublicUserResponse[]>;
+    following(id: UserId, signal?: AbortSignal): Promise<PublicUserResponse[]>;
+    connections(id: UserId, signal?: AbortSignal): Promise<Connections>;
   };
   social: {
     favorites(signal?: AbortSignal): Promise<FavoriteListsResponse>;
-    favorite(kind: FavoriteKind, id: string, signal?: AbortSignal): Promise<FavoriteResponse | null>;
-    setFavorite(kind: FavoriteKind, id: string, selected: boolean, signal?: AbortSignal): Promise<FavoriteResponse | null>;
-    isFollowing(id: string, signal?: AbortSignal): Promise<boolean>;
-    setFollowing(id: string, selected: boolean, signal?: AbortSignal): Promise<boolean>;
+    favorite(kind: FavoriteKind, id: string | GameId, signal?: AbortSignal): Promise<FavoriteResponse | null>;
+    setFavorite(kind: FavoriteKind, id: string | GameId, selected: boolean, signal?: AbortSignal): Promise<FavoriteResponse | null>;
+    isFollowing(id: UserId, signal?: AbortSignal): Promise<boolean>;
+    setFollowing(id: UserId, selected: boolean, signal?: AbortSignal): Promise<boolean>;
   };
   community: {
     recent(signal?: AbortSignal): Promise<ReviewResponse[]>;
@@ -103,10 +115,10 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
     }
   }
   const list = <T>(decode: Decoder<T>): Decoder<T[]> => (value) => decodeList(value, decode);
-  const getUser = (id: string, signal?: AbortSignal): Promise<PublicUserResponse> => call({ path: ['users', id], signal }, decodeUser);
-  const userReviews = (id: string, signal?: AbortSignal): Promise<ReviewResponse[]> => call({ path: ['users', id, 'reviews'], signal }, list(decodeReview));
-  const followers = (id: string, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', id, 'followers'], signal }, list(decodeUser));
-  const following = (id: string, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', id, 'following'], signal }, list(decodeUser));
+  const getUser = (id: UserId, signal?: AbortSignal): Promise<PublicUserResponse> => call({ path: ['users', localPathId(id)], signal }, decodeUser);
+  const userReviews = (id: UserId, signal?: AbortSignal): Promise<ReviewResponse[]> => call({ path: ['users', localPathId(id), 'reviews'], signal }, list(decodeReview));
+  const followers = (id: UserId, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', localPathId(id), 'followers'], signal }, list(decodeUser));
+  const following = (id: UserId, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', localPathId(id), 'following'], signal }, list(decodeUser));
   return {
     catalog,
     session,
@@ -122,13 +134,13 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
     },
     games: {
       list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort, page: query?.page, pageSize: query?.pageSize }, signal }, decodeGamePage),
-      get: (id, signal) => call({ path: ['games', id], signal }, decodeGame),
-      opinions: (id, signal) => call({ path: ['games', id, 'opinions'], signal }, decodeOpinions),
-      reviews: (id, signal) => call({ path: ['games', id, 'reviews'], signal }, list(decodeReview)),
-      myRating: (id, signal) => call({ path: ['games', id, 'rating', 'me'], signal }, unwrapRating, true),
-      rate: (id, input, signal) => call({ method: 'PUT', path: ['games', id, 'rating', 'me'], body: { value: input.value }, signal }, decodeRating, true),
-      myReview: (id, signal) => call({ path: ['games', id, 'reviews', 'me'], signal }, unwrapReview, true),
-      publish: (id, input, signal) => call({ method: 'POST', path: ['games', id, 'reviews'], body: { text: input.text }, signal }, decodeReview, true),
+      get: (id, signal) => call({ path: ['games', localPathId(id)], signal }, decodeGame),
+      opinions: (id, signal) => call({ path: ['games', localPathId(id), 'opinions'], signal }, decodeOpinions),
+      reviews: (id, signal) => call({ path: ['games', localPathId(id), 'reviews'], signal }, list(decodeReview)),
+      myRating: (id, signal) => call({ path: ['games', localPathId(id), 'rating', 'me'], signal }, unwrapRating, true),
+      rate: (id, input, signal) => call({ method: 'PUT', path: ['games', localPathId(id), 'rating', 'me'], body: { value: input.value }, signal }, decodeRating, true),
+      myReview: (id, signal) => call({ path: ['games', localPathId(id), 'reviews', 'me'], signal }, unwrapReview, true),
+      publish: (id, input, signal) => call({ method: 'POST', path: ['games', localPathId(id), 'reviews'], body: { text: input.text }, signal }, decodeReview, true),
     },
     reviews: {
       get: (id, signal) => call({ path: ['reviews', id], signal }, decodeReview),
@@ -144,15 +156,15 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
     },
     social: {
       favorites: (signal) => call({ path: ['favorites'], signal }, decodeFavoriteLists, true),
-      favorite: (kind, id, signal) => call({ path: ['favorites', kind, id], signal }, unwrapFavorite, true),
+      favorite: (kind, id, signal) => call({ path: ['favorites', kind, favoritePathId(kind, id)], signal }, unwrapFavorite, true),
       async setFavorite(kind, id, selected, signal) {
-        if (selected) return call({ method: 'PUT', path: ['favorites', kind, id], signal }, decodeFavorite, true);
-        await call({ method: 'DELETE', path: ['favorites', kind, id], signal }, decodeVoid, true); return null;
+        if (selected) return call({ method: 'PUT', path: ['favorites', kind, favoritePathId(kind, id)], signal }, decodeFavorite, true);
+        await call({ method: 'DELETE', path: ['favorites', kind, favoritePathId(kind, id)], signal }, decodeVoid, true); return null;
       },
-      isFollowing: (id, signal) => call({ path: ['users', id, 'follow', 'me'], signal }, unwrapFollowing, true),
+      isFollowing: (id, signal) => call({ path: ['users', localPathId(id), 'follow', 'me'], signal }, unwrapFollowing, true),
       async setFollowing(id, selected, signal) {
-        if (selected) return call({ method: 'PUT', path: ['users', id, 'follow'], signal }, unwrapFollowing, true);
-        await call({ method: 'DELETE', path: ['users', id, 'follow'], signal }, decodeVoid, true); return false;
+        if (selected) return call({ method: 'PUT', path: ['users', localPathId(id), 'follow'], signal }, unwrapFollowing, true);
+        await call({ method: 'DELETE', path: ['users', localPathId(id), 'follow'], signal }, decodeVoid, true); return false;
       },
     },
     community: {

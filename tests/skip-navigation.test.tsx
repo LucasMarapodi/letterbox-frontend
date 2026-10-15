@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import { AppRoutes } from '../src/App';
 
-test.each(['/', '/login', '/perfil/user-1', '/reviews/review-1', '/jogos/game-1'])('teclado pode pular navegação para conteúdo em %s', async (path) => {
+test.each(['/', '/login', '/perfil/1', '/reviews/review-1', '/jogos/1'])('teclado pode pular navegação para conteúdo em %s', async (path) => {
   const interaction = userEvent.setup();
   render(<MemoryRouter initialEntries={[path]}><AppRoutes /></MemoryRouter>);
   await interaction.tab();

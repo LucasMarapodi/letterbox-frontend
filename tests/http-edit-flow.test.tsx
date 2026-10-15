@@ -15,7 +15,7 @@ test('leitura pública e PATCH mínimo preservam projeção, ID e createdAt', as
   const service = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session }).community;
   expect(await service.getReview(wireReview.id)).toEqual(wireReview);
   expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
-  expect(await service.editReview(wireReview.id, updated.text, { ...wireUser, id: 'forged' })).toEqual(updated);
+  expect(await service.editReview(wireReview.id, updated.text, { ...wireUser, id: 999 })).toEqual(updated);
   expect(transport.mock.calls[1][0].endsWith('/reviews/r%2F1')).toBe(true);
   expect(transport.mock.calls[1][1]).toMatchObject({ method: 'PATCH', body: '{"text":"Texto atualizado"}', headers: { Authorization: 'Bearer test-only' } });
 });
@@ -31,7 +31,7 @@ test('404 público vira ausência, rede/contrato continuam erros; edição disti
 });
 async function open(failure?: number, other = false): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();
-  const review = other ? { ...wireReview, userId:'other', author:{...wireReview.author,id:'other',displayName:'Outro'} } : wireReview;
+  const review = other ? { ...wireReview, userId: 2, author:{...wireReview.author,id: 2,displayName:'Outro'} } : wireReview;
   const transport = withAuthentication(async(url, init) => {
     if(new URL(url).pathname === '/api/v1/games') return Response.json(wirePage([]));
     if(url.endsWith('/comments')) return Response.json([]);

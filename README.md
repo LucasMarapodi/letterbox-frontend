@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 488 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 519 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -29,7 +29,7 @@ Playwright 1.64.1 fixado. Requer .NET 10 e o binário Release existente de Back.
 - src/services/http: transporte, requests permitidos, DTOs e validação de JSON unknown.
 - src/services/runtime.ts: composição HTTP compartilhando cliente e sessão.
 - src/session: usuário confirmado, versão e isolamento de ações privadas.
-- src/routing: IDs opacos, preservando percentuais literais na navegação.
+- src/routing: usuários/jogos com IDs locais inteiros positivos; reviews com IDs opacos, preservando percentuais literais na navegação.
 - tests/doubles: fornecedores/fixtures isolados para testes unitários; nunca importados por src.
 - tests/e2e: navegador real e instância própria do backend existente.
 
@@ -45,7 +45,7 @@ Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e inva
 
 [I-PR-07](docs/I-PR-07.md), [TDD](docs/TDD-I-PR-07.md) e [relatório dos endpoints](docs/RELATORIO-ENDPOINTS.md). Os documentos PR-01 a PR-09/TDD-PR-* preservam o histórico da fase anterior; descrições mockadas nesses registros não representam o runtime atual.
 
-Limites: Back continua em memória, com token simulado e IGDB fake. SQL, autenticação de produção e IGDB externa estão fora da fase. A API não gera IDs . ou .., rejeitados pelo transporte antes de fetch; percentuais literais continuam preservados. Branches preparadas localmente; Front não possui remoto configurado. Nenhum merge foi feito.
+Contratos atuais: identidade e catálogo acompanham P-PR-01/P-PR-02 do Back com PostgreSQL. Usuários/jogos usam IDs locais numéricos; o identificador externo IGDB é um campo separado. IDs próprios das demais entidades continuam textuais nesta etapa. As seções de entregas abaixo preservam seus limites históricos; veja a [adaptação atual](docs/FIX-CONTRATOS-NUMERICOS.md). Branches preparadas localmente; Front não possui remoto configurado. Nenhum merge foi feito.
 
 ## Quarta fase — G-PR-05
 

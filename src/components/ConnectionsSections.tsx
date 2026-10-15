@@ -7,7 +7,7 @@ import { Avatar } from './Avatar';
 import { EmptyState, ErrorState, LoadingState } from './Feedback';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; connections: Connections };
-export function ConnectionsSections({ profileId }: { profileId: string }): ReactElement {
+export function ConnectionsSections({ profileId }: { profileId: number }): ReactElement {
   const { community } = useServices();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);

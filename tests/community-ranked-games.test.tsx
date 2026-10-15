@@ -12,9 +12,9 @@ afterEach(() => vi.restoreAllMocks());
 function service(): ReturnType<typeof createMockCommunityService> { return createMockCommunityService({ reviews: rankingReviews, comments: rankingComments, clock: () => new Date(rankingNow) }); }
 test('agrega reviews por jogo uma vez e filtra janela sem contaminar outros jogos', async () => {
   const mock = service();
-  expect((await mock.getGamesInDiscussion('24h')).map((item) => [item.game.id, item.commentCount])).toEqual([['game-1',2],['game-2',1]]);
-  expect((await mock.getGamesInDiscussion('7d')).map((item) => [item.game.id, item.commentCount])).toEqual([['game-1',4],['game-2',1]]);
-  expect((await mock.getGamesInDiscussion('30d')).map((item) => [item.game.id, item.commentCount])).toEqual([['game-1',4],['game-2',2]]);
+  expect((await mock.getGamesInDiscussion('24h')).map((item) => [item.game.id, item.commentCount])).toEqual([[1,2],[2,1]]);
+  expect((await mock.getGamesInDiscussion('7d')).map((item) => [item.game.id, item.commentCount])).toEqual([[1,4],[2,1]]);
+  expect((await mock.getGamesInDiscussion('30d')).map((item) => [item.game.id, item.commentCount])).toEqual([[1,4],[2,2]]);
 });
 test('desempata por último comentário e ID e mantém jogo sem capa', async () => {
   const mock = createMockCommunityService({ reviews: rankingReviews, comments: [
@@ -22,7 +22,7 @@ test('desempata por último comentário e ID e mantém jogo sem capa', async () 
     { ...rankingComments[0], id: 'later', reviewId: 'd', createdAt: new Date(rankingNow).toISOString() },
   ], clock: () => new Date(rankingNow) });
   const results = await mock.getGamesInDiscussion('7d');
-  expect(results.map((item) => item.game.id)).toEqual(['game-3','game-1','game-2']);
+  expect(results.map((item) => item.game.id)).toEqual([3,1,2]);
   vi.spyOn(community, 'getGamesInDiscussion').mockResolvedValue(results);
   const interaction = await open();
   expect(await screen.findByText('Sem capa')).toBeVisible();

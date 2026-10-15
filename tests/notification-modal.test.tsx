@@ -31,7 +31,7 @@ test('sino abre modal nomeado sem mudar URL e exibe eventos pessoais na ordem do
   await interaction.click(screen.getByRole('button', { name: 'Notificações' }));
   const dialog = screen.getByRole('dialog', { name: 'Notificações' });
   expect(dialog).toHaveAttribute('aria-modal', 'true');
-  expect(screen.getByLabelText('Endereço atual')).toHaveTextContent('/jogos/game-1');
+  expect(screen.getByLabelText('Endereço atual')).toHaveTextContent('/jogos/1');
   const items = await within(dialog).findAllByRole('link');
   expect(items.map((item) => item.textContent)).toEqual([
     expect.stringContaining('Leo comentou na sua review'), expect.stringContaining('Leo publicou uma nova review'),

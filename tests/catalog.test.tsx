@@ -6,7 +6,7 @@ import { beforeEach, expect, test, vi } from 'vitest';
 import { HomePage } from '../src/pages/HomePage';
 import { AppRoutes } from '../src/App';
 import { services } from '../src/services';
-import type { Game, Id } from '../src/models';
+import type { Game } from '../src/models';
 import type { GameService, Services } from '../src/services/contracts';
 import { deferred, makeGame } from './fixtures';
 
@@ -21,10 +21,10 @@ beforeEach(() => {
 });
 
 test('visitante vê os jogos retornados com capa e link acessível', async () => {
-  const games: Game[] = [makeGame(), makeGame({ id: 'game-2', title: 'Segundo jogo' })];
+  const games: Game[] = [makeGame(), makeGame({ id: 2, title: 'Segundo jogo' })];
   vi.mocked(services.games.list).mockResolvedValueOnce(gamePage(games));
   renderHome();
-  expect(await screen.findByRole('link', { name: 'Jogo público' })).toHaveAttribute('href', '/jogos/game-1');
+  expect(await screen.findByRole('link', { name: 'Jogo público' })).toHaveAttribute('href', '/jogos/1');
   expect(screen.getByRole('link', { name: 'Segundo jogo' })).toBeVisible();
   expect(screen.getAllByRole('article')).toHaveLength(2);
   expect(screen.getAllByAltText('')[0]).toHaveAttribute('src', '/capa.svg');
@@ -57,7 +57,7 @@ test('rejeição informa erro distinto e permite recuperar a listagem', async ()
 });
 
 test('uma capa ausente continua permitindo consultar o jogo', async () => {
-  const id: Id = 'sem-capa';
+  const id = 3;
   vi.mocked(services.games.list).mockResolvedValueOnce(gamePage([makeGame({ id, coverUrl: null })]));
   renderHome();
   expect(await screen.findByRole('img', { name: 'Capa de Jogo público indisponível' })).toBeVisible();
@@ -104,8 +104,8 @@ test('resposta de uma consulta anterior não substitui os resultados atuais', as
 
 test('ordenar mantém a busca submetida e limpar mantém a ordenação escolhida', async () => {
   const user = userEvent.setup();
-  const alpha: Game = makeGame({ id: 'a', title: 'Alpha game' });
-  const zeta: Game = makeGame({ id: 'z', title: 'Zeta game' });
+  const alpha: Game = makeGame({ id: 1, title: 'Alpha game' });
+  const zeta: Game = makeGame({ id: 2, title: 'Zeta game' });
   vi.mocked(services.games.list).mockResolvedValueOnce(gamePage([alpha, zeta])).mockResolvedValueOnce(gamePage([alpha, zeta])).mockResolvedValueOnce(gamePage([zeta, alpha])).mockResolvedValueOnce(gamePage([zeta, alpha]));
   renderHome();
   await screen.findByRole('link', { name: alpha.title });
@@ -122,18 +122,8 @@ test('ordenar mantém a busca submetida e limpar mantém a ordenação escolhida
   expect(screen.getByRole('combobox', { name: 'Ordenar por' })).toHaveValue('name-desc');
 });
 
-test.each(['.', '..', '~.', '~..'])('clicar no catálogo consulta o ID literal %s', async (id) => {
-  const user = userEvent.setup();
-  const game: Game = makeGame({ id });
-  vi.mocked(services.games.list).mockResolvedValueOnce(gamePage([game]));
-  vi.mocked(services.games.getById).mockResolvedValueOnce(game);
-  render(<MemoryRouter><AppRoutes /></MemoryRouter>);
-  const link = await screen.findByRole('link', { name: game.title });
-  const href: string | null = link.getAttribute('href');
-  if (!href) throw new Error('Link sem destino.');
-  // O navegador não pode normalizar o ID como navegação para diretório pai.
-  expect(new URL(href, 'http://localhost').pathname).toBe(href);
-  await user.click(link);
-  expect(await screen.findByRole('heading', { name: game.title, level: 2 })).toBeVisible();
-  expect(services.games.getById).toHaveBeenCalledWith(id);
+test.each(['.', '..', '~.', '~..'])('ID local de jogo inválido %s não é consultado', id => {
+  render(<MemoryRouter initialEntries={['/jogos/' + encodeURIComponent(id)]}><AppRoutes /></MemoryRouter>);
+  expect(screen.getByText('Jogo não encontrado.')).toBeVisible();
+  expect(services.games.getById).not.toHaveBeenCalled();
 });

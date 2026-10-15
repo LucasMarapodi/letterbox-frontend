@@ -12,21 +12,21 @@ vi.mock('../src/services', () => ({ services: {
   games: { list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
 } } satisfies { services: Services }));
 
-const review: PublicReview = { id: 'review%2F1', gameId: 'game-1', userId: 'user%2F1', text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 'user%2F1', displayName: 'Ana', avatarUrl: null } };
+const review: PublicReview = { id: 'review%2F1', gameId: 1, userId: 1, text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 1, displayName: 'Ana', avatarUrl: null } };
 
 beforeEach(() => {
   vi.mocked(services.games.list).mockReset().mockResolvedValue(gamePage([]));
   vi.mocked(services.games.getById).mockReset().mockResolvedValue(makeGame());
   vi.mocked(services.games.getOpinions).mockReset().mockResolvedValue({ averageRating: null, reviews: [] });
 });
-function renderGame(): void { render(<MemoryRouter initialEntries={['/jogos/game-1']}><AppRoutes /></MemoryRouter>); }
+function renderGame(): void { render(<MemoryRouter initialEntries={['/jogos/1']}><AppRoutes /></MemoryRouter>); }
 
 test('média zero fornecida pelo serviço é uma nota válida', async () => {
   vi.mocked(services.games.getOpinions).mockResolvedValueOnce({ averageRating: 0, reviews: [] });
   renderGame();
   expect(await screen.findByText('Nota média: 0 de 5')).toBeVisible();
   expect(screen.queryByText('Ainda sem avaliações.')).not.toBeInTheDocument();
-  expect(services.games.getOpinions).toHaveBeenCalledWith('game-1');
+  expect(services.games.getOpinions).toHaveBeenCalledWith(1);
 });
 
 test('ausência de média não aparece como zero e reviews vazias são informadas', async () => {
@@ -42,7 +42,7 @@ test('a página exibe a média fornecida sem calculá-la a partir das reviews', 
   expect(await screen.findByText('Nota média: 4,25 de 5')).toBeVisible();
   expect(screen.getByText(review.text)).toBeVisible();
   expect(screen.getByRole('link', { name: 'Review de Ana' })).toHaveAttribute('href', '/reviews/review%252F1');
-  expect(screen.getByRole('link', { name: 'Ana' })).toHaveAttribute('href', '/perfil/user%252F1');
+  expect(screen.getByRole('link', { name: 'Ana' })).toHaveAttribute('href', '/perfil/1');
 });
 
 test('o link da review navega até seu conteúdo com ID preservado', async () => {
@@ -60,7 +60,7 @@ test('o link do autor navega ao perfil público com ID preservado', async () => 
   renderGame();
   await user.click(await screen.findByRole('link', { name: 'Ana' }));
   expect(screen.getByRole('heading', { name: 'Perfil público', level: 1 })).toBeVisible();
-  expect(screen.getByText('ID do usuário: user%2F1')).toBeVisible();
+  expect(screen.getByText('ID do usuário: 1')).toBeVisible();
 });
 
 test('opiniões pendentes anunciam carregamento sem ocultar dados do jogo', async () => {

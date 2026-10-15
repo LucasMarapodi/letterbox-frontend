@@ -58,7 +58,7 @@ async function stop(): Promise<void> {
 test.beforeAll(async ({ request }) => { await start(request); });
 test.afterAll(async () => { await stop(); });
 async function home(page: Page): Promise<void> { await page.getByRole('link', { name: 'Game Reviews', exact: true }).click(); }
-async function game(page: Page, id: string): Promise<void> { await home(page); await page.locator(`a[href="/jogos/${id}"]`).first().click(); }
+async function game(page: Page, id: number): Promise<void> { await home(page); await page.locator(`a[href="/jogos/${id}"]`).first().click(); }
 async function register(page: Page, name: string, email: string, password: string): Promise<void> {
   await page.goto('/cadastro');
   await page.getByLabel('Nome', { exact: true }).fill(name);
@@ -67,7 +67,7 @@ async function register(page: Page, name: string, email: string, password: strin
   await page.getByRole('button', { name: 'Criar conta', exact: true }).click();
   await expect(page.getByText('Conta criada. Entre para continuar.', { exact: true })).toBeVisible();
 }
-async function login(page: Page, email: string, password: string): Promise<{ token: string; userId: string }> {
+async function login(page: Page, email: string, password: string): Promise<{ token: string; userId: number }> {
   await page.locator('.site-header').getByRole('link', { name: 'Entrar', exact: true }).click();
   await expect(page.getByRole('form', { name: 'Login', exact: true })).toBeVisible();
   await page.getByLabel('E-mail', { exact: true }).fill(email);
@@ -77,9 +77,13 @@ async function login(page: Page, email: string, password: string): Promise<{ tok
   const body: unknown = await (await response).json();
   const data = record(body);
   await expect(page.getByRole('link', { name: 'Meu perfil', exact: true })).toBeVisible();
-  return { token: string(data.token), userId: string(record(data.user).id) };
+  return { token: string(data.token), userId: localId(record(data.user).id) };
 }
-async function publish(page: Page, id: string, text: string): Promise<string> {
+function localId(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0 || value > 2_147_483_647) throw new Error('ID local inválido.');
+  return value;
+}
+async function publish(page: Page, id: number, text: string): Promise<string> {
   await game(page, id);
   await page.getByLabel('Sua review', { exact: true }).fill(text);
   const response = page.waitForResponse((r) => r.url() === `${api}/api/v1/games/${id}/reviews` && r.request().method() === 'POST');
@@ -123,11 +127,11 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   await a.getByLabel('Biografia', { exact: true }).fill('Perfil E2E atualizado pela API.');
   await a.getByRole('button', { name: 'Salvar perfil', exact: true }).click();
   await expect(a.getByText('Perfil atualizado.', { exact: true })).toBeVisible();
-  const first = await publish(a, 'game-1', 'Review E2E da autora.');
+  const first = await publish(a, 1, 'Review E2E da autora.');
   await a.getByRole('radio', { name: '5 estrelas', exact: true }).check();
   await a.getByRole('button', { name: 'Salvar nota', exact: true }).click();
   await expect(a.getByText('Nota 5 salva.', { exact: true })).toBeVisible();
-  await game(a, 'game-1');
+  await game(a, 1);
   await expect(a.getByRole('radio', { name: '5 estrelas', exact: true })).toBeChecked();
   await a.getByRole('link', { name: 'Editar minha review', exact: true }).click();
   await a.getByLabel('Sua review', { exact: true }).fill('Review E2E editada pela autora.');
@@ -149,7 +153,7 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   await expect(b.getByText('Perfil E2E atualizado pela API.', { exact: true })).toBeVisible();
   await b.getByRole('button', { name: 'Seguir E2E Autora', exact: true }).click();
   await expect(b.getByRole('button', { name: 'Deixar de seguir E2E Autora', exact: true })).toBeVisible();
-  await publish(a, 'game-2', 'Nova review E2E para o feed.');
+  await publish(a, 2, 'Nova review E2E para o feed.');
   await home(b);
   await b.getByRole('button', { name: 'Atualizar feed', exact: true }).click();
   await expect(b.getByText('Nova review E2E para o feed.', { exact: true })).toBeVisible();
@@ -158,7 +162,7 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   await b.screenshot({ path: 'docs/evidence/I-PR-07-notifications.png' });
   await b.keyboard.press('Escape');
   await expect(b.getByRole('button', { name: 'Notificações', exact: true })).toBeFocused();
-  await game(b, 'game-3');
+  await game(b, 3);
   await b.getByRole('button', { name: 'Favoritar jogo', exact: true }).click();
   await expect(b.getByRole('button', { name: 'Remover jogo dos favoritos', exact: true })).toBeVisible();
   await b.getByRole('button', { name: 'Remover jogo dos favoritos', exact: true }).click();
@@ -178,7 +182,7 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   // Permission checks target the real API; hidden controls are not fabricated in the UI.
   for (const [method, path, expected, data, token] of [
     ['PATCH', `/reviews/${first}`, 403, { text: 'Tentativa de outra conta.' }, sessionB.token],
-    ['POST', '/games/game-1/reviews', 409, { text: 'Duplicada.' }, sessionA.token],
+    ['POST', '/games/1/reviews', 409, { text: 'Duplicada.' }, sessionA.token],
     ['GET', '/dashboard', 401, undefined, ''],
   ] satisfies [string, string, number, { text: string } | undefined, string][]) {
     const response = await request.fetch(`${api}/api/v1${path}`, { method, data, headers: { Origin: origin, ...(token ? { Authorization: `Bearer ${token}` } : {}) } });

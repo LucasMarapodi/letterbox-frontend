@@ -8,7 +8,7 @@ import { AuthError } from '../src/services/authContracts';
 import type { User } from '../src/models';
 import { deferred } from './fixtures';
 
-const user: User = { id: 'user-1', displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };
+const user: User = { id: 1, displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };
 function renderLogin(authService: Pick<AuthService, 'login'>): void {
   const service: AuthService = { ...authService, async register() { throw new Error('Cadastro não esperado no teste de login.'); } };
   render(<MemoryRouter initialEntries={['/login']}><AppRoutes authService={service} /></MemoryRouter>);

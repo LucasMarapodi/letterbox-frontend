@@ -15,7 +15,7 @@ async function open(path: string, options: { logout?: Promise<Response>; favorit
   let logins = 0;
   const transport = vi.fn<FetchTransport>().mockImplementation(async (url) => {
     const route = new URL(url).pathname;
-    if (route.endsWith('/auth/login')) { logins++; currentUser = logins === 1 ? wireUser : { ...wireUser, id: `${wireUser.id}-next`, displayName: 'Nova conta' }; return Response.json({ user: currentUser, token: `test-session-${logins}`, expiresAt: '2080-01-01T00:00:00Z' }); }
+    if (route.endsWith('/auth/login')) { logins++; currentUser = logins === 1 ? wireUser : { ...wireUser, id: (wireUser.id + 1), displayName: 'Nova conta' }; return Response.json({ user: currentUser, token: `test-session-${logins}`, expiresAt: '2080-01-01T00:00:00Z' }); }
     if (route.endsWith('/auth/me')) return Response.json(currentUser);
     if (route.endsWith('/auth/logout')) return options.logout ?? new Response(null, { status: 204 });
     if (route === '/api/v1/games') return Response.json(wirePage());
@@ -34,7 +34,7 @@ async function open(path: string, options: { logout?: Promise<Response>; favorit
   await screen.findByRole('button', { name: 'Sair' });
   return { router, adapters, transport, user: userEvent.setup() };
 }
-test.each(['/perfil/u%252F1', '/reviews/review', '/comunidade'])('logout em %s substitui rota por Início como visitante', async (path) => {
+test.each(['/perfil/1', '/reviews/review', '/comunidade'])('logout em %s substitui rota por Início como visitante', async (path) => {
   const { user, transport } = await open(path);
   await user.click(screen.getByRole('button', { name: 'Sair' }));
   await waitFor(() => expect(screen.getByLabelText('Rota atual')).toHaveTextContent(/^\/$/));
@@ -52,7 +52,7 @@ test('redireciona após limpeza local sem aguardar revogação; falha mantém av
 });
 test('replace remove perfil do histórico; resposta privada tardia não reaparece nem reutiliza token', async () => {
   const pending = deferred<Response>();
-  const { user, router, transport } = await open('/perfil/u%252F1', { favorites: pending.promise });
+  const { user, router, transport } = await open('/perfil/1', { favorites: pending.promise });
   await screen.findByText('Carregando favoritos…');
   const request = transport.mock.calls.find(([url]) => url.endsWith('/favorites'))?.[1];
   await user.click(screen.getByRole('button', { name: 'Sair' }));
