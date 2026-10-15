@@ -1,15 +1,16 @@
 import { useRef, useState, type FormEvent, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { AuthError } from '../services/authContracts';
 import { useSession } from '../session/SessionProvider';
 
 type RegistrationErrors = Partial<Record<'name' | 'email' | 'password', string>>;
-type RegistrationFeedback = { status: 'idle' } | { status: 'pending' } | { status: 'success' } | { status: 'error'; message: string };
+type RegistrationFeedback = { status: 'idle' } | { status: 'pending' } | { status: 'error'; message: string };
 
 export function RegisterPage(): ReactElement {
   const { authService } = useSession();
+  const navigate = useNavigate();
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -34,7 +35,7 @@ export function RegisterPage(): ReactElement {
     try {
       await authService.register({ name, email, password });
       setPassword('');
-      setFeedback({ status: 'success' });
+      navigate('/login', { replace: true, state: { registrationComplete: true } });
     } catch (error: unknown) {
       setFeedback({ status: 'error', message: error instanceof AuthError && error.code === 'duplicate-email'
         ? 'Este e-mail já está cadastrado.' : error instanceof AuthError && error.code === 'invalid-fields' ? 'Os dados do cadastro são inválidos. Confira os campos.' : 'Não foi possível criar a conta. Tente novamente.' });
@@ -54,7 +55,6 @@ export function RegisterPage(): ReactElement {
     </form>
     {feedback.status === 'pending' && <p role="status">Criando conta…</p>}
     {feedback.status === 'error' && <p role="alert">{feedback.message}</p>}
-    {feedback.status === 'success' && <><p role="status">Conta criada. Entre para continuar.</p><Link to="/login">Entrar para continuar</Link></>}
     <p>Já tem conta? <Link to="/login">Entrar</Link></p>
   </main>;
 }

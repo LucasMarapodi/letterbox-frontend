@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent, type ReactElement } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { AuthError } from '../services/authContracts';
@@ -11,6 +11,8 @@ type LoginFeedback = { status: 'idle' } | { status: 'pending' } | { status: 'err
 export function LoginPage(): ReactElement {
   const { signIn } = useSession();
   const navigate = useNavigate();
+  const navigationState: unknown = useLocation().state;
+  const registrationComplete = typeof navigationState === 'object' && navigationState !== null && 'registrationComplete' in navigationState && navigationState.registrationComplete === true;
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [errors, setErrors] = useState<LoginErrors>({});
@@ -40,6 +42,7 @@ export function LoginPage(): ReactElement {
 
   return <main className="auth-page">
     <h1>Entrar</h1>
+    {registrationComplete && <p role="status">Conta criada. Entre para continuar.</p>}
     <form aria-label="Login" noValidate onSubmit={submit}>
       <TextField id="login-email" label="E-mail" type="email" autoComplete="username" required disabled={pending} value={email} onChange={(event) => setEmail(event.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'login-email-error' : undefined} />
       {errors.email && <p id="login-email-error" role="alert">{errors.email}</p>}
