@@ -12,6 +12,7 @@ import { FollowButton } from '../components/FollowButton';
 import { ConnectionsSections } from '../components/ConnectionsSections';
 import { ProfileEditor } from './ProfileEditor';
 import { CatalogNotice } from '../components/CatalogNotice';
+import { ReviewFavoriteStar } from '../components/ReviewFavoriteStar';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: number }): ReactElement {
@@ -46,6 +47,7 @@ function ProfileContent({ id }: { id: number }): ReactElement {
         <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>
         <p className="review-text">{review.text}</p>
         <Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review de {review.game.title}</Link>
+        <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}
     </section>
     {user?.id === id && privateFeatures?.favorites !== false && <FavoritesSections key={`${version}-${user.id}`} />}

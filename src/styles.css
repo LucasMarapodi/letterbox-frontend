@@ -227,3 +227,10 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .favorite-game-copy h3 { margin: 0 0 0.5rem; }
 .favorite-game-copy p { margin: 0; white-space: pre-wrap; color: #b8cbd0; }
 @media (max-width: 560px) { .favorite-game { grid-template-columns: 4rem minmax(0, 1fr); gap: 0.75rem; padding: 0.75rem; } }
+
+.review-favorite-action { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.review-favorite-star { margin-left: 0.5rem; min-width: 2.75rem; min-height: 2.75rem; padding: 0.25rem 0.6rem; font-size: 1.5rem; line-height: 1; background: transparent; border: 1px solid #405259; color: #b8cbd0; }
+.review-favorite-star[aria-pressed="true"] { color: #f4d47c; border-color: #a58e56; }
+.review-favorite-star:focus-visible { outline: 3px solid #e2cf72; outline-offset: 3px; }
+.review-favorite-action [role="alert"] { font-size: 0.8rem; color: #f1bbb3; }
+.review-favorite-login { margin-left: 0.75rem; font-size: 0.8rem; }

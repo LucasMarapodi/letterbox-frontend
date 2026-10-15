@@ -53,7 +53,8 @@ test.each(cases)('Início sem favoritos, feed preservado e perfil disponível: %
   const { interaction, transport } = await open(options);
   expect(await within(await screen.findByRole('region', { name: 'Feed de reviews' })).findByText(wireReview.text)).toBeVisible();
   expectNoFavorites();
-  expect(transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/favorites')).toHaveLength(0);
+  await screen.findByRole('button', { name: options.empty ? 'Favoritar review de Ana' : 'Remover review de Ana dos favoritos' });
+  expect(transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/favorites')).toHaveLength(options.dashboard ? 0 : 1);
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
   const games = await screen.findByRole('region', { name: 'Jogos favoritos' });
   if (options.empty) expect(within(games).getByText('Nenhum jogo favorito.')).toBeVisible();
@@ -61,7 +62,7 @@ test.each(cases)('Início sem favoritos, feed preservado e perfil disponível: %
     expect(within(games).getByRole('link', { name: wireGame.title })).toHaveAttribute('href', '/jogos/12');
     expect(screen.getByRole('region', { name: 'Reviews favoritas' })).toBeVisible();
   }
-  expect(transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/favorites')).toHaveLength(1);
+  expect(transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/favorites')).toHaveLength(options.dashboard ? 1 : 2);
 });
 
 test('dashboard preserva loading, erro e retry sem montar favoritos', async () => {
@@ -101,5 +102,5 @@ test.each([true, false])('busca, ordenação, paginação e atualização do fee
   await within(screen.getByRole('region', { name: 'Feed de reviews' })).findByText(wireReview.text);
   expect(transport.mock.calls.filter(([url]) => url.endsWith('/feed/following'))).toHaveLength(feedCalls + 1);
   expectNoFavorites();
-  expect(transport.mock.calls.some(([url]) => url.endsWith('/favorites'))).toBe(false);
+  expect(transport.mock.calls.filter(([url]) => url.endsWith('/favorites'))).toHaveLength(dashboard ? 0 : 1);
 });

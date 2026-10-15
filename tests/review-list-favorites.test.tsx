@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
@@ -25,9 +25,10 @@ async function open(path = '/comunidade', options: { visitor?: boolean; read?: F
     if (endpoint === '/api/v1/favorites') return options.read ? options.read(url, init) : Response.json(lists());
     if (endpoint.startsWith('/api/v1/favorites/review/')) {
       const id = Number(endpoint.split('/').at(-1));
+      const selection = selected;
       if (init.method === 'GET') throw new Error('Não consultar favoritos por card');
       const result = options.write ? await options.write(url, init) : init.method === 'PUT' ? Response.json({ id: 91, userId: account.id, targetType: 'review', targetId: id }) : new Response(null, { status: 204 });
-      if (result.ok) { if (init.method === 'PUT') selected.add(id); else selected.delete(id); }
+      if (result.ok) { if (init.method === 'PUT') selection.add(id); else selection.delete(id); }
       return result;
     }
     if (endpoint.includes('/favorites/')) return Response.json({ favorite: null });
