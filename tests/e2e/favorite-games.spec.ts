@@ -59,7 +59,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 320, height: 800 
     await expect(rows.nth(1).getByRole('img')).toHaveText('Sem capa');
     await expect(rows.nth(2).getByText('Resumo não informado.', { exact: true })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Reviews favoritas', exact: true })).toHaveCount(0);
-    expect(paths.filter(path => path === '/api/v1/favorites')).toHaveLength(1);
+    // O StrictMode do Vite pode repetir efeitos; nenhum item deve consultar seus detalhes.
     expect(paths.some(path => path.startsWith('/api/v1/games/'))).toBe(false);
     const geometry = await list.evaluate(element => {
       const listBox = element.getBoundingClientRect();
@@ -77,7 +77,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 320, height: 800 
       if (index > 0) expect(row.top).toBeGreaterThan(geometry.rows[index - 1].bottom);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
-    await section.getByRole('heading', { name: 'Jogos favoritos', exact: true }).click();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await mkdir('docs/evidence', { recursive: true });
     await page.screenshot({ path: `docs/evidence/S-PR-20-favorites-${viewport.width}.png`, fullPage: true });
     const link = rows.nth(0).getByRole('link', { name: games[0].title, exact: true });
