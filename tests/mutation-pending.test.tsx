@@ -120,10 +120,12 @@ test('logout informa revogação pendente sem bloquear novo login; resposta anti
   const transport = vi.fn<FetchTransport>().mockImplementation((url) => url.endsWith('/auth/logout') ? pending.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
   const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
+  const logoutCall = vi.spyOn(adapters.auth, 'logout');
   render(<MemoryRouter><AppRoutes adapters={adapters} /></MemoryRouter>);
   const interaction = userEvent.setup();
   const logout = screen.getByRole('button', { name: 'Sair' });
   act(() => { fireEvent.click(logout); fireEvent.click(logout); });
+  expect(logoutCall).toHaveBeenCalledTimes(1);
   expect(transport.mock.calls.filter(([url]) => url.endsWith('/auth/logout'))).toHaveLength(1);
   expect(screen.getByText('Encerrando sessão…')).toHaveAttribute('role', 'status');
   await interaction.click(screen.getByRole('link', { name: 'Entrar' }));
