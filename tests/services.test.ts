@@ -11,6 +11,7 @@ test('permite substituir a implementação mantendo o contrato público', async 
   const games: GameService = {
     async list() { return []; },
     async getById() { return null; },
+    async getOpinions() { return { averageRating: null, reviews: [] }; },
   };
   const services = createServices({ games });
   expect(services.games).toBe(games);

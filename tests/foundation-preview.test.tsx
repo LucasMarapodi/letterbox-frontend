@@ -8,13 +8,13 @@ import type { GameService } from '../src/services/contracts';
 
 const game: Game = { id: 'game-1', title: 'Jogo fictício', summary: '', coverUrl: null, genres: [], platforms: [], releaseDate: null, averageRating: null };
 
-function renderPreview(gameService: GameService): void {
+function renderPreview(gameService: Pick<GameService, 'getById'>): void {
   render(<MemoryRouter><FoundationPreview gameService={gameService} /></MemoryRouter>);
 }
 
 test('a prévia compõe cartão, avatar, campo e botão sem publicar conteúdo', async () => {
   const user = userEvent.setup();
-  const gameService: GameService = { async list() { return [game]; }, async getById() { return game; } };
+  const gameService: Pick<GameService, 'getById'> = { async getById() { return game; } };
   renderPreview(gameService);
   expect(await screen.findByRole('link', { name: game.title })).toHaveAttribute('href', '/jogos/game-1');
   expect(screen.getByRole('img', { name: 'Visitante' })).toBeVisible();
@@ -28,7 +28,7 @@ test('a prévia compõe cartão, avatar, campo e botão sem publicar conteúdo',
 test('a leitura pendente exibe carregamento até receber o cartão', async () => {
   let resolve!: (value: Game | null) => void;
   const promise: Promise<Game | null> = new Promise((fulfill) => { resolve = fulfill; });
-  const gameService: GameService = { async list() { return []; }, getById() { return promise; } };
+  const gameService: Pick<GameService, 'getById'> = { getById() { return promise; } };
   renderPreview(gameService);
   expect(screen.getByRole('status')).toHaveTextContent('Carregando exemplo…');
   await act(async () => { resolve(game); await promise; });
@@ -37,7 +37,7 @@ test('a leitura pendente exibe carregamento até receber o cartão', async () =>
 });
 
 test('ausência do jogo apresenta o estado vazio', async () => {
-  const gameService: GameService = { async list() { return []; }, async getById() { return null; } };
+  const gameService: Pick<GameService, 'getById'> = { async getById() { return null; } };
   renderPreview(gameService);
   expect(await screen.findByText('Nenhum jogo de exemplo disponível.')).toBeVisible();
 });
@@ -47,7 +47,7 @@ test('a rejeição mostra erro e a nova tentativa usa o mesmo contrato', async (
   const getById = vi.fn<GameService['getById']>()
     .mockRejectedValueOnce(new Error('Falha simulada'))
     .mockResolvedValueOnce(game);
-  const gameService: GameService = { async list() { return []; }, getById };
+  const gameService: Pick<GameService, 'getById'> = { getById };
   renderPreview(gameService);
   expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível carregar o exemplo.');
   await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));

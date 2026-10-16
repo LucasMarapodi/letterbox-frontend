@@ -9,7 +9,7 @@ import { TextField } from '../components/TextField';
 import { GameCard } from '../components/GameCard';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 
-export interface FoundationPreviewProps { gameService?: GameService; }
+export interface FoundationPreviewProps { gameService?: Pick<GameService, 'getById'>; }
 type PreviewState =
   | { status: 'loading' }
   | { status: 'ready'; game: Game | null }
