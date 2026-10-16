@@ -102,15 +102,19 @@ test('busca aplicada com campo já apagado gera uma consulta sem termo, reseta p
   expect(queries()).toHaveLength(count + 1);
 });
 
-test('remover busca pendente restaura ordenação padrão e ignora resposta antiga', async () => {
+test('busca pendente bloqueia limpeza; após terminar, limpar restaura ordenação padrão', async () => {
   const pending = deferred<Response>();
   const { interaction, queries } = await open(async query => query.get('term') ? pending.promise : response(query));
   await screen.findByText('Página 1');
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'aplicada{Enter}');
   expect(queries().at(-1)).toMatchObject({ term: 'aplicada', sort: 'name-asc' });
   await interaction.click(screen.getByRole('button', { name: 'Limpar busca' }));
+  expect(queries()).toHaveLength(2);
+  expect(screen.getByRole('dialog', { name: 'Carregando jogos' })).toBeInTheDocument();
+  await act(async () => { pending.resolve(response(new URLSearchParams(), 'Resultado aplicado')); await pending.promise; });
+  await screen.findByRole('link', { name: 'Resultado aplicado' });
+  await interaction.click(screen.getByRole('button', { name: 'Limpar busca' }));
   expect(await screen.findByRole('link', { name: 'Jogo atual' })).toBeVisible();
   expect(queries().at(-1)).toEqual({ term: '', sort: 'release-desc', page: '1', pageSize: '20' });
-  await act(async () => { pending.resolve(response(new URLSearchParams(), 'Resultado antigo')); await pending.promise; });
-  expect(screen.queryByRole('link', { name: 'Resultado antigo' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Resultado aplicado' })).not.toBeInTheDocument();
 });
