@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
@@ -157,4 +157,15 @@ test('resposta de escrita antiga não altera curtidas da próxima sessão', asyn
   expect(await screen.findByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
   await act(async () => { pending.resolve(new Response(null, { status: 204 })); });
   expect(screen.getByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
+});
+test('detalhe agrupa curtir, favoritar e editar em uma barra antes dos comentários', async()=>{
+ await open('/reviews/55');
+ const actions=await screen.findByRole('group',{name:'Ações da review'});
+ expect(await within(actions).findByRole('button',{name:'Curtir review de Ana'})).toBeEnabled();
+ expect(await within(actions).findByRole('button',{name:'Favoritar review'})).toBeVisible();
+ await userEvent.click(within(actions).getByRole('button',{name:'Editar minha review'}));
+ expect(within(actions).getByRole('form')).toBeVisible();
+ expect(within(actions).queryByRole('heading',{name:'Comentários'})).not.toBeInTheDocument();
+ await userEvent.click(within(actions).getByRole('button',{name:'Cancelar'}));
+ expect(within(actions).getByRole('button',{name:'Editar minha review'})).toBeVisible();
 });
