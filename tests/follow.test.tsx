@@ -41,12 +41,12 @@ test('perfil consulta estado alterna relação e próprio perfil não permite se
   vi.spyOn(community, 'isFollowing').mockImplementation(service.isFollowing);
   vi.spyOn(community, 'setFollowing').mockImplementation(service.setFollowing);
   const interaction = await open();
-  await interaction.click(await screen.findByRole('button', { name: 'Seguir Leo' }));
-  await interaction.click(await screen.findByRole('button', { name: 'Deixar de seguir Leo' }));
-  expect(await screen.findByRole('button', { name: 'Seguir Leo' })).toHaveAttribute('aria-pressed', 'false');
+  await interaction.click(await screen.findByRole('button', { name: 'Seguir' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Deixar de seguir' }));
+  expect(await screen.findByRole('button', { name: 'Seguir' })).toHaveAttribute('aria-pressed', 'false');
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
   await screen.findByRole('heading', { name: 'Ana' });
-  expect(screen.queryByRole('button', { name: 'Seguir Ana' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Seguir' })).not.toBeInTheDocument();
 });
 test('visitante tem acesso público mas não altera relações', async () => {
   const set = vi.spyOn(community, 'setFollowing');
@@ -61,20 +61,20 @@ test('erro de alteração não confirma relação e erro de leitura permite nova
   const interaction = await open();
   await screen.findByText('Não foi possível consultar a relação.');
   await interaction.click(screen.getByRole('button', { name: 'Tentar novamente' }));
-  await interaction.click(await screen.findByRole('button', { name: 'Seguir Leo' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Seguir' }));
   expect(await screen.findByText('Não foi possível atualizar a relação. Tente novamente.')).toBeVisible();
-  expect(screen.getByRole('button', { name: 'Seguir Leo' })).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByRole('button', { name: 'Seguir' })).toHaveAttribute('aria-pressed', 'false');
 });
 test('envio pendente não duplica e resposta após logout não restaura ação', async () => {
   const pending = deferred<void>();
   vi.spyOn(community, 'isFollowing').mockResolvedValue(false);
   const set = vi.spyOn(community, 'setFollowing').mockReturnValue(pending.promise);
   const interaction = await open();
-  const button = await screen.findByRole('button', { name: 'Seguir Leo' });
+  const button = await screen.findByRole('button', { name: 'Seguir' });
   await act(async () => { fireEvent.click(button); fireEvent.click(button); });
   expect(set).toHaveBeenCalledTimes(1);
-  expect(screen.getByRole('button', { name: 'Atualizando relação…' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Seguir' })).toBeDisabled();
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   await act(async () => { pending.resolve(); await pending.promise; });
-  expect(screen.queryByRole('button', { name: 'Deixar de seguir Leo' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Deixar de seguir' })).not.toBeInTheDocument();
 });

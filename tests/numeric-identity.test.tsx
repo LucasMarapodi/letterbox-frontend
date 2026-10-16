@@ -53,7 +53,7 @@ test('login numérico confirma me, abre dashboard e mantém perfil próprio/edi�
   expect(transport.mock.calls.filter(([url]) => url.endsWith('/auth/me'))).toHaveLength(1);
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
   expect(await screen.findByRole('form', { name: 'Editar perfil' })).toBeVisible();
-  expect(screen.queryByRole('button', { name: 'Seguir Ana' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Seguir' })).not.toBeInTheDocument();
   await interaction.click(screen.getByRole('link', { name: `Ler review de ${wireGame.title}` }));
   expect(await screen.findByRole('form', { name: 'Salvar review' })).toBeVisible();
   expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();

@@ -41,9 +41,11 @@ async function login(): Promise<ReturnType<typeof userEvent.setup>> {
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByRole('link', { name: 'Review de exemplo' });
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
+  await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
   return interaction;
 }
-test('Home exibe feed ordenado com texto autor jogo data e destino da review', async () => {
+test('Comunidade exibe feed ordenado com texto autor jogo data e destino da review', async () => {
   const service = createMockCommunityService({ reviews, users: [ana, leo, bia] });
   await service.setFollowing(leo.id, true, ana);
   vi.spyOn(community, 'getFeed').mockImplementation(service.getFeed);
@@ -58,7 +60,7 @@ test('Home exibe feed ordenado com texto autor jogo data e destino da review', a
   expect(within(cards[0]).getByRole('link', { name: 'Ler review' })).toHaveAttribute('href', '/reviews/2');
   expect(within(cards[0]).getByText('01/02/2026')).toHaveAttribute('datetime', '2026-02-01T12:00:00Z');
 });
-test('deixar de seguir no perfil remove review ao voltar à Home', async () => {
+test('deixar de seguir no perfil remove review ao voltar à Comunidade', async () => {
   const service = createMockCommunityService();
   await service.setFollowing(leo.id, true, ana);
   vi.spyOn(community, 'getFeed').mockImplementation(service.getFeed);
@@ -67,9 +69,10 @@ test('deixar de seguir no perfil remove review ao voltar à Home', async () => {
   const interaction = await login();
   expect(await screen.findByText('Um mundo pequeno, mas cheio de detalhes para descobrir.')).toBeVisible();
   await interaction.click(screen.getByRole('link', { name: 'Perfil de Leo' }));
-  await interaction.click(await screen.findByRole('button', { name: 'Deixar de seguir Leo' }));
-  await screen.findByRole('button', { name: 'Seguir Leo' });
-  await interaction.click(screen.getByRole('link', { name: 'Início' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Deixar de seguir' }));
+  await screen.findByRole('button', { name: 'Seguir' });
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
+  await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
   expect(await screen.findByText('Nenhuma review de pessoas seguidas.')).toBeVisible();
 });
 test('erro do feed permite nova tentativa e vazio mantém catálogo acessível', async () => {
@@ -79,7 +82,7 @@ test('erro do feed permite nova tentativa e vazio mantém catálogo acessível',
   expect(await within(feed).findByText('Não foi possível carregar o feed.')).toBeVisible();
   await interaction.click(within(feed).getByRole('button', { name: 'Tentar novamente' }));
   expect(await within(feed).findByText('Nenhuma review de pessoas seguidas.')).toBeVisible();
-  expect(screen.getByRole('link', { name: 'Ecos do Horizonte' })).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Recentes' })).toBeVisible();
 });
 test('logout descarta consulta pendente e visitante não consulta feed', async () => {
   const pending = deferred<ReviewDetails[]>();

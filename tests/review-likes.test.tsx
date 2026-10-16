@@ -60,7 +60,8 @@ async function open(path = '/comunidade', options: {
   return { calls, transport, interaction, switchAccount() { account = { ...wireUser, id: 4, displayName: 'Outra conta' }; } };
 }
 test.each(['/comunidade', '/jogos/12', '/reviews/55', '/perfil/1', '/'])('contagem e estado privado em %s', async path => {
-  const { calls } = await open(path);
+  const { calls, interaction } = await open(path);
+  if(path==='/'){await interaction.click(screen.getByRole('link',{name:'Comunidade'}));await interaction.click(screen.getByRole('button',{name:'Feed de reviews'}));}
   expect(await screen.findByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
   expect(screen.getByText('2 curtidas')).toBeVisible(); expect(calls('/like/me', 'GET')).toHaveLength(1);
 });

@@ -54,7 +54,7 @@ test.each(['/comunidade', '/', '/jogos/12', '/perfil/1', '/perfil/2'])('estrelas
   const { transport, author } = await open(path);
   const stars = await screen.findAllByRole('button', { name: `Remover review de ${author.displayName} dos favoritos` });
   for (const star of stars) { expect(star).toHaveAttribute('aria-pressed', 'true'); expect(star).toHaveTextContent('★'); }
-  expect(transport.mock.calls.filter(([url]) => url.endsWith('/favorites'))).toHaveLength(path === '/' ? 0 : 1);
+  expect(transport.mock.calls.filter(([url]) => url.endsWith('/favorites'))).toHaveLength(1);
   expect(transport.mock.calls.some(([url]) => url.includes('/favorites/review/'))).toBe(false);
   if (path === '/') expect(screen.queryByRole('region', { name: 'Jogos favoritos' })).not.toBeInTheDocument();
 });
