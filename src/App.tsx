@@ -42,13 +42,13 @@ function ApplicationRoutes(): ReactElement {
       <div className="header-inner">
       <Link className="brand" to="/" aria-label="Game Reviews"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>Game Reviews</Link>
       <div className="header-controls">
+      <MenuSearch onSearch={term => navigate(searchUrl(term))} />
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
         <Link to="/comunidade">Comunidade</Link>
         {user && privateFeatures?.notifications !== false && <NotificationBell key={`${version}-${user.id}`} />}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
-      <MenuSearch onSearch={term => navigate(searchUrl(term))} />
       {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" disabled={signingOut} onClick={logout}>Sair <span aria-hidden="true">↗</span></button></div>}
       </div>
       </div>
