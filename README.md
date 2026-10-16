@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 633 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 647 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -44,6 +44,8 @@ Início não monta seções de favoritos. Elas permanecem no próprio perfil; Re
 Reviews nas listagens de Comunidade, feed, jogo e perfil têm estrela para favoritar/remover, com estado compartilhado por página e sessão. O dashboard reaproveita os favoritos do payload agregado. Veja [PR-23](docs/S-PR-23.md).
 
 Busca, limpeza efetiva da busca e troca de tamanho preservam o catálogo montado e a rolagem com overlay bloqueante durante a consulta. Erro libera a tela e oferece retry; operações sem alteração não consultam novamente. Veja [PR-25](docs/S-PR-25.md).
+
+Menu público tem busca de pessoas/jogos, debounce de 300 ms, sugestões agrupadas, navegação por teclado e retry de uma categoria. A página de resultados/Enter sem seleção depende da PR-28. Veja [PR-27](docs/S-PR-27.md).
 
 Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e invalida solicitações anteriores imediatamente, tentando revogação real. 401 privado atual limpa sessão; respostas antigas não recuperam identidade ou dados pessoais. Falhas de rede têm erro/retry, sem fixtures.
 

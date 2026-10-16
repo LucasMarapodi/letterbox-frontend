@@ -2,6 +2,7 @@ import { isLocalId, type LocalId } from '../../models';
 import type { PublicProfile, Connections } from '../communityContracts';
 import type { PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse, LoginResponse, DashboardResponse, GameOpinionsResponse, FavoriteListsResponse, RankedReviewResponse, RankedGameResponse } from './dtos';
 import { HttpFailure } from './client';
+import type { SearchResponse, SearchQuery, SearchGroup, SearchError, SearchPerson, SearchGame, SearchMetadata } from '../searchContracts';
 export type Decoder<T> = (value: unknown) => T;
 export function decodeGamePage(value: unknown): GamePageResponse {
   const item = record(value);
@@ -83,3 +84,42 @@ export function unwrapFollowing(value: unknown): boolean { const result = record
 export function decodeList<T>(value: unknown, item: Decoder<T>): T[] { return Array.isArray(value) ? value.map((entry: unknown) => item(entry)) : fail(); }
 export function composeProfile(user: unknown, reviews: unknown): PublicProfile { return { user: decodeUser(user), reviews: decodeList(reviews, decodeReview) }; }
 export function composeConnections(followers: unknown, following: unknown): Connections { return { followers: decodeList(followers, decodeUser), following: decodeList(following, decodeUser) }; }
+
+export function decodeSearch(value: unknown, query: SearchQuery): SearchResponse {
+  function searchError(value: unknown, total = false): SearchError {
+    const item = record(value);
+    if (!(total ? ['search_unavailable'] : ['storage_unavailable', 'integration_unavailable', 'integration_timeout', 'integration_invalid_response']).includes(text(item.code))) return fail();
+    return { code: text(item.code), message: text(item.message) };
+  }
+  function group<T>(value: unknown, decode: Decoder<T>, requested: boolean, games = false): SearchGroup<T> {
+    const item = record(value);
+    const items = decodeList(item.items, decode);
+    if (!requested && item.status !== 'notRequested') return fail();
+    if (requested && item.status === 'notRequested') return fail();
+    if (item.status === 'ready') {
+      const size = query.mode === 'suggestions' ? 5 : 20;
+      if (item.page !== query.page || item.pageSize !== size || items.length > size || typeof item.hasNextPage !== 'boolean' || item.error !== null) return fail();
+      let metadata: SearchMetadata | null = null;
+      if (item.metadata !== null) {
+        if (!games) return fail();
+        const meta = record(item.metadata);
+        if (typeof meta.isStale !== 'boolean') return fail();
+        metadata = { fetchedAt: instant(meta.fetchedAt), isStale: meta.isStale };
+      }
+      return { status: 'ready', items, page: query.page, pageSize: size, hasNextPage: item.hasNextPage, error: null, metadata };
+    }
+    if (items.length || item.page !== null || item.pageSize !== null || item.hasNextPage !== null || item.metadata !== null) return fail();
+    if (item.status === 'unavailable') return { status: 'unavailable', items, page: null, pageSize: null, hasNextPage: null, error: searchError(item.error), metadata: null };
+    if (item.status === 'notRequested' && item.error === null) return { status: 'notRequested', items, page: null, pageSize: null, hasNextPage: null, error: null, metadata: null };
+    return fail();
+  }
+  const person: Decoder<SearchPerson> = value => { const item = publicRecord(value); return { id: localId(item.id), username: text(item.username), displayName: text(item.displayName), avatarUrl: nullable(item.avatarUrl, text) }; };
+  const game: Decoder<SearchGame> = value => { const item = publicRecord(value); return { id: localId(item.id), title: text(item.title), summary: text(item.summary), coverUrl: nullable(item.coverUrl, text), releaseDate: nullable(item.releaseDate, date) }; };
+  const item = record(value);
+  if (item.query !== query.q.trim()) return fail();
+  const people = group(item.people, person, query.scope !== 'games');
+  const games = group(item.games, game, query.scope !== 'people', true);
+  const available = people.status === 'ready' || games.status === 'ready';
+  if (available && item.error !== null) return fail();
+  return { query: item.query as string, people, games, error: available ? null : searchError(item.error, true) };
+}

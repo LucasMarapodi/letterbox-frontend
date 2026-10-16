@@ -18,13 +18,15 @@ import type { ApplicationServices } from './services/runtime';
 import { CommunityPage } from './pages/CommunityPage';
 import { DashboardHome } from './pages/DashboardHome';
 import { FavoritesProvider } from './components/FavoritesProvider';
+import { MenuSearch } from './components/MenuSearch';
 
 export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
 function ApplicationRoutes(): ReactElement {
   const { user, signOut, signingOut, notice, version } = useSession();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   function logout(): void {
     // signOut limpa a sessão antes do primeiro await; a resposta remota não navega.
     void signOut();
@@ -44,6 +46,7 @@ function ApplicationRoutes(): ReactElement {
         {user && privateFeatures?.notifications !== false && <NotificationBell key={`${version}-${user.id}`} />}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
+      <MenuSearch key={location.key} />
       {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" disabled={signingOut} onClick={logout}>Sair <span aria-hidden="true">↗</span></button></div>}
       </div>
       </div>

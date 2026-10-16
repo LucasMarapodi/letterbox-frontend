@@ -4,6 +4,7 @@ import type { CommunityService } from './communityContracts';
 import type { NotificationService } from './notificationContracts';
 import type { DashboardService } from './dashboardContracts';
 import type { FetchTransport } from './http/client';
+import type { SearchService } from './searchContracts';
 import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters, type HttpSessionStore } from './http/adapters';
 import { createHttpAuthService } from './http/authService';
 import { createHttpGameService } from './http/gameService';
@@ -16,7 +17,7 @@ import { createCatalogStore, type CatalogStore } from './catalogMetadata';
 // HTTP é a única fonte de negócio na aplicação.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
 export type PrivateFeature = 'opinions' | 'rating' | 'publishReview' | 'editReview' | 'comments' | 'favorites' | 'follows' | 'dashboard' | 'feed' | 'notifications';
-export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; dashboard?: DashboardService; catalog?: CatalogStore; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
+export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; search?: SearchService; dashboard?: DashboardService; catalog?: CatalogStore; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
 export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown }, options: { transport?: FetchTransport; session?: HttpSessionStore } = {}): ApplicationServices {
   const session = options.session ?? createHttpSessionStore();
   const catalog = createCatalogStore();
@@ -25,6 +26,7 @@ export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown 
   const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), { ...options, session, catalog });
   return {
     catalog,
+    search: { search: (query, signal) => getHttp().search(query, signal) },
     auth: createHttpAuthService(getHttp, session), games: createHttpGameService(getHttp), http: getHttp,
     privateFeatures: { opinions: false, rating: true, publishReview: true, editReview: true, comments: true, favorites: true, follows: true, dashboard: true, feed: true, notifications: true },
     dashboard: { get: () => communityRequest(() => getHttp().community.dashboard()) },
