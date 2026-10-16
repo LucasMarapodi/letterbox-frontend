@@ -70,8 +70,8 @@ for (const mobile of [false, true]) {
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.getByText('Página 1', { exact: true })).toBeVisible();
     expect(Object.fromEntries(queries.at(-1)!)).toEqual({ term: 'a & b', sort: 'release-desc', genreId: '31', platformId: '42', page: '1', pageSize: '50' });
-    await expect(page.getByLabel('Filtros aplicados')).toContainText('Aventura da API');
-    await expect(page.getByLabel('Filtros aplicados')).toContainText('Plataforma da API');
+    await expect(page.getByLabel('Gênero', { exact: true })).toHaveValue('31');
+    await expect(page.getByLabel('Filtros aplicados')).toHaveCount(0);
     await expect(page.getByRole('article').first().locator('time')).toHaveText('29/02/2024');
     await page.locator('.catalog-toolbar').scrollIntoViewIfNeeded();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
