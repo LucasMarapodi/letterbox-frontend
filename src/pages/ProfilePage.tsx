@@ -12,7 +12,6 @@ import { FavoritesSections } from '../components/FavoritesSections';
 import { FollowButton } from '../components/FollowButton';
 import { ConnectionsSections } from '../components/ConnectionsSections';
 import { ProfileEditor } from './ProfileEditor';
-import { ProfileCompletion } from './ProfileCompletion';
 import { CatalogNotice } from '../components/CatalogNotice';
 import { ReviewFavoriteStar } from '../components/ReviewFavoriteStar';
 
@@ -24,14 +23,13 @@ function ProfileContent({ id }: { id: number }): ReactElement {
   const [attempt, setAttempt] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [connectionsVersion, setConnectionsVersion] = useState(0);
-  const [completionRevision, setCompletionRevision] = useState(0);
-  const [editorRevision, setEditorRevision] = useState(0);
+
   useEffect(() => {
     let active = true;
     setRefreshing(true);
     void community.getProfile(id, user).then((profile) => { if (active) { setState({ status: 'ready', profile }); setRefreshing(false); } }, () => { if (active) { setState({ status: 'error' }); setRefreshing(false); } });
     return () => { active = false; };
-  }, [id, user, attempt]);
+  }, [id, user?.id, attempt]);
   if (state.status === 'loading') return <LoadingState region="Informações do perfil" message="Carregando perfil…" />;
   if (state.status === 'error') return <ErrorState region="Informações do perfil" message="Não foi possível carregar o perfil." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
   const profile = state.profile;
@@ -41,12 +39,10 @@ function ProfileContent({ id }: { id: number }): ReactElement {
     <section className="profile-overview" aria-label="Informações do perfil" aria-busy={refreshing}>
       {refreshing ? <LoadingState message="Carregando perfil…" /> : <>
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
-      <div><h2>{profile.user.displayName}</h2><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
+      <div className="profile-overview-copy"><div className="profile-name-row"><h2>{profile.user.displayName}</h2><ProfileEditor profile={profile.user} onSaved={updated => setState({ status: 'ready', profile: { ...profile, user: updated } })} /></div><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
       <FollowButton targetId={id} name={profile.user.displayName} onChanged={() => setConnectionsVersion((value) => value + 1)} />
       </>}
     </section>
-    <ProfileCompletion profile={profile.user} revision={completionRevision} onSaved={data => { setState({ status: 'ready', profile: { ...profile, user: { ...profile.user, bio: data.bio, avatarUrl: data.avatarUrl } } }); setEditorRevision(value => value + 1); }} />
-    <ProfileEditor key={editorRevision} profile={profile.user} onSaved={(updated) => { setState({ status: 'ready', profile: { ...profile, user: updated } }); setCompletionRevision(value => value + 1); }} />
     <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
       {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
         <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>

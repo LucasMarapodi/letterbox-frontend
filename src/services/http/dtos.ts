@@ -26,6 +26,7 @@ export interface RatingRequest { value: number; }
 export interface TextRequest { text: string; }
 export interface ReviewRequest { rating: number; text?: string | null; }
 export interface ReviewPatchRequest { rating?: number; text?: string | null; }
-export interface ProfilePatchRequest { displayName?: string; bio?: string; avatarUrl?: string | null; }
+export interface ProfilePatchRequest { displayName?: string; bio?: string | null; avatarUrl?: string | null; country?: string | null; state?: string | null; favoriteGameIds?: number[]; }
+export interface ProfileUpdateResponse extends PublicUserResponse { completion: ProfileCompletionResponse; }
 export interface ProfileCompletionRequest { country: string; state: string; bio: string; avatarUrl?: string | null; favoriteGameIds: number[]; }
 export interface ProfileCompletionResponse { country: string | null; state: string | null; bio: string; avatarUrl: string | null; favoriteGameIds: number[]; favoriteGameCount: number; isComplete: boolean; }

@@ -1,8 +1,8 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import type { GameQuery, CatalogFilters } from '../contracts';
 import { decodeCatalogFilters } from './decoders';
-import { decodeProfileCompletion } from './decoders';
-import type { ProfileCompletionRequest, ProfileCompletionResponse } from './dtos';
+import { decodeProfileCompletion, decodeProfileUpdate } from './decoders';
+import type { ProfileCompletionRequest, ProfileCompletionResponse, ProfileUpdateResponse } from './dtos';
 import type { ReviewRequest, ReviewPatchRequest } from './dtos';
 import { decodeReviewLikeStatus } from './decoders';
 import type { ReviewLikeStatusResponse } from './dtos';
@@ -50,6 +50,7 @@ export interface HttpAdapters {
     comment(id: ReviewId, input: TextRequest, signal?: AbortSignal): Promise<CommentResponse>;
   };
   profiles: {
+    update(input: ProfilePatchRequest, signal?: AbortSignal): Promise<ProfileUpdateResponse>;
     completion(signal?: AbortSignal): Promise<ProfileCompletionResponse>;
     complete(input: ProfileCompletionRequest, signal?: AbortSignal): Promise<ProfileCompletionResponse>;
     get(id: UserId, signal?: AbortSignal): Promise<PublicUserResponse>;
@@ -161,6 +162,7 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       comment: (id, input, signal) => call({ method: 'POST', path: ['reviews', localPathId(id), 'comments'], body: { text: input.text }, signal }, decodeComment, true),
     },
     profiles: {
+      update: (input, signal) => call({ method: 'PATCH', path: ['users', 'me', 'profile'], signal, body: input }, decodeProfileUpdate, true),
       completion: signal => call({ path: ['users', 'me', 'profile-completion'], signal }, decodeProfileCompletion, true),
       complete: (input, signal) => call({ method: 'PUT', path: ['users', 'me', 'profile-completion'], signal, body: { country: input.country, state: input.state, bio: input.bio, favoriteGameIds: input.favoriteGameIds, ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }) } }, decodeProfileCompletion, true),
       get: getUser, reviews: userReviews, followers, following,
