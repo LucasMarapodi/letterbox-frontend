@@ -47,7 +47,7 @@ test('respostas numéricas de nota, publicação e edição são aceitas; favori
     if (path.endsWith('/rating/me')) return Response.json(init.method === 'PUT' ? { ...rating, value: 5 } : { rating: null });
     if (path.endsWith('/reviews/me')) return Response.json({ review: saved ? { ...review, text } : null });
     if (path === '/api/v1/games/12/reviews' && init.method === 'POST') { saved = true; return Response.json({ ...review, text }); }
-    if (path.endsWith('/opinions')) return Response.json({ averageRating: null, reviews: [] });
+    if (path.endsWith('/opinions')) return Response.json({ averageRating: saved?4.5:null, reviews: saved?[review]:[] });
     if (path === '/api/v1/reviews/55') {
       if (init.method === 'PATCH') text = 'Review editada';
       return Response.json({ ...review, text });
@@ -61,16 +61,14 @@ test('respostas numéricas de nota, publicação e edição são aceitas; favori
   await services.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={['/jogos/12']}><AppRoutes adapters={services} /></MemoryRouter>);
   const interaction = userEvent.setup();
-  await interaction.click(await screen.findByRole('radio', { name: '5 estrelas' }));
-  await interaction.click(screen.getByRole('button', { name: 'Salvar nota' }));
-  expect(await screen.findByText('Nota 5 salva.')).toBeVisible();
-  await interaction.type(await screen.findByLabelText('Sua review'), 'Review numérica');
+  await interaction.click(await screen.findByRole('button',{name:'Criar review'})); await interaction.click(await screen.findByRole('radio', { name: '5 estrelas' }));
+  await interaction.type(await screen.findByLabelText('Descrição (opcional)'), 'Review numérica');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   expect(await screen.findByText('Review publicada.')).toBeVisible();
-  await interaction.click(await screen.findByRole('link', { name: 'Editar minha review' }));
+  await interaction.click(await screen.findByRole('link',{name:'Review de Ana'})); await interaction.click(await screen.findByRole('button',{name:'Editar minha review'}));
   expect(await screen.findByRole('button', { name: 'Remover review dos favoritos' })).toBeVisible();
-  await interaction.clear(await screen.findByLabelText('Sua review'));
-  await interaction.type(screen.getByLabelText('Sua review'), 'Review editada');
+  await interaction.clear(await screen.findByLabelText('Descrição (opcional)'));
+  await interaction.type(screen.getByLabelText('Descrição (opcional)'), 'Review editada');
   await interaction.click(screen.getByRole('button', { name: 'Salvar review' }));
   expect(await screen.findByText('Review atualizada.')).toBeVisible();
   expect(services.auth.sessionUser?.()?.id).toBe(wireUser.id);

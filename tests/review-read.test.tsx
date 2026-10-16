@@ -9,7 +9,7 @@ import type { ReviewDetails } from '../src/services/communityContracts';
 import { deferred } from './fixtures';
 import { encodeRouteId } from '../src/routing/encodeRouteId';
 
-const review: ReviewDetails = { id: 55, userId: 42, gameId: 12, text: 'Review completa pública', createdAt: '2026-01-02T12:00:00Z', updatedAt: null, author: { id: 42, displayName: 'Ana', avatarUrl: null }, game: { id: 12, title: 'Jogo da review' } };
+const review: ReviewDetails = { id: 55, userId: 42, gameId: 12, rating: 4, text: 'Review completa pública', createdAt: '2026-01-02T12:00:00Z', updatedAt: null, author: { id: 42, displayName: 'Ana', avatarUrl: null }, game: { id: 12, title: 'Jogo da review' } };
 afterEach(() => vi.restoreAllMocks());
 function open(): void { render(<MemoryRouter initialEntries={[`/reviews/${encodeRouteId(review.id)}`]}><AppRoutes /></MemoryRouter>); }
 test('leitura pública preserva ID opaco e mostra autor jogo data e links', async () => {

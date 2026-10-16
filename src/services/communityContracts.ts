@@ -1,6 +1,7 @@
 import type { ReviewId, UserId, GameId, Rating, User, Review, Comment, Favorite, Game } from '../models';
 import type { GameOpinions, PublicReview } from './contracts';
 export interface ReviewDetails extends PublicReview { game: { id: GameId; title: string }; }
+export interface ReviewInput { rating: number; text: string; }
 export interface PublicComment extends Comment { author: Pick<User, 'id' | 'displayName' | 'avatarUrl'>; }
 export interface PublicProfile { user: User; reviews: ReviewDetails[]; }
 export type FavoriteKind = 'game' | 'review';
@@ -29,11 +30,11 @@ export interface CommunityService {
   getProfile(id: UserId, sessionUser?: User | null): Promise<PublicProfile | null>;
   rate(gameId: GameId, value: number, user: User | null): Promise<Rating>;
   getRating(gameId: GameId, user: User | null): Promise<Rating | null>;
-  publish(gameId: GameId, text: string, user: User | null): Promise<Review>;
+  publish(gameId: GameId, input: ReviewInput, user: User | null): Promise<Review>;
   findOwnReview(gameId: GameId, user: User): Promise<Review | null>;
   getOpinions(gameId: GameId): Promise<GameOpinions>;
   getReview(id: ReviewId): Promise<ReviewDetails | null>;
-  editReview(id: ReviewId, text: string, user: User | null): Promise<Review>;
+  editReview(id: ReviewId, input: ReviewInput, user: User | null): Promise<Review>;
   getComments(reviewId: ReviewId): Promise<PublicComment[]>;
   comment(reviewId: ReviewId, text: string, user: User | null): Promise<Comment>;
 }

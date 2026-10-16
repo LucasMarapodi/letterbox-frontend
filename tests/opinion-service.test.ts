@@ -3,7 +3,7 @@ import { createMockGameService } from './doubles/gameService';
 import type { Rating, Review, User } from '../src/models';
 
 const user: User = { id: 1, username: 'ana', displayName: 'Ana', bio: '', avatarUrl: null };
-const review: Review = { id: 1, gameId: 1, userId: user.id, text: 'Review do primeiro jogo.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null };
+const review: Review = { id: 1, gameId: 1, userId: user.id, rating: 4, text: 'Review do primeiro jogo.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null };
 const ratings: Rating[] = [
   { id: 1, gameId: 1, userId: 1, value: 0 },
   { id: 2, gameId: 1, userId: 2, value: 4 },

@@ -1,3 +1,4 @@
+import { ReviewBody } from '../components/ReviewBody';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
@@ -49,7 +50,7 @@ function ProfileContent({ id }: { id: number }): ReactElement {
     <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
       {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
         <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>
-        <p className="review-text">{review.text}</p>
+        <ReviewBody review={review} />
         <Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review de {review.game.title}</Link>
         <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}

@@ -3,6 +3,7 @@ import type { GameQuery, CatalogFilters } from '../contracts';
 import { decodeCatalogFilters } from './decoders';
 import { decodeProfileCompletion } from './decoders';
 import type { ProfileCompletionRequest, ProfileCompletionResponse } from './dtos';
+import type { ReviewRequest, ReviewPatchRequest } from './dtos';
 import { validSearchTerm, type SearchService } from '../searchContracts';
 import { decodeSearch } from './decoders';
 import { isLocalId, type User, type UserId, type GameId, type ReviewId } from '../../models';
@@ -36,11 +37,11 @@ export interface HttpAdapters {
     myRating(id: GameId, signal?: AbortSignal): Promise<RatingResponse | null>;
     rate(id: GameId, input: RatingRequest, signal?: AbortSignal): Promise<RatingResponse>;
     myReview(id: GameId, signal?: AbortSignal): Promise<ReviewResponse | null>;
-    publish(id: GameId, input: TextRequest, signal?: AbortSignal): Promise<ReviewResponse>;
+    publish(id: GameId, input: ReviewRequest, signal?: AbortSignal): Promise<ReviewResponse>;
   };
   reviews: {
     get(id: ReviewId, signal?: AbortSignal): Promise<ReviewResponse>;
-    edit(id: ReviewId, input: TextRequest, signal?: AbortSignal): Promise<ReviewResponse>;
+    edit(id: ReviewId, input: ReviewPatchRequest, signal?: AbortSignal): Promise<ReviewResponse>;
     comments(id: ReviewId, signal?: AbortSignal): Promise<CommentResponse[]>;
     comment(id: ReviewId, input: TextRequest, signal?: AbortSignal): Promise<CommentResponse>;
   };
@@ -145,11 +146,11 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       myRating: (id, signal) => call({ path: ['games', localPathId(id), 'rating', 'me'], signal }, unwrapRating, true),
       rate: (id, input, signal) => call({ method: 'PUT', path: ['games', localPathId(id), 'rating', 'me'], body: { value: input.value }, signal }, decodeRating, true),
       myReview: (id, signal) => call({ path: ['games', localPathId(id), 'reviews', 'me'], signal }, unwrapReview, true),
-      publish: (id, input, signal) => call({ method: 'POST', path: ['games', localPathId(id), 'reviews'], body: { text: input.text }, signal }, decodeReview, true),
+      publish: (id, input, signal) => call({ method: 'POST', path: ['games', localPathId(id), 'reviews'], body: { rating: input.rating, ...(input.text === undefined ? {} : { text: input.text }) }, signal }, decodeReview, true),
     },
     reviews: {
       get: (id, signal) => call({ path: ['reviews', localPathId(id)], signal }, decodeReview),
-      edit: (id, input, signal) => call({ method: 'PATCH', path: ['reviews', localPathId(id)], body: { text: input.text }, signal }, decodeReview, true),
+      edit: (id, input, signal) => call({ method: 'PATCH', path: ['reviews', localPathId(id)], body: { ...(input.rating === undefined ? {} : { rating: input.rating }), ...(input.text === undefined ? {} : { text: input.text }) }, signal }, decodeReview, true),
       comments: (id, signal) => call({ path: ['reviews', localPathId(id), 'comments'], signal }, list(decodeComment)),
       comment: (id, input, signal) => call({ method: 'POST', path: ['reviews', localPathId(id), 'comments'], body: { text: input.text }, signal }, decodeComment, true),
     },

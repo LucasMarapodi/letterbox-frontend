@@ -14,9 +14,9 @@ test('representa usuários e jogos com contratos provisórios verificáveis', ()
   void invalidGame;
 });
 
-test('representa notas, reviews e comentários sem exigir nota junto à review', () => {
+test('representa notas, reviews e comentários com nota nullable apenas para reviews legadas', () => {
   const rating = { id: 1, userId: 1, gameId: 1, value: 0 } satisfies Rating;
-  const review = { id: 1, userId: 1, gameId: 1, text: 'Gostei.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null } satisfies Review;
+  const review = { id: 1, userId: 1, gameId: 1, rating: 4, text: 'Gostei.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null } satisfies Review;
   const comment = { id: 1, userId: 2, reviewId: 1, parentCommentId: null, likeCount: 0, text: 'Concordo.', createdAt: '2026-01-02T00:00:00Z' } satisfies Comment;
   expectTypeOf(rating).toExtend<Rating>();
   expectTypeOf(review).toExtend<Review>();

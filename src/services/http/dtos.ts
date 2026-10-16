@@ -23,6 +23,8 @@ export interface RegisterRequest { name: string; email: string; password: string
 export interface LoginRequest { email: string; password: string; }
 export interface RatingRequest { value: number; }
 export interface TextRequest { text: string; }
+export interface ReviewRequest { rating: number; text?: string | null; }
+export interface ReviewPatchRequest { rating?: number; text?: string | null; }
 export interface ProfilePatchRequest { displayName?: string; bio?: string; avatarUrl?: string | null; }
 export interface ProfileCompletionRequest { country: string; state: string; bio: string; avatarUrl?: string | null; favoriteGameIds: number[]; }
 export interface ProfileCompletionResponse { country: string | null; state: string | null; bio: string; avatarUrl: string | null; favoriteGameIds: number[]; favoriteGameCount: number; isComplete: boolean; }

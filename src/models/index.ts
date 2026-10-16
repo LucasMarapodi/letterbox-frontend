@@ -49,6 +49,8 @@ export interface Review {
   userId: UserId;
   gameId: GameId;
   text: string;
+  /** Null somente para o histórico sem avaliação; nunca converter para zero. */
+  rating: number | null;
   createdAt: DateTime;
   updatedAt: DateTime | null;
 }

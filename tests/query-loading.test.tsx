@@ -44,7 +44,6 @@ const cases: QueryCase[] = [
   { route: '/comunidade', endpoint: '/community/reviews/most-commented', region: 'Reviews mais comentadas', action: 'Mais comentadas' },
   { route: '/comunidade', endpoint: '/community/games/in-discussion', region: 'Jogos em discussão', action: 'Jogos em discussão' },
   { route: '/', endpoint: '/notifications', region: 'Dados de notificações', authenticated: true, action: 'Notificações' },
-  { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/rating/me`, region: 'Nota pessoal', authenticated: true },
   { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/reviews/me`, region: 'Consulta da sua review', authenticated: true },
   { route: gameRoute, endpoint: `/favorites/game/${encodeURIComponent(wireGame.id)}`, region: 'Favorito pessoal', authenticated: true },
   { route: '/perfil/2', endpoint: '/users/2/follow/me', region: 'Relação pessoal', authenticated: true },
@@ -107,8 +106,8 @@ test('falha ao consultar review própria oferece retry sem liberar publicação 
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[gameRoute]}><AppRoutes adapters={adapters} /></MemoryRouter>);
   await screen.findByText('Não foi possível verificar sua review.');
-  expect(screen.queryByLabelText('Sua review')).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('Descrição (opcional)')).not.toBeInTheDocument();
   failure = false;
   await userEvent.setup().click(screen.getByRole('button', { name: 'Tentar novamente' }));
-  expect(await screen.findByLabelText('Sua review')).toBeVisible();
+  await userEvent.click(await screen.findByRole('button',{name:'Criar review'})); expect(await screen.findByLabelText('Descrição (opcional)')).toBeVisible();
 });

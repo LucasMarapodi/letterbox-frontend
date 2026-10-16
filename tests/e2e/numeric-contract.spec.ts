@@ -6,10 +6,10 @@ import { wireUser, wireGame, wireReview } from '../http-fixtures';
 
 const account = { ...wireUser, id: 42 };
 const game = { ...wireGame, id: 12, igdbId: 345447 };
-const review = { ...wireReview, userId: 42, gameId: 12, author: { ...wireReview.author, id: 42 }, game: { ...wireReview.game, id: 12 } };
+const review = { ...wireReview, rating: 3, userId: 42, gameId: 12, author: { ...wireReview.author, id: 42 }, game: { ...wireReview.game, id: 12 } };
 let server: Server;
 let storageUnavailable = true;
-let savedRating = 3;
+
 let gameFavorite = true;
 let reviewFavorite = true;
 const paths: string[] = [];
@@ -32,12 +32,10 @@ test.beforeAll(async () => {
     else if (path.endsWith('/auth/me') || path === '/api/v1/users/42') body = account;
     else if (path === '/api/v1/games') body = { items: [game], page: 1, pageSize: 20, hasNextPage: false };
     else if (path === '/api/v1/games/12') body = game;
-    else if (path.endsWith('/opinions')) body = { averageRating: 3, reviews: [review] };
-    else if (path.endsWith('/rating/me')) {
-      if (request.method === 'PUT') savedRating = 5;
-      const rating = { id: 77, userId: 42, gameId: 12, value: savedRating };
-      body = request.method === 'PUT' ? rating : { rating };
-    }
+    else if (path.endsWith('/opinions')) body = { averageRating: review.rating, reviews: [review] };
+    else if(path.endsWith('/games/filters')) body={genres:[],platforms:[]};
+    else if(path.endsWith('/profile-completion')) body={country:null,state:null,bio:account.bio,avatarUrl:account.avatarUrl,favoriteGameIds:[],favoriteGameCount:0,isComplete:false};
+
     else if (path.endsWith('/reviews/me')) body = { review };
     else if (path === '/api/v1/favorites/game/12' || path === '/api/v1/favorites/review/55') {
       const isGame = path.includes('/game/');
@@ -54,7 +52,7 @@ test.beforeAll(async () => {
     else if (path.endsWith('/favorites')) body = { games: [game], reviews: [] };
     else if (path === '/api/v1/users/42/reviews') body = [review];
     else if (path === `/api/v1/reviews/${encodeURIComponent(review.id)}`) {
-      if (request.method === 'PATCH') review.text = 'Review numérica editada';
+      if (request.method === 'PATCH') { review.text = 'Review numérica editada'; review.rating=5; }
       body = review;
     }
     response.end(JSON.stringify(body));
@@ -80,10 +78,10 @@ test('contrato P-PR-05: favoritos de jogo/review numéricos com inclusão e remo
   await expect(page.getByRole('link', { name: 'Meu perfil' })).toHaveAttribute('href', '/perfil/42');
   await page.getByRole('region', { name: 'Jogos', exact: true }).getByRole('link', { name: game.title, exact: true }).click();
   await expect(page).toHaveURL(/\/jogos\/12$/);
-  await expect(page.getByRole('radio', { name: '3 estrelas', exact: true })).toBeChecked();
+  await page.getByRole('button',{name:'Editar minha review',exact:true}).click(); await expect(page.getByRole('radio', { name: '3 estrelas', exact: true })).toBeChecked();
   await page.getByRole('radio', { name: '5 estrelas', exact: true }).check();
-  await page.getByRole('button', { name: 'Salvar nota', exact: true }).click();
-  await expect(page.getByText('Nota 5 salva.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Salvar review', exact: true }).click();
+  await expect(page.getByText('Review atualizada.', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Remover jogo dos favoritos' })).toBeVisible();
   await page.getByRole('button', { name: 'Remover jogo dos favoritos', exact: true }).click();
   await page.getByRole('button', { name: 'Favoritar jogo', exact: true }).click();
@@ -93,13 +91,13 @@ test('contrato P-PR-05: favoritos de jogo/review numéricos com inclusão e remo
   await page.getByRole('link', { name: 'Meu perfil' }).click();
   await expect(page.getByRole('form', { name: 'Editar perfil', exact: true })).toBeVisible();
   await page.getByRole('link', { name: `Ler review de ${game.title}`, exact: true }).click();
-  await expect(page.getByRole('form', { name: 'Salvar review', exact: true })).toBeVisible();
+  await page.getByRole('button',{name:'Editar minha review',exact:true}).click(); await expect(page.getByRole('form', { name: 'Salvar review', exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/reviews\/55$/);
   await expect(page.getByRole('button', { name: 'Remover review dos favoritos', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Remover review dos favoritos', exact: true }).click();
   await page.getByRole('button', { name: 'Favoritar review', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Remover review dos favoritos', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await page.getByLabel('Sua review', { exact: true }).fill('Review numérica editada');
+  await page.getByLabel('Descrição (opcional)', { exact: true }).fill('Review numérica editada');
   await page.getByRole('button', { name: 'Salvar review', exact: true }).click();
   await expect(page.getByText('Review atualizada.', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Seu comentário', { exact: true })).toHaveCount(0);

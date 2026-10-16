@@ -24,7 +24,7 @@ export function createHttpRatingService(getHttp: () => HttpAdapters): Pick<Commu
 export function createHttpPublishingService(getHttp: () => HttpAdapters): Pick<CommunityService, 'findOwnReview' | 'publish' | 'getGameReviews'> {
   return {
     findOwnReview: (id) => communityRequest(() => getHttp().games.myReview(id)),
-    publish: (id, text) => communityRequest(() => getHttp().games.publish(id, { text }), 'empty-text', 'duplicate-review'),
+    publish: (id, input) => communityRequest(() => getHttp().games.publish(id, input), 'invalid-rating', 'duplicate-review'),
     getGameReviews: (id) => getHttp().games.reviews(id),
   };
 }
@@ -34,7 +34,7 @@ export function createHttpReviewService(getHttp: () => HttpAdapters): Pick<Commu
       try { return await getHttp().reviews.get(id); }
       catch (error: unknown) { if (error instanceof HttpFailure && error.kind === 'http' && error.status === 404) return null; throw error; }
     },
-    editReview: (id, text) => communityRequest(() => getHttp().reviews.edit(id, { text }), 'empty-text'),
+    editReview: (id, input) => communityRequest(() => getHttp().reviews.edit(id, input), 'invalid-rating'),
   };
 }
 export function createHttpCommentService(getHttp: () => HttpAdapters): Pick<CommunityService, 'getComments' | 'comment'> {
