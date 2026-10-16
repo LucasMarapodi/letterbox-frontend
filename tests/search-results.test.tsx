@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
+import { StrictMode } from 'react';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
@@ -17,7 +18,7 @@ function body(query: URLSearchParams) {
   return { query: query.get('q'), people: query.get('scope') === 'games' ? skipped : ready([{ ...person, displayName: `Mario página ${page}` }]), games: query.get('scope') === 'people' ? skipped : ready([game]), error: null };
 }
 function Location() { const location = useLocation(); const navigate = useNavigate(); return <><output aria-label="URL atual">{location.pathname}{location.search}</output><button onClick={() => navigate(-1)}>Voltar histórico</button><button onClick={() => navigate(1)}>Avançar histórico</button></>; }
-function open(route = '/pesquisa?q=mario&aba=pessoas&page=1', respond: (query: URLSearchParams) => Promise<Response> = async query => Response.json(body(query))) {
+function open(route = '/pesquisa?q=mario&aba=pessoas&page=1', respond: (query: URLSearchParams) => Promise<Response> = async query => Response.json(body(query)), strict = false) {
   const transport = vi.fn<FetchTransport>().mockImplementation(async url => {
     const parsed = new URL(url);
     if (parsed.pathname === '/api/v1/search') return respond(parsed.searchParams);
@@ -26,7 +27,8 @@ function open(route = '/pesquisa?q=mario&aba=pessoas&page=1', respond: (query: U
     if (parsed.pathname.endsWith('/opinions')) return Response.json({ averageRating: null, reviews: [] });
     return Response.json([]);
   });
-  const view = render(<MemoryRouter initialEntries={[route]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /><Location /></MemoryRouter>);
+  const app = <MemoryRouter initialEntries={[route]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /><Location /></MemoryRouter>;
+  const view = render(strict ? <StrictMode>{app}</StrictMode> : app);
   return { ...view, interaction: userEvent.setup(), queries: () => transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/search').map(([url]) => Object.fromEntries(new URL(url).searchParams)) };
 }
 
@@ -41,6 +43,12 @@ test('URL direta consulta 20 por categoria em uma chamada, Pessoas padrão e Jog
   expect(screen.getByLabelText('URL atual')).toHaveTextContent('/pesquisa?q=mario&aba=jogos&page=1');
   expect(queries()).toHaveLength(1);
   expect(screen.queryByLabelText('Itens por página')).not.toBeInTheDocument();
+});
+
+test('StrictMode não duplica a consulta inicial de resultados', async () => {
+  const { queries } = open(undefined, undefined, true);
+  await screen.findByRole('link', { name: /Mario página 1/ });
+  expect(queries()).toHaveLength(1);
 });
 
 test('paginação é por categoria e histórico recupera URL e cache; trocar aba reinicia página', async () => {
