@@ -36,7 +36,9 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
   }
 
   function clearSearch(): void {
+    if (!term.trim() && !query.term?.trim()) return;
     setTerm('');
+    if (!query.term?.trim()) return;
     setState({ status: 'loading' });
     setQuery((previous) => ({ ...previous, term: '', sort: explicitSort.current ? previous.sort : 'release-desc', page: 1 }));
   }
