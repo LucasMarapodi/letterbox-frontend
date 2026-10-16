@@ -94,3 +94,13 @@ test('X descarta rascunho e limpeza de país envia ambos os campos opcionais', a
 test('401 descarta modal e sessão sem sucesso falso',async()=>{
  await open({save:async()=>Response.json({code:'unauthorized',message:'Sessão inválida'},{status:401})}); const d=await edit(); change(d,'Descrição','Bio'); await userEvent.click(within(d).getByRole('button',{name:'Salvar alterações'})); expect(await screen.findByText('Sua sessão expirou. Entre novamente.')).toBeVisible(); expect(screen.queryByRole('dialog')).not.toBeInTheDocument(); expect(screen.queryByText('Perfil atualizado.')).not.toBeInTheDocument();
 });
+test('sucesso aparece fora do cabeçalho como popup temporário sem mover o botão', async()=>{
+ await open(); const d=await edit(); change(d,'Descrição','Bio atualizada'); vi.useFakeTimers();
+ try {
+  await act(async()=>{fireEvent.submit(within(d).getByRole('form',{name:'Editar perfil'})); await vi.advanceTimersByTimeAsync(0);});
+  const message=screen.getByText('Perfil atualizado.'); const heading=screen.getByRole('heading',{name:'Ana',level:2});
+  expect(heading.parentElement).not.toContainElement(message); expect(message.closest('[role="status"]')).toHaveClass('profile-success-toast');
+  expect(heading.parentElement?.children).toHaveLength(2); expect(screen.getByRole('button',{name:'Editar perfil'})).toBeVisible();
+  await act(async()=>{await vi.advanceTimersByTimeAsync(4000);}); expect(screen.queryByText('Perfil atualizado.')).not.toBeInTheDocument();
+ } finally {vi.useRealTimers();}
+});
