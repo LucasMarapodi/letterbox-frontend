@@ -1,3 +1,4 @@
+import { CatalogNotice } from '../components/CatalogNotice';
 import { useEffect, useState, type ReactElement } from 'react';
 import { useServices } from '../services/ServiceProvider';
 import type { ReviewDetails } from '../services/communityContracts';
@@ -14,6 +15,7 @@ export function CommunityRecent(): ReactElement {
     return () => { active = false; };
   }, [community, attempt]);
   return <section aria-label="Reviews recentes"><h2>Reviews recentes</h2>
+    {state.status === 'ready' && <CatalogNotice paths={[['community', 'reviews', 'recent']]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'loading' && <LoadingState message="Carregando reviews recentes…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar as reviews recentes." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'ready' && (state.reviews.length ? state.reviews.map((review) => <CommunityReviewCard key={review.id} review={review} />) : <EmptyState message="Nenhuma review publicada." />)}

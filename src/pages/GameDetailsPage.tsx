@@ -9,6 +9,7 @@ import { GameCover } from '../components/GameCover';
 import { RatingForm } from './RatingForm';
 import { PublishReview } from './PublishReview';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { CatalogNotice } from '../components/CatalogNotice';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
 interface GameDetailsContentProps { id: Id; }
@@ -46,6 +47,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   const game: Game | null = state.game;
   if (!game) return <EmptyState message="Jogo não encontrado." />;
   return <section className="game-information" aria-labelledby="game-title">
+    <CatalogNotice paths={[[ 'games', id ], ['games', id, 'opinions'], ['games', id, 'reviews']]} onRetry={retry} />
     <aside className="game-poster" aria-label="Capa do jogo">
       <GameCover title={game.title} src={game.coverUrl} className="details-cover" />
     </aside>
@@ -77,4 +79,3 @@ export function GameDetailsPage(): ReactElement {
     {id ? <GameDetailsContent key={id} id={id} /> : <EmptyState message="Jogo não encontrado." />}
   </main>;
 }
-

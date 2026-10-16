@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { expect, test, vi } from 'vitest';
 import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters } from '../src/services/http/adapters';
 import type { FetchTransport } from '../src/services/http/client';
@@ -14,7 +15,7 @@ const endpoints: EndpointCase[] = [
   { name: 'login', method: 'POST', path: '/auth/login', run: (a) => a.auth.login({ email: 'test@example.com', password: 'test-only' }), response: login, body: { email: 'test@example.com', password: 'test-only' } },
   { name: 'me', method: 'GET', path: '/auth/me', run: (a) => a.auth.me(), response: wireUser, private: true },
   { name: 'logout', method: 'POST', path: '/auth/logout', run: (a) => a.auth.logout(), response: undefined, private: true },
-  { name: 'games', method: 'GET', path: '/games?term=a+%26+b&sort=name-desc', run: (a) => a.games.list({ term: 'a & b', sort: 'name-desc' }), response: [wireGame] },
+  { name: 'games', method: 'GET', path: '/games?term=a+%26+b&sort=name-desc', run: (a) => a.games.list({ term: 'a & b', sort: 'name-desc' }), response: wirePage([wireGame]) },
   { name: 'game', method: 'GET', path: '/games/game%252F42', run: (a) => a.games.get(wireGame.id), response: wireGame },
   { name: 'opinions', method: 'GET', path: '/games/g/opinions', run: (a) => a.games.opinions('g'), response: { averageRating: 0, reviews: [wireReview] } },
   { name: 'rating-read', method: 'GET', path: '/games/g/rating/me', run: (a) => a.games.myRating('g'), response: { rating: null }, private: true },

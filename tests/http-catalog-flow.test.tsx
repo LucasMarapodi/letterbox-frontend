@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -7,9 +8,9 @@ import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
 import { wireGame, wireReview } from './http-fixtures';
 test('catálogo envia filtros e IDs opacos ao HTTP sem Bearer',async()=>{
-  const transport=vi.fn<FetchTransport>().mockImplementation(async(url)=>Response.json(new URL(url).pathname==='/api/v1/games'?[wireGame]:wireGame));
+  const transport=vi.fn<FetchTransport>().mockImplementation(async(url)=>Response.json(new URL(url).pathname==='/api/v1/games'?wirePage([wireGame]):wireGame));
   const games=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport}).games;
-  expect(await games.list({term:'a & b',sort:'name-desc'})).toEqual([wireGame]);
+  expect(await games.list({term:'a & b',sort:'name-desc'})).toEqual(wirePage([wireGame]));
   expect(await games.getById(wireGame.id)).toEqual(wireGame);
   expect(transport.mock.calls.map(([url])=>url)).toEqual(['http://localhost:5207/api/v1/games?term=a+%26+b&sort=name-desc','http://localhost:5207/api/v1/games/game%252F42']);
   for(const [,request] of transport.mock.calls) expect(request.headers).not.toHaveProperty('Authorization');
@@ -23,7 +24,7 @@ test('404 de detalhe vira null, mas rede/500/contrato não viram ausência',asyn
   await expect(games.getById('g')).rejects.toMatchObject({kind:'contract'});
 });
 test('Home busca/ordena e abre detalhes/opiniões reais com zero e capa ausente',async()=>{
-  const transport=vi.fn<FetchTransport>().mockImplementation(async(url)=>Response.json(url.includes('/opinions')?{averageRating:0,reviews:[wireReview]}:new URL(url).pathname==='/api/v1/games'?[wireGame]:wireGame));
+  const transport=vi.fn<FetchTransport>().mockImplementation(async(url)=>Response.json(url.includes('/opinions')?{averageRating:0,reviews:[wireReview]}:new URL(url).pathname==='/api/v1/games'?wirePage([wireGame]):wireGame));
   const interaction=userEvent.setup(); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
   expect(await screen.findByRole('link',{name:wireGame.title})).toBeVisible();
   expect(screen.getByText('Sem capa')).toBeVisible();
@@ -36,7 +37,7 @@ test('Home busca/ordena e abre detalhes/opiniões reais com zero e capa ausente'
   expect(screen.queryByText('Ecos do Horizonte')).not.toBeInTheDocument();
 });
 test('API desligada gera erro na Home e nova tentativa não usa fixture',async()=>{
-  const transport=vi.fn<FetchTransport>().mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(Response.json([]));
+  const transport=vi.fn<FetchTransport>().mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(Response.json(wirePage()));
   const interaction=userEvent.setup(); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
   expect(await screen.findByText('Não foi possível carregar os jogos.')).toBeVisible();
   expect(screen.queryByText('Ecos do Horizonte')).not.toBeInTheDocument();

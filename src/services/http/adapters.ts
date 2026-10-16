@@ -1,13 +1,15 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import type { GameQuery } from '../contracts';
 import type { User } from '../../models';
-import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
+import { catalogKey, createCatalogStore, type CatalogMetadata, type CatalogStore } from '../catalogMetadata';
+import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
 import { HttpFailure, createHttpClient, validateApiBaseUrl, type FetchTransport, type HttpRequest } from './client';
-import { decodeUser, decodeGame, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
+import { decodeUser, decodeGame, decodeGamePage, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, type Decoder } from './decoders';
 export interface SessionSnapshot { token: string; user: User; expiresAt: string; version: number; signal: AbortSignal; }
 export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; updateUser(user: User): void; clear(): void; subscribe(listener: () => void): () => void; }
 export interface HttpAdapterConfig { apiBaseUrl: string; }
 export interface HttpAdapters {
+  catalog: CatalogStore;
   session: HttpSessionStore;
   auth: {
     register(input: RegisterRequest, signal?: AbortSignal): Promise<PublicUserResponse>;
@@ -16,7 +18,7 @@ export interface HttpAdapters {
     logout(signal?: AbortSignal): Promise<void>;
   };
   games: {
-    list(query?: GameQuery, signal?: AbortSignal): Promise<GameResponse[]>;
+    list(query?: GameQuery, signal?: AbortSignal): Promise<GamePageResponse>;
     get(id: string, signal?: AbortSignal): Promise<GameResponse>;
     opinions(id: string, signal?: AbortSignal): Promise<GameOpinionsResponse>;
     reviews(id: string, signal?: AbortSignal): Promise<ReviewResponse[]>;
@@ -77,17 +79,23 @@ export function createHttpSessionStore(): HttpSessionStore {
   };
 }
 function decodeVoid(value: unknown): void { if (value !== undefined) throw new HttpFailure('contract'); }
-export function createHttpAdapters(config: HttpAdapterConfig, options: { transport?: FetchTransport; session?: HttpSessionStore } = {}): HttpAdapters {
+export function createHttpAdapters(config: HttpAdapterConfig, options: { transport?: FetchTransport; session?: HttpSessionStore; catalog?: CatalogStore } = {}): HttpAdapters {
   const client = createHttpClient(readHttpConfig(config).apiBaseUrl, options.transport);
   const session = options.session ?? createHttpSessionStore();
+  const catalog = options.catalog ?? createCatalogStore();
   async function call<T>(request: Omit<HttpRequest, 'token'>, decode: Decoder<T>, authenticated = false): Promise<T> {
     const snapshot = authenticated ? session.current() : null;
     if (authenticated && !snapshot) throw new HttpFailure('http', 401, 'unauthorized');
     const signal = snapshot ? request.signal ? AbortSignal.any([snapshot.signal, request.signal]) : snapshot.signal : request.signal;
+    const key = catalogKey(request.path);
+    const sequence = catalog.begin(key);
+    let metadata: CatalogMetadata | null = null;
     try {
-      const value = await client.request({ ...request, signal, ...(snapshot ? { token: snapshot.token } : {}) });
+      const value = await client.request({ ...request, signal, onCatalogMetadata: (value) => { metadata = value; }, ...(snapshot ? { token: snapshot.token } : {}) });
       if (snapshot && session.version() !== snapshot.version) throw new HttpFailure('cancelled');
-      return decode(value);
+      const result = decode(value);
+      catalog.finish(key, sequence, metadata);
+      return result;
     } catch (error: unknown) {
       if (snapshot && session.version() !== snapshot.version) throw new HttpFailure('cancelled');
       if (snapshot && error instanceof HttpFailure && error.status === 401) session.clear();
@@ -100,6 +108,7 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
   const followers = (id: string, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', id, 'followers'], signal }, list(decodeUser));
   const following = (id: string, signal?: AbortSignal): Promise<PublicUserResponse[]> => call({ path: ['users', id, 'following'], signal }, list(decodeUser));
   return {
+    catalog,
     session,
     auth: {
       register: (input, signal) => call({ method: 'POST', path: ['auth', 'register'], body: { name: input.name, email: input.email, password: input.password }, signal }, decodeUser),
@@ -112,7 +121,7 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       },
     },
     games: {
-      list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort }, signal }, list(decodeGame)),
+      list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort, page: query?.page, pageSize: query?.pageSize }, signal }, decodeGamePage),
       get: (id, signal) => call({ path: ['games', id], signal }, decodeGame),
       opinions: (id, signal) => call({ path: ['games', id, 'opinions'], signal }, decodeOpinions),
       reviews: (id, signal) => call({ path: ['games', id, 'reviews'], signal }, list(decodeReview)),

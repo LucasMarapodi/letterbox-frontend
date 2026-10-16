@@ -1,3 +1,4 @@
+import { CatalogNotice } from './CatalogNotice';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useServices } from '../services/ServiceProvider';
@@ -22,6 +23,7 @@ export function FavoritesSections({ initialLists }: { initialLists?: FavoriteLis
   if (state.status === 'loading') return <LoadingState message="Carregando favoritos…" />;
   if (state.status === 'error') return <ErrorState message="Não foi possível carregar os favoritos." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
   return <div className="favorites-sections">
+    {initialLists === undefined && <CatalogNotice paths={[[ 'favorites' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     <section aria-label="Jogos favoritos"><h2>Jogos favoritos</h2>
       {state.lists.games.length ? <div className="game-grid">{state.lists.games.map((game) => <GameCard key={game.id} game={game} />)}</div> : <EmptyState message="Nenhum jogo favorito." />}
     </section>
@@ -30,4 +32,3 @@ export function FavoritesSections({ initialLists }: { initialLists?: FavoriteLis
     </section>
   </div>;
 }
-

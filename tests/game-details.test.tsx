@@ -1,3 +1,4 @@
+import { gamePage } from './fixtures';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter } from 'react-router-dom';
@@ -13,7 +14,7 @@ vi.mock('../src/services', () => ({ services: {
 } } satisfies { services: Services }));
 
 beforeEach(() => {
-  vi.mocked(services.games.list).mockReset().mockResolvedValue([]);
+  vi.mocked(services.games.list).mockReset().mockResolvedValue(gamePage([]));
   vi.mocked(services.games.getById).mockReset().mockResolvedValue(null);
   vi.mocked(services.games.getOpinions).mockReset().mockResolvedValue({ averageRating: null, reviews: [] });
 });

@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 import App from '../src/App';
-import type { Game } from '../src/models';
+import { gamePage } from './fixtures';
 import type { Services } from '../src/services/contracts';
 
 vi.mock('../src/services', () => ({
   services: {
     games: {
-      async list(): Promise<Game[]> { return []; },
+      async list() { return gamePage(); },
       async getById(): Promise<null> { return null; },
       async getOpinions() { return { averageRating: null, reviews: [] }; },
     },

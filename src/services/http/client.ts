@@ -1,3 +1,4 @@
+import { readCatalogMetadata, type CatalogMetadata } from '../catalogMetadata';
 export type FetchTransport = (input: string, init: RequestInit) => Promise<Response>;
 export type HttpFailureKind = 'network' | 'http' | 'contract' | 'cancelled' | 'configuration';
 export class HttpFailure extends Error {
@@ -14,6 +15,7 @@ export interface HttpRequest {
   token?: string;
   signal?: AbortSignal;
   root?: boolean;
+  onCatalogMetadata?: (metadata: CatalogMetadata | null) => void;
 }
 export interface HttpClient { request(input: HttpRequest): Promise<unknown>; }
 export function validateApiBaseUrl(baseUrl: string): string {
@@ -24,7 +26,7 @@ export function validateApiBaseUrl(baseUrl: string): string {
 }
 function isApiError(value: unknown): value is { code: string; message: string } {
   return typeof value === 'object' && value !== null && 'code' in value && typeof value.code === 'string' &&
-    ['validation_failed','unauthorized','forbidden','not_found','conflict','internal_error','http_error'].includes(value.code) && 'message' in value && typeof value.message === 'string';
+    ['validation_failed','unauthorized','forbidden','not_found','conflict','internal_error','http_error','integration_unavailable','integration_invalid_response','integration_timeout'].includes(value.code) && 'message' in value && typeof value.message === 'string';
 }
 export function createHttpClient(baseUrl: string, transport: FetchTransport = (url, init) => fetch(url, init)): HttpClient {
   const base = validateApiBaseUrl(baseUrl);
@@ -56,6 +58,7 @@ export function createHttpClient(baseUrl: string, transport: FetchTransport = (u
       if (!isApiError(payload)) throw new HttpFailure('contract', response.status);
       throw new HttpFailure('http', response.status, payload.code);
     }
+    input.onCatalogMetadata?.(readCatalogMetadata(response.headers));
     return payload;
   } };
 }

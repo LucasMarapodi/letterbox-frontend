@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 401 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 415 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -46,3 +46,7 @@ Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e inva
 [I-PR-07](docs/I-PR-07.md), [TDD](docs/TDD-I-PR-07.md) e [relatório dos endpoints](docs/RELATORIO-ENDPOINTS.md). Os documentos PR-01 a PR-09/TDD-PR-* preservam o histórico da fase anterior; descrições mockadas nesses registros não representam o runtime atual.
 
 Limites: Back continua em memória, com token simulado e IGDB fake. SQL, autenticação de produção e IGDB externa estão fora da fase. A API não gera IDs . ou .., rejeitados pelo transporte antes de fetch; percentuais literais continuam preservados. Branches preparadas localmente; Front não possui remoto configurado. Nenhum merge foi feito.
+
+## Quarta fase — G-PR-05
+
+Catálogo agora usa GamePageResponse, Recentes e páginas do servidor; headers stale/fetchedAt são exibidos sem request extra. 415 testes/check e navegador determinístico aprovados. Veja [entrega e limites](docs/G-PR-05.md). npm run test:e2e:catalog verifica o contrato com servidor sintético; não é IGDB live. O cenário npm run test:e2e da terceira fase precisa da adaptação planejada para IDs descobertos na G-US-17. Executar Back atualizado para novo envelope; a API antiga de 5080 não é compatível.

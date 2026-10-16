@@ -1,3 +1,4 @@
+import { gamePage } from './fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -14,7 +15,7 @@ vi.mock('../src/services', () => ({ services: {
 const review: PublicReview = { id: 'review%2F1', gameId: 'game-1', userId: 'user%2F1', text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 'user%2F1', displayName: 'Ana', avatarUrl: null } };
 
 beforeEach(() => {
-  vi.mocked(services.games.list).mockReset().mockResolvedValue([]);
+  vi.mocked(services.games.list).mockReset().mockResolvedValue(gamePage([]));
   vi.mocked(services.games.getById).mockReset().mockResolvedValue(makeGame());
   vi.mocked(services.games.getOpinions).mockReset().mockResolvedValue({ averageRating: null, reviews: [] });
 });

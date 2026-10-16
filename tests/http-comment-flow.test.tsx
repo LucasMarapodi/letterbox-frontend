@@ -1,3 +1,4 @@
+import { wirePage } from './http-fixtures';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -31,7 +32,7 @@ test.each([[400,'empty-text'],[404,'not-found']])('POST %s recebe erro tipado',a
 async function open(status?:number,visitor=false):Promise<{interaction:ReturnType<typeof userEvent.setup>;transport:ReturnType<typeof vi.fn<FetchTransport>>}>{
   let sent=false;
   const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
-    if(new URL(url).pathname==='/api/v1/games') return Response.json([]);
+    if(new URL(url).pathname==='/api/v1/games') return Response.json(wirePage([]));
     if(url.endsWith('/auth/logout')) return new Response(null,{status:204});
     if(url.endsWith('/comments')) {
       if(init.method==='POST'){

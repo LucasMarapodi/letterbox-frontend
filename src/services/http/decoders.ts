@@ -1,7 +1,17 @@
 import type { PublicProfile, Connections } from '../communityContracts';
-import type { PublicUserResponse, GameResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse, LoginResponse, DashboardResponse, GameOpinionsResponse, FavoriteListsResponse, RankedReviewResponse, RankedGameResponse } from './dtos';
+import type { PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse, LoginResponse, DashboardResponse, GameOpinionsResponse, FavoriteListsResponse, RankedReviewResponse, RankedGameResponse } from './dtos';
 import { HttpFailure } from './client';
 export type Decoder<T> = (value: unknown) => T;
+export function decodeGamePage(value: unknown): GamePageResponse {
+  const item = record(value);
+  const { page, pageSize, hasNextPage } = item;
+  if (typeof page !== 'number' || !Number.isSafeInteger(page) || page < 1 ||
+      typeof pageSize !== 'number' || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 100 ||
+      typeof hasNextPage !== 'boolean') return fail();
+  const items = decodeList(item.items, decodeGame);
+  if (items.length > pageSize) return fail();
+  return { items, page, pageSize, hasNextPage };
+}
 function fail(): never { throw new HttpFailure('contract'); }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
 function record(value: unknown): Record<string, unknown> { if (!isRecord(value)) return fail(); return value; }
