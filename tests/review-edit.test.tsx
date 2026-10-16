@@ -43,6 +43,7 @@ test('autor recebe conteúdo existente e falha preserva rascunho', async () => {
   const input = await screen.findByLabelText('Descrição (opcional)');
   expect(input).toHaveValue('A exploração convida a seguir cada caminho. A trilha sonora acompanha muito bem a aventura.');
   await interaction.clear(input); await interaction.type(input, 'Rascunho atualizado');
+  await interaction.type(screen.getByLabelText('Título'), 'Minha aventura');
   await interaction.click(screen.getByRole('button', { name: 'Salvar review' }));
   expect(await screen.findByText('Não foi possível salvar a review. Tente novamente.')).toBeVisible();
   expect(input).toHaveValue('Rascunho atualizado');

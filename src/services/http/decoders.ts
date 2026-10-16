@@ -107,7 +107,9 @@ export function decodeGame(value: unknown): GameResponse {
 }
 export function decodeReview(value: unknown): ReviewResponse {
   const item = publicRecord(value); const game = publicRecord(item.game);
-  return { id: localId(item.id), userId: localId(item.userId), gameId: localId(item.gameId), text: text(item.text), rating: nullable(item.rating, score), likeCount: likeCount(item.likeCount), createdAt: instant(item.createdAt), updatedAt: nullable(item.updatedAt, instant), author: author(item.author), game: { id: localId(game.id), title: text(game.title), coverUrl: nullable(game.coverUrl, text) } };
+  const title = item.title === undefined || item.title === null ? null : text(item.title).trim() || null;
+  if (title && title.length > 150) return fail();
+  return { id: localId(item.id), userId: localId(item.userId), gameId: localId(item.gameId), title, text: text(item.text), rating: nullable(item.rating, score), likeCount: likeCount(item.likeCount), createdAt: instant(item.createdAt), updatedAt: nullable(item.updatedAt, instant), author: author(item.author), game: { id: localId(game.id), title: text(game.title), coverUrl: nullable(game.coverUrl, text) } };
 }
 export function decodeComment(value: unknown): CommentResponse {
   const item = publicRecord(value); return { id: localId(item.id), userId: localId(item.userId), reviewId: localId(item.reviewId), parentCommentId: nullable(item.parentCommentId, localId), likeCount: likeCount(item.likeCount), text: text(item.text), createdAt: instant(item.createdAt), author: author(item.author) };

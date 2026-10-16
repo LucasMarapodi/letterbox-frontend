@@ -10,7 +10,7 @@ export type RatingResponse = Rating;
 export type FavoriteResponse = Favorite;
 export interface ReviewLikeStatusResponse { likedByMe: boolean; }
 export interface CommentLikeStatusResponse { likedByMe: boolean; }
-export interface ReviewResponse extends ReviewDetails { game: { id: number; title: string; coverUrl: string | null }; }
+export interface ReviewResponse extends ReviewDetails { title: string | null; game: { id: number; title: string; coverUrl: string | null }; }
 export type CommentResponse = PublicComment;
 export type NotificationResponse = NotificationItem;
 export interface LoginResponse { token: string; expiresAt: string; user: PublicUserResponse; }
@@ -27,8 +27,8 @@ export interface RegisterRequest { name: string; email: string; password: string
 export interface LoginRequest { email: string; password: string; }
 export interface RatingRequest { value: number; }
 export interface TextRequest { text: string; }
-export interface ReviewRequest { rating: number; text?: string | null; }
-export interface ReviewPatchRequest { rating?: number; text?: string | null; }
+export interface ReviewRequest { rating: number; text?: string | null; title?: string | null; }
+export interface ReviewPatchRequest { rating?: number; text?: string | null; title?: string | null; }
 export interface ProfilePatchRequest { displayName?: string; bio?: string | null; avatarUrl?: string | null; country?: string | null; state?: string | null; favoriteGameIds?: number[]; }
 export interface ProfileUpdateResponse extends PublicUserResponse { completion: ProfileCompletionResponse; }
 export interface ProfileCompletionRequest { country: string; state: string; bio: string; avatarUrl?: string | null; favoriteGameIds: number[]; }

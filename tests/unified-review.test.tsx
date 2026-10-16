@@ -61,7 +61,7 @@ test.each([0, 4.25, 5])('nota %s sem descrição gera uma única review e revali
   const { writes, transport } = await open(); const editor = await form();
   fireEvent.change(within(editor).getByLabelText('Nota (0 a 5)'), { target: { value: String(rating) } });
   fireEvent.submit(editor); await screen.findByText('Review publicada.');
-  expect(writes()).toHaveLength(1); expect(JSON.parse(String(writes()[0][1].body))).toEqual({ rating, text: '' });
+  expect(writes()).toHaveLength(1); expect(JSON.parse(String(writes()[0][1].body))).toEqual({ rating, title: null, text: '' });
   expect(writes()[0][1].headers).toHaveProperty('Authorization', 'Bearer test-only');
   await screen.findByRole('button', { name: 'Editar minha review' });
   await waitFor(() => expect(transport.mock.calls.filter(([url]) => url.endsWith('/reviews/me')).length).toBeGreaterThan(1));
@@ -74,7 +74,7 @@ test('edição de detalhe carrega nota fracionada e envia texto vazio com PATCH 
   const editor = await form(true); expect(within(editor).getByLabelText('Nota (0 a 5)')).toHaveValue(4.25);
   fireEvent.change(within(editor).getByLabelText('Descrição (opcional)'), { target: { value: '' } });
   fireEvent.submit(editor); await screen.findByText('Review atualizada.');
-  expect(writes()).toHaveLength(1); expect(writes()[0][1].method).toBe('PATCH'); expect(JSON.parse(String(writes()[0][1].body))).toEqual({ rating: 4.25, text: '' });
+  expect(writes()).toHaveLength(1); expect(writes()[0][1].method).toBe('PATCH'); expect(JSON.parse(String(writes()[0][1].body))).toEqual({ rating: 4.25, title: null, text: '' });
   expect(screen.getByRole('link', { name: 'Jogo HTTP' })).toBeVisible();
 });
 test('legado sem nota permanece legível e exige seleção na edição', async () => {
@@ -95,7 +95,7 @@ test('falha mantém rascunho; submit duplo e resposta após logout não declaram
   const pending = deferred<Response>(); let fail = true;
   const { writes, interaction } = await open({ write: async () => fail ? Response.json({ code: 'storage_unavailable', message: 'Falha' }, { status: 503 }) : pending.promise });
   const editor = await form(); fireEvent.change(within(editor).getByLabelText('Nota (0 a 5)'), { target: { value: '3' } });
-  fireEvent.change(within(editor).getByLabelText('Descrição (opcional)'), { target: { value: 'Rascunho' } }); fireEvent.submit(editor);
+  fireEvent.change(within(editor).getByLabelText('Descrição (opcional)'), { target: { value: 'Rascunho' } }); fireEvent.change(within(editor).getByLabelText('T\u00edtulo'), {target:{value:'Minha aventura'}}); fireEvent.submit(editor);
   expect(await within(editor).findByRole('alert')).toHaveTextContent('Não foi possível publicar');
   expect(within(editor).getByLabelText('Descrição (opcional)')).toHaveValue('Rascunho');
   fail = false; fireEvent.submit(editor); fireEvent.submit(editor); expect(writes()).toHaveLength(2);
@@ -114,7 +114,8 @@ test.each([undefined, '4', -1, 5.1])('decoder não inventa/converte nota inváli
   expect(() => decodeReview({ ...wireReview, rating })).toThrow();
 });
 test.each(['/jogos/12', '/reviews/55', `/perfil/${wireUser.id}`, '/comunidade', '/'])('review sem descrição e nota zero permanece visível em %s', async path => {
-  await open({ own: { ...wireReview, text: '', rating: 0 }, path });
+  const {interaction}=await open({ own: { ...wireReview, text: '', rating: 0 }, path });
+  if(path==='/'){await interaction.click(screen.getByRole('link',{name:'Comunidade'}));await interaction.click(screen.getByRole('button',{name:'Feed de reviews'}));}
   expect((await screen.findAllByText('Nota: 0 de 5')).length).toBeGreaterThan(0);
   expect(document.querySelectorAll('p.review-text')).toHaveLength(0);
 });

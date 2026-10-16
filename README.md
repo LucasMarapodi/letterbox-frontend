@@ -106,3 +106,7 @@ Curtidas de comentários/respostas e ajustes visuais solicitados nos cartões e 
 ## Sexta fase — S-PR-13
 
 Mais curtidos na Comunidade: comentários/respostas com períodos, paginação, contagens distintas e revalidação após curtida; navegação destaca o comentário na review. 142 testes pertinentes, dois cenários Chromium, lint/tipos/build e API real aprovados. [Entrega e dependências](docs/S-PR-13.md).
+
+## Sexta fase — S-PR-37
+
+Título no formulário e nas reviews, validação condicional/limite, contratos nullable e ordem da API preservada. 156 testes pertinentes, dois Chromium com HTTP sintético, lint/tipos/build aprovados. Integração com PostgreSQL local aguarda migration da S-PR-36. [Entrega e limites](docs/S-PR-37.md).

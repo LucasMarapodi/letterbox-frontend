@@ -50,6 +50,7 @@ test('formulário exige nota e preserva descrição quando envio falha', async (
   expect(publish).not.toHaveBeenCalled();
   await interaction.type(screen.getByLabelText('Nota (0 a 5)'),'4.5'); await interaction.clear(screen.getByLabelText('Descrição (opcional)'));
   await interaction.type(screen.getByLabelText('Descrição (opcional)'), 'Minha opinião');
+  await interaction.type(screen.getByLabelText('Título'), 'Minha aventura');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   expect(await screen.findByText('Não foi possível publicar a review. Tente novamente.')).toBeVisible();
   expect(screen.getByLabelText('Descrição (opcional)')).toHaveValue('Minha opinião');
@@ -59,6 +60,7 @@ test('publicação válida aparece e encaminha para edição', async () => {
   vi.spyOn(community, 'publish').mockResolvedValue({ id: 99, gameId: 1, userId: author.id, likeCount: 0, rating: 4, text: 'Opinião nova', createdAt: '2026-01-01', updatedAt: null });
   const interaction = await openGame();
   await interaction.type(screen.getByLabelText('Nota (0 a 5)'),'4'); await interaction.type(await screen.findByLabelText('Descrição (opcional)'), 'Opinião nova');
+  await interaction.type(screen.getByLabelText('Título'), 'Minha aventura');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   expect(await screen.findByText('Review publicada.')).toBeVisible();
   expect(screen.getByRole('button', { name: 'Editar minha review' })).toBeVisible();

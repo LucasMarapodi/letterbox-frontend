@@ -60,7 +60,7 @@ test('envio duplo mantém título/texto travados e envia uma vez',async()=>{
 
 function adapter(payload:unknown={...wireReview,title:'Título da API'}) {
   const session=createHttpSessionStore();session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
-  const transport=vi.fn<FetchTransport>().mockResolvedValue(Response.json(payload));
+  const transport=vi.fn<FetchTransport>().mockImplementation(async()=>Response.json(payload));
   return {http:createHttpAdapters({apiBaseUrl:'http://localhost:5080'},{session,transport}),transport};
 }
 test('POST/PATCH enviam título e diferenciam omissão de limpeza',async()=>{
@@ -70,7 +70,7 @@ test('POST/PATCH enviam título e diferenciam omissão de limpeza',async()=>{
   for(const [,init]of transport.mock.calls)expect(init.headers).toHaveProperty('Authorization','Bearer test-only');
 });
 test.each([undefined,null,'Título da API'])('decodifica título/legado sem perder conteúdo: %j',async title=>{
-  const {http}=adapter({...wireReview,...(title===undefined?{}:{title})});expect(await http.reviews.get(55)).toMatchObject({title:title??null,text:wireReview.text});
+  const {http}=adapter({...wireReview,title});expect(await http.reviews.get(55)).toMatchObject({title:title??null,text:wireReview.text});
 });
 test.each([123,{},'a'.repeat(151)])('título incompatível é erro de contrato: %j',async title=>{
   const {http}=adapter({...wireReview,title});await expect(http.reviews.get(55)).rejects.toMatchObject({kind:'contract'});
@@ -101,10 +101,10 @@ async function application(path:string,options:{errorCode?:string;reviews?:unkno
 }
 test.each(['/reviews/2','/jogos/12','/perfil/1','/comunidade'])('título é exibido em %s sem inventar título no legado',async path=>{
   await application(path);const headings=await screen.findAllByRole('heading',{name:titled.title});expect(headings.length).toBeGreaterThan(0);
-  if(path!=='/reviews/2'){expect(await screen.findAllByText('Texto histórico')).not.toHaveLength(0);expect(screen.queryByRole('heading',{name:'Texto histórico'})).not.toBeInTheDocument();}
+  if(path!=='/reviews/2'&&path!=='/perfil/1'){expect(await screen.findAllByText('Texto histórico')).not.toHaveLength(0);expect(screen.queryByRole('heading',{name:'Texto histórico'})).not.toBeInTheDocument();}
 });
 test('perfil pagina ordem recebida antes do slice e preserva reviews sem título',async()=>{
-  const {interaction}=await application('/perfil/1');const region=screen.getByRole('region',{name:'Reviews do usuário'});await within(region).findByRole('heading',{name:titled.title});
+  const {interaction}=await application('/perfil/1');const region=await screen.findByRole('region',{name:'Reviews do usuário'});await within(region).findByRole('heading',{name:titled.title});
   expect(within(region).getAllByRole('article').map(card=>card.querySelector('a.review-card-link')?.getAttribute('href'))).toEqual(['/reviews/2','/reviews/1']);
   await interaction.click(within(region).getByRole('button',{name:/Próxima página/}));expect(await within(region).findByText('Texto histórico')).toBeVisible();
 });

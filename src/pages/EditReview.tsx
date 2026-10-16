@@ -14,7 +14,7 @@ function EditControl({ review, onSaved }: { review: ReviewDetails; onSaved(revie
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   return <section aria-label="Editar minha review" className={`review-edit-control${open ? ' is-open' : ''}`}>
-    {open ? <RatedReviewForm initialText={review.text} initialRating={review.rating} submitLabel="Salvar review" pendingLabel="Salvando…" failureMessage="Não foi possível salvar a review. Tente novamente." onCancel={() => setOpen(false)} errorMessage={error => {
+    {open ? <RatedReviewForm initialTitle={review.title} initialText={review.text} initialRating={review.rating} submitLabel="Salvar review" pendingLabel="Salvando…" failureMessage="Não foi possível salvar a review. Tente novamente." onCancel={() => setOpen(false)} errorMessage={error => {
       if (error instanceof CommunityError && error.code === 'forbidden') return 'Você não tem permissão para editar esta review.';
       if (error instanceof CommunityError && error.code === 'not-found') return 'Esta review não está mais disponível.';
       return 'Não foi possível salvar a review. Tente novamente.';
