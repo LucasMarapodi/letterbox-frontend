@@ -86,6 +86,17 @@ test('estrelas compartilham leitura, respondem ao teclado e removem a última fa
   await page.getByRole('link', { name: 'Meu perfil', exact: true }).click();
   const copies = page.getByRole('button', { name: 'Remover review de Leo dos favoritos', exact: true });
   await expect(copies).toHaveCount(2);
+  const favoritesSection = page.getByRole('region', {name: 'Reviews favoritas', exact: true});
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({width, height: 900});
+    const sectionBox = await favoritesSection.boundingBox();
+    const containerBox = await page.getByRole('region', {name: 'Favoritos', exact: true}).boundingBox();
+    expect(sectionBox!.width).toBeGreaterThan(containerBox!.width - 2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({width: 1280, height: 900});
+  await favoritesSection.screenshot({path: 'docs/evidence/S-PR-11-favorites-full-width.png'});
+
   await page.getByRole('region', { name: 'Reviews favoritas', exact: true }).getByRole('button', { name: 'Remover review de Leo dos favoritos', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Reviews favoritas', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Favoritar review de Leo', exact: true })).toHaveAttribute('aria-pressed', 'false');
