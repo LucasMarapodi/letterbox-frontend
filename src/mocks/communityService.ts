@@ -1,10 +1,11 @@
-import type { CommunityService } from '../services/communityContracts';
+import type { CommunityService, ReviewDetails } from '../services/communityContracts';
 import { CommunityError } from '../services/communityContracts';
 import type { Rating, Review, User, Comment, Favorite } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
-import type { MockUserStore } from './userStore';
-export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore } = {}): CommunityService {
+import type { MockUserStore, MockSessionStore } from './userStore';
+import { commentsInPeriod } from './commentWindow';
+export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore; sessionStore?: MockSessionStore; clock?: () => Date } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = options.userStore?.users ?? structuredClone(options.users ?? userFixtures);
@@ -14,7 +15,30 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   let sequence = 1;
   const favorites: Favorite[] = [];
   const follows: { followerId: string; followedId: string }[] = [];
+  function reviewDetails(review: Review): ReviewDetails {
+    const author = users.find((item) => item.id === review.userId);
+    const game = gameFixtures.find((item) => item.id === review.gameId);
+    return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
+  }
   return {
+    async getGamesInDiscussion(period) {
+      const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));
+      const gameByReview = new Map(reviews.map((review) => [review.id, review.gameId]));
+      return structuredClone(gameFixtures.map((game) => {
+        const activity = eligible.filter((comment) => gameByReview.get(comment.reviewId) === game.id).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+        return { game, commentCount: activity.length, lastCommentAt: activity[0]?.createdAt ?? '' };
+      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || a.game.id.localeCompare(b.game.id)));
+    },
+    async getMostCommented(period) {
+      const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));
+      return structuredClone(reviews.map((review) => {
+        const activity = eligible.filter((comment) => comment.reviewId === review.id).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+        return { review: reviewDetails(review), commentCount: activity.length, lastCommentAt: activity[0]?.createdAt ?? '' };
+      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || a.review.id.localeCompare(b.review.id)));
+    },
+    async getRecentReviews() {
+      return structuredClone([...reviews].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id)).map(reviewDetails));
+    },
     async getFeed(user) {
       if (!user) throw new CommunityError('session-required');
       const followed = new Set(follows.filter((relation) => relation.followerId === user.id).map((relation) => relation.followedId));
@@ -86,13 +110,15 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       return structuredClone(ratings.find((rating) => rating.gameId === gameId && rating.userId === user.id) ?? null);
     },
     async comment(reviewId, text, user) {
-      if (!user) throw new CommunityError('session-required');
+      const authenticated = options.sessionStore?.user;
+      if (!authenticated || !user) throw new CommunityError('session-required');
+      if (authenticated.id !== user.id) throw new CommunityError('forbidden');
       if (!reviews.some((review) => review.id === reviewId)) throw new CommunityError('not-found');
       if (!text.trim()) throw new CommunityError('empty-text');
       while (comments.some((comment) => comment.id === `mock-comment-${sequence}`)) sequence++;
-      const comment: Comment = { id: `mock-comment-${sequence++}`, reviewId, userId: user.id, text: text.trim(), createdAt: new Date().toISOString() };
+      const comment: Comment = { id: `mock-comment-${sequence++}`, reviewId, userId: authenticated.id, text: text.trim(), createdAt: (options.clock?.() ?? new Date()).toISOString() };
       comments.push(comment);
-      if (!users.some((item) => item.id === user.id)) users.push(structuredClone(user));
+      if (!users.some((item) => item.id === authenticated.id)) users.push(structuredClone(authenticated));
       return structuredClone(comment);
     },
     async getComments(reviewId) {

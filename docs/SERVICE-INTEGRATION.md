@@ -12,10 +12,14 @@
 | --- | --- |
 | Games | listar/buscar/ordenar, detalhes por ID, média e reviews |
 | Auth | cadastro e login; sessão e logout no cliente mockado |
-| Community | perfis, nota por usuário, publicação/edição de review, comentários, favoritos, seguir/deixar de seguir, conexões públicas, feed |
+| Community | perfis, nota por usuário, publicação/edição de review, comentários, favoritos, seguir/deixar de seguir, conexões públicas, feed, reviews recentes e rankings por review/jogo |
 | Notifications | consulta pessoal de eventos ordenados |
 
 Na composição mockada, cadastro e comunidade compartilham usuários, e as opiniões dos jogos são consultadas na mesma comunidade que recebe publicações e notas. Notificações permanecem fixtures previamente registradas.
+
+Comentários exigem a sessão interna compartilhada entre auth/community, estabelecida por credenciais válidas. O argumento de usuário é comparado com essa sessão; não concede autorização. Logout revoga essa sessão e o formulário. Adaptadores custom devem implementar revogação e autorização reais; o método opcional logout mantém compatibilidade com fornecedores anteriores. O armazenamento interno em memória é um recurso de teste, não uma fronteira de segurança de produção.
+
+Comunidade consulta getRecentReviews, getMostCommented e getGamesInDiscussion. Rankings aceitam apenas 24h/7d/30d e usam relógio injetável, janela móvel inclusiva e contagem de comentários. Os desempates usam atividade mais recente e ID. As telas descartam respostas de períodos anteriores. As fixtures padrão têm datas históricas e podem produzir rankings vazios; um comentário mockado novo aparece ao reabrir o ranking. Não há atualização em tempo real.
 
 ## Pendências de API
 

@@ -7,6 +7,12 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+.community-navigation { margin: 1.5rem 0 2rem; gap: 0.6rem; }
+.community-period { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.community-review h3 { margin: 1rem 0 0.5rem; }
+.community-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.community-navigation button { background: #1c272c; color: #c6ddd4; }
+.community-navigation button[aria-pressed="true"] { background: #67daa3; color: #123427; }
 main, .header-controls, .session-menu, .session-user, .profile-overview > div, .favorites-sections > section, .connections-sections > section { min-width: 0; }
 .header-controls { flex-wrap: wrap; }
 .session-menu { max-width: 100%; }

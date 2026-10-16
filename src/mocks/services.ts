@@ -3,10 +3,11 @@ import { createMockCommunityService } from './communityService';
 import type { AuthService } from '../services/authContracts';
 import type { CommunityService } from '../services/communityContracts';
 import { userFixtures } from './opinions';
-import type { MockUserStore } from './userStore';
+import type { MockUserStore, MockSessionStore } from './userStore';
 
 export function createMockServices(): { auth: AuthService; community: CommunityService } {
   const userStore: MockUserStore = { users: structuredClone(userFixtures) };
-  return { auth: createMockAuthService({ userStore }), community: createMockCommunityService({ userStore }) };
+  const sessionStore: MockSessionStore = { user: null };
+  return { auth: createMockAuthService({ userStore, sessionStore }), community: createMockCommunityService({ userStore, sessionStore }) };
 }
 export const mockServices = createMockServices();
