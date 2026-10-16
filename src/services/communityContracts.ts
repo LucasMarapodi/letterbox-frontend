@@ -5,11 +5,16 @@ export interface PublicComment extends Comment { author: Pick<User, 'id' | 'disp
 export interface PublicProfile { user: User; reviews: ReviewDetails[]; }
 export type FavoriteKind = 'game' | 'review';
 export interface FavoriteLists { games: Game[]; reviews: ReviewDetails[]; }
+export interface Connections { followers: User[]; following: User[]; }
 
 export class CommunityError extends Error {
-  constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found') { super(code); }
+  constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found' | 'self-follow' | 'duplicate-follow') { super(code); }
 }
 export interface CommunityService {
+  getFeed(user: User | null): Promise<ReviewDetails[]>;
+  getConnections(profileId: Id): Promise<Connections>;
+  isFollowing(targetId: Id, user: User | null): Promise<boolean>;
+  setFollowing(targetId: Id, selected: boolean, user: User | null): Promise<void>;
   getFavorites(user: User | null): Promise<FavoriteLists>;
   getFavorite(kind: FavoriteKind, targetId: Id, user: User | null): Promise<Favorite | null>;
   setFavorite(kind: FavoriteKind, targetId: Id, selected: boolean, user: User | null): Promise<Favorite | null>;

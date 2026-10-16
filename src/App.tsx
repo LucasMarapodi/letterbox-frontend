@@ -13,6 +13,7 @@ import { ReviewPage } from './pages/ReviewPage';
 import { Avatar } from './components/Avatar';
 import { FavoritesSections } from './components/FavoritesSections';
 import { encodeRouteId } from './routing/encodeRouteId';
+import { FeedSection } from './components/FeedSection';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
@@ -32,7 +33,7 @@ function ApplicationRoutes(): ReactElement {
       </div>
     </header>
     <Routes>
-      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={user.id} /> : null} />} />
+      <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={user.id} /> : null} feed={user ? <FeedSection key={user.id} /> : null} />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
       <Route path="/perfil/:userId" element={<ProfilePage />} />

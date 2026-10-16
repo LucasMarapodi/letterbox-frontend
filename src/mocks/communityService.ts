@@ -13,7 +13,39 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   ]);
   let sequence = 1;
   const favorites: Favorite[] = [];
+  const follows: { followerId: string; followedId: string }[] = [];
   return {
+    async getFeed(user) {
+      if (!user) throw new CommunityError('session-required');
+      const followed = new Set(follows.filter((relation) => relation.followerId === user.id).map((relation) => relation.followedId));
+      return structuredClone(reviews.filter((review) => followed.has(review.userId))
+        .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id))
+        .map((review) => {
+          const author = users.find((item) => item.id === review.userId);
+          const game = gameFixtures.find((item) => item.id === review.gameId);
+          return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
+        }));
+    },
+    async getConnections(profileId) {
+      return structuredClone({
+        followers: users.filter((user) => follows.some((relation) => relation.followerId === user.id && relation.followedId === profileId)),
+        following: users.filter((user) => follows.some((relation) => relation.followerId === profileId && relation.followedId === user.id)),
+      });
+    },
+    async isFollowing(targetId, user) {
+      if (!user) throw new CommunityError('session-required');
+      return follows.some((relation) => relation.followerId === user.id && relation.followedId === targetId);
+    },
+    async setFollowing(targetId, selected, user) {
+      if (!user) throw new CommunityError('session-required');
+      if (targetId === user.id) throw new CommunityError('self-follow');
+      if (!users.some((item) => item.id === targetId)) throw new CommunityError('not-found');
+      const index = follows.findIndex((relation) => relation.followerId === user.id && relation.followedId === targetId);
+      if (!selected) { if (index >= 0) follows.splice(index, 1); return; }
+      if (index >= 0) throw new CommunityError('duplicate-follow');
+      if (!users.some((item) => item.id === user.id)) users.push(structuredClone(user));
+      follows.push({ followerId: user.id, followedId: targetId });
+    },
     async getFavorites(user) {
       if (!user) throw new CommunityError('session-required');
       const own = favorites.filter((favorite) => favorite.userId === user.id);

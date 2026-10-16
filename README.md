@@ -1,6 +1,6 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews, comentários, perfis e favoritos das US-01 a US-24, sem backend ou acesso direto à IGDB.
+React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews, comentários, perfis, favoritos, conexões e feed das US-01 a US-27, sem backend ou acesso direto à IGDB.
 
 ## Executar
 
@@ -69,3 +69,9 @@ O adaptador `src/services/community.ts` centraliza essas operações. A instânc
 
 Evidências: `docs/TDD-PR-04.md`. Descrição local para revisão: `docs/PR-04.md`. Branch `feat/pr-04-avaliacoes-reviews-comentarios`, sem merge e sem publicação remota.
 
+
+## Conexões e feed — PR-06
+
+Seguir e deixar de seguir no perfil, com bloqueio de própria conta, duplicidade e visitantes. Listas públicas de seguidores e seguidos com avatares e links. Feed na Home autenticada mostra reviews de pessoas seguidas por publicação decrescente. Falhas e estados vazios são tratados; alterações refletem na próxima consulta. Relações permanecem em memória.
+
+Branch feat/pr-06-conexoes-feed, derivada da PR-05, sem merge. Evidências em docs/TDD-PR-06.md e descrição local em docs/PR-06.md. Publicação pendente por ausência de remoto.
