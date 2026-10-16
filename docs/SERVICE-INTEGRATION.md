@@ -1,5 +1,7 @@
 # Troca de fornecedores de dados
 
+Terceira fase: a I-PR-02 acrescentou a infraestrutura descrita em [HTTP-INTEGRATION.md](HTTP-INTEGRATION.md). Os exports HTTP do runtime preparam a ativação dos domínios nas próximas PRs; o padrão mock/custom abaixo ainda descreve os fluxos atuais da aplicação. Não há fallback HTTP -> mock.
+
 `src/services/runtime.ts` reúne `ApplicationServices`: games, auth, community e notifications. `readServiceConfig` normaliza a URL e seleciona mock/custom; `createApplicationServices` constrói uma instância isolada ou exige os adaptadores custom fornecidos. O padrão da aplicação usa mocks. `VITE_API_BASE_URL`, ilustrada em `.env.example`, reserva a configuração da URL, sem produzir solicitações HTTP.
 
 `AppRoutes` aceita `adapters: ApplicationServices`. `ServiceProvider` distribui os fornecedores e as telas usam `useServices`; login/cadastro usam o fornecedor de autenticação através da sessão. A substituição é feita na composição, mantendo a interface das telas. Para usar custom, construa os fornecedores com `createApplicationServices({ implementation: 'custom', apiBaseUrl }, adapters)` e passe o resultado a `AppRoutes`. Não se ativa HTTP apenas preenchendo uma variável de ambiente.
