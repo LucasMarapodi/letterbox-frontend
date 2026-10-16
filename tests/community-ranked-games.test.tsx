@@ -18,8 +18,8 @@ test('agrega reviews por jogo uma vez e filtra janela sem contaminar outros jogo
 });
 test('desempata por último comentário e ID e mantém jogo sem capa', async () => {
   const mock = createMockCommunityService({ reviews: rankingReviews, comments: [
-    { ...rankingComments[0], reviewId: 1 }, { ...rankingComments[0], id: 'tie', reviewId: 3 },
-    { ...rankingComments[0], id: 'later', reviewId: 4, createdAt: new Date(rankingNow).toISOString() },
+    { ...rankingComments[0], reviewId: 1 }, { ...rankingComments[0], id: 9, reviewId: 3 },
+    { ...rankingComments[0], id: 10, reviewId: 4, createdAt: new Date(rankingNow).toISOString() },
   ], clock: () => new Date(rankingNow) });
   const results = await mock.getGamesInDiscussion('7d');
   expect(results.map((item) => item.game.id)).toEqual([3,1,2]);

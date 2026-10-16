@@ -6,6 +6,7 @@ export type UserId = LocalId;
 export type GameId = LocalId;
 export type ReviewId = LocalId;
 export type RatingId = LocalId;
+export type CommentId = LocalId;
 export function isLocalId(value: unknown): value is LocalId {
   return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 2_147_483_647;
 }
@@ -51,9 +52,11 @@ export interface Review {
 }
 
 export interface Comment {
-  id: Id;
+  id: CommentId;
   userId: UserId;
   reviewId: ReviewId;
+  parentCommentId: CommentId | null;
+  likeCount: number;
   text: string;
   createdAt: DateTime;
 }
@@ -76,5 +79,5 @@ interface NotificationBase {
 
 export type Notification = NotificationBase & (
   | { type: 'new-review' }
-  | { type: 'review-comment'; commentId: Id }
+  | { type: 'review-comment'; commentId: CommentId }
 );

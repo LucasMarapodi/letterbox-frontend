@@ -11,7 +11,7 @@ import type { NotificationResponse } from '../src/services/http/dtos';
 import { wireUser, wireNotification, withAuthentication } from './http-fixtures';
 import { deferred } from './fixtures';
 const publication:NotificationResponse={...wireNotification,userId:wireUser.id,actorId: 2,actor:{id: 2,displayName:'Outro',avatarUrl:null}};
-const comment:NotificationResponse={...publication,id:'comment-event',type:'review-comment',commentId:'c'};
+const comment:NotificationResponse={...publication,id:'comment-event',type:'review-comment',commentId:81};
 test('DTOs dos dois tipos e autoria chegam pela API com Bearer, sem token na URL',async()=>{
  const session=createHttpSessionStore();session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});const transport=vi.fn<FetchTransport>().mockResolvedValue(Response.json([publication,comment]));const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{session,transport}).notifications;expect(await service.list({...wireUser,id: 999})).toEqual([publication,comment]);expect(transport.mock.calls[0][0]).toBe('http://localhost:5080/api/v1/notifications');expect(transport.mock.calls[0][1].headers).toHaveProperty('Authorization','Bearer test-only');
 });

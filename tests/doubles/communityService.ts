@@ -10,7 +10,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = options.userStore?.users ?? structuredClone(options.users ?? userFixtures);
   const comments: Comment[] = structuredClone(options.comments ?? [
-    { id: 'comment-1', reviewId: 1, userId: 2, text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
+    { id: 1, reviewId: 1, parentCommentId: null, likeCount: 0, userId: 2, text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
   ]);
   let sequence = 1;
   const favorites: Favorite[] = [];
@@ -116,8 +116,8 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       if (authenticated.id !== user.id) throw new CommunityError('forbidden');
       if (!reviews.some((review) => review.id === reviewId)) throw new CommunityError('not-found');
       if (!text.trim()) throw new CommunityError('empty-text');
-      while (comments.some((comment) => comment.id === `mock-comment-${sequence}`)) sequence++;
-      const comment: Comment = { id: `mock-comment-${sequence++}`, reviewId, userId: authenticated.id, text: text.trim(), createdAt: (options.clock?.() ?? new Date()).toISOString() };
+      while (comments.some((comment) => comment.id === sequence)) sequence++;
+      const comment: Comment = { id: sequence++, parentCommentId: null, likeCount: 0, reviewId, userId: authenticated.id, text: text.trim(), createdAt: (options.clock?.() ?? new Date()).toISOString() };
       comments.push(comment);
       if (!users.some((item) => item.id === authenticated.id)) users.push(structuredClone(authenticated));
       return structuredClone(comment);

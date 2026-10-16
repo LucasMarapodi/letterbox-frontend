@@ -59,7 +59,7 @@ test('pendência bloqueia duplo envio e comentário publicado aparece', async ()
   await act(async () => { fireEvent.submit(form); fireEvent.submit(form); });
   expect(send).toHaveBeenCalledTimes(1);
   expect(screen.getByRole('button', { name: 'Publicando…' })).toBeDisabled();
-  const comment: Comment = { id: 'c-new', userId: author.id, reviewId: 2, text: 'Comentário enviado', createdAt: '2026-01-04T12:00:00Z' };
+  const comment: Comment = { id: 2, userId: author.id, reviewId: 2, parentCommentId: null, likeCount: 0, text: 'Comentário enviado', createdAt: '2026-01-04T12:00:00Z' };
   get.mockResolvedValue([{ ...comment, author }]);
   await act(async () => { pending.resolve(comment); await pending.promise; });
   expect(await screen.findByText('Comentário enviado')).toBeVisible();
