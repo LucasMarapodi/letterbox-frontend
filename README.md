@@ -1,6 +1,6 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. Fundação, catálogo público e autenticação mockada das US-01 a US-14, sem backend ou acesso direto à IGDB.
+React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews e comentários das US-01 a US-20, sem backend ou acesso direto à IGDB.
 
 ## Executar
 
@@ -35,7 +35,7 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 ## Rotas provisórias
 
 `/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
-Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Review e perfil permanecem provisórios. Notificações será acessado pelo sino e modal na US-28, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
+Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Reviews possuem leitura pública, edição do autor e comentários; perfil permanece provisório. Notificações será acessado pelo sino e modal na US-28, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 
@@ -60,4 +60,12 @@ Evidências de TDD: `docs/TDD-PR-02.md`. Descrição local da PR: `docs/PR-02.md
 Login, cadastro sem login automático, sessão em memória e logout. `RequireSession` oferece proteção reutilizável para ações das próximas US. Conteúdo público continua acessível a visitantes.
 
 Credenciais fictícias: `ana@example.com` / `teste123`. Decisões e limitações em `docs/AUTH.md`; evidências em `docs/TDD-PR-03.md`; descrição para revisão em `docs/PR-03.md`.
+
+## Avaliações, reviews e comentários — PR-04
+
+Nos detalhes do jogo, a sessão permite salvar nota e publicar review; quem já publicou encontra o link de edição. A página de review mostra texto completo, autor, jogo, data e comentários públicos. Somente o autor edita; outros usuários podem comentar. Logout remove os formulários autenticados. Nota e review são independentes.
+
+O adaptador `src/services/community.ts` centraliza essas operações. A instância padrão compartilha as opiniões públicas com o catálogo; as factories dos mocks produzem instâncias isoladas para testes. Dados ficam em memória até reload. Comentários na própria review e granularidade das notas permanecem pendentes de definição.
+
+Evidências: `docs/TDD-PR-04.md`. Descrição local para revisão: `docs/PR-04.md`. Branch `feat/pr-04-avaliacoes-reviews-comentarios`, sem merge e sem publicação remota.
 

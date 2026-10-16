@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
@@ -33,10 +33,28 @@ test('login válido inicia sessão central e preserva sessão ao navegar', async
   renderLogin({ login });
   await fillLogin();
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
-  expect(await screen.findByRole('status')).toHaveTextContent('Você entrou como Ana.');
+  expect(await screen.findByRole('heading', { name: 'Game Reviews', level: 1 })).toBeVisible();
+  expect(screen.queryByRole('form', { name: 'Login' })).not.toBeInTheDocument();
+  expect(screen.queryByText('Você entrou como Ana.')).not.toBeInTheDocument();
   expect(login).toHaveBeenCalledWith({ email: 'ana@example.com', password: 'teste123' });
   await interaction.click(screen.getByRole('link', { name: 'Início' }));
   expect(screen.getByLabelText('Usuário conectado')).toHaveTextContent('Ana');
+});
+
+test('sessão troca links de autenticação por avatar e nome e logout restaura links', async () => {
+  const interaction = userEvent.setup();
+  renderLogin({ login: vi.fn<AuthService['login']>().mockResolvedValue({ ...user, avatarUrl: '/ana-avatar.png' }) });
+  await fillLogin();
+  await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  const header = within(screen.getByRole('banner'));
+  expect(await header.findByRole('img', { name: 'Ana' })).toHaveAttribute('src', '/ana-avatar.png');
+  expect(header.queryByRole('link', { name: 'Entrar' })).not.toBeInTheDocument();
+  expect(header.queryByRole('link', { name: 'Criar conta' })).not.toBeInTheDocument();
+  expect(header.getByLabelText('Usuário conectado')).toHaveTextContent('Ana');
+  await interaction.click(header.getByRole('button', { name: 'Sair' }));
+  expect(header.getByRole('link', { name: 'Entrar' })).toBeVisible();
+  expect(header.getByRole('link', { name: 'Criar conta' })).toBeVisible();
+  expect(header.queryByRole('img', { name: 'Ana' })).not.toBeInTheDocument();
 });
 test('credenciais inválidas apresentam erro sem iniciar sessão', async () => {
   const interaction = userEvent.setup();

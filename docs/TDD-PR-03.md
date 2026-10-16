@@ -26,3 +26,6 @@ Proteção de ações existente revalidada sem alteração funcional: visitante 
 - RED: 1 falha esperada e 106 testes verdes; commit cd63b97.
 - GREEN: 107 testes, lint, tipos e build aprovados.
 - Layout escuro centralizado, marca no topo, introdução com acesso ao cadastro, busca compacta, bordas arredondadas e adaptação para telas pequenas. CSS sem dependências adicionais. Visual conferido no navegador.
+
+## Correção — login pendente e logout
+RED: 1 falha esperada e 151 testes verdes, commit f512629. GREEN: 152 testes, lint, tipos e build aprovados. Logout invalida respostas anteriores; login novo continua funcional.

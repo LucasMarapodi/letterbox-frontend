@@ -11,7 +11,7 @@ import type { GameQuery, GameSort } from '../services/contracts';
 
 type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; games: Game[] };
 
-export function HomePage(): ReactElement {
+export function HomePage({ authenticated = false }: { authenticated?: boolean }): ReactElement {
   const [state, setState] = useState<CatalogState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [term, setTerm] = useState<string>('');
@@ -49,13 +49,16 @@ export function HomePage(): ReactElement {
     setAttempt((previous) => previous + 1);
   }
   return <main className="dashboard">
-    <section className="dashboard-hero" aria-labelledby="dashboard-title">
+    {authenticated ? <section className="dashboard-welcome" aria-labelledby="dashboard-title">
+      <span className="eyebrow">SEU PRÓXIMO JOGO COMEÇA AQUI</span>
+      <h1 id="dashboard-title">Game Reviews</h1>
+    </section> : <section className="dashboard-hero" aria-labelledby="dashboard-title">
       <span className="eyebrow">DESCUBRA. JOGUE. COMPARTILHE.</span>
       <h1 id="dashboard-title">Game Reviews</h1>
       <p className="hero-headline">Cada jogo, uma nova história.</p>
       <p className="hero-description">Explore jogos e descubra novas experiências.</p>
       <Link className="primary-link" to="/cadastro">Comece sua jornada <span aria-hidden="true">↗</span></Link>
-    </section>
+    </section>}
     <div className="catalog-toolbar">
     <form className="catalog-search" aria-label="Busca de jogos" onSubmit={search}>
       <TextField label="Buscar jogos" placeholder="Encontre seu próximo jogo…" value={term} onChange={(event) => setTerm(event.target.value)} />

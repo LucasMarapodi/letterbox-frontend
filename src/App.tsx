@@ -9,6 +9,8 @@ import { SessionProvider, useSession } from './session/SessionProvider';
 import { LoginPage } from './pages/LoginPage';
 
 import { RegisterPage } from './pages/RegisterPage';
+import { ReviewPage } from './pages/ReviewPage';
+import { Avatar } from './components/Avatar';
 
 export interface AppRoutesProps { authService?: AuthService; }
 
@@ -18,19 +20,19 @@ function ApplicationRoutes(): ReactElement {
     <header className="site-header">
       <div className="header-inner">
       <Link className="brand" to="/" aria-label="Game Reviews"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>Game Reviews</Link>
+      <div className="header-controls">
       <nav aria-label="Navegação principal">
         <Link to="/">Início</Link>{' '}
-        <Link to="/login">Entrar</Link>{' '}
-        <Link to="/cadastro">Criar conta</Link>
+        {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
-      {user && <span aria-label="Usuário conectado">{user.displayName}</span>}
-      {user && <button type="button" onClick={signOut}>Sair</button>}
+      {user && <div className="session-menu"><div className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></div><button className="logout-button" type="button" onClick={signOut}>Sair <span aria-hidden="true">↗</span></button></div>}
+      </div>
       </div>
     </header>
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<HomePage authenticated={Boolean(user)} />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
-      <Route path="/reviews/:reviewId" element={<PlaceholderPage title="Review" parameter="reviewId" parameterLabel="ID da review" />} />
+      <Route path="/reviews/:reviewId" element={<ReviewPage />} />
       <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
