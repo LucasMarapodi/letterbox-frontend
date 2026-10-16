@@ -1,6 +1,6 @@
-/** Identificador opaco em string apenas para os mocks; a API real poderá alterá-lo. */
+/** Identificador opaco retornado pela API. */
 export type Id = string;
-/** Datas dos mocks em formato ISO; não constitui formato definitivo da API. */
+/** Data/data-hora ISO validada na fronteira HTTP. */
 export type DateTime = string;
 
 export interface User {

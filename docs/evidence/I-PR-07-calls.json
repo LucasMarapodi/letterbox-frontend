@@ -1,0 +1,1183 @@
+{
+  "date": "2026-10-14",
+  "front": "http://127.0.0.1:5174",
+  "api": "http://127.0.0.1:5081",
+  "calls": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "status": 200,
+      "source": "infrastructure"
+    },
+    {
+      "method": "GET",
+      "path": "/openapi/v1.json",
+      "status": 200,
+      "source": "infrastructure"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "status": 201,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "status": 409,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/me/profile",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/games/{gameId}/reviews",
+      "status": 201,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "status": 201,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/recent",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/recent",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 201,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/follow/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/follow/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/users/{userId}/follow",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/games/{gameId}/reviews",
+      "status": 201,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/feed/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/rating/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/reviews/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games/{gameId}/opinions",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 204,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reviews/{reviewId}/comments",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/favorites/{kind}/{targetId}",
+      "status": 204,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/reviews",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/follow/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/follow/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/{userId}/follow",
+      "status": 204,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/followers",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/{userId}/following",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/recent",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/recent",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/reviews/most-commented",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/reviews/{reviewId}",
+      "status": 403,
+      "source": "permissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/games/in-discussion",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/games/in-discussion",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/games/{gameId}/reviews",
+      "status": 409,
+      "source": "permissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 401,
+      "source": "permissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 401,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 401,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 204,
+      "source": "browser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/games",
+      "status": 200,
+      "source": "browser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/feed/following",
+      "status": 401,
+      "source": "browser"
+    }
+  ]
+}

@@ -3,16 +3,16 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import { AppRoutes } from '../src/App';
-import { createApplicationServices } from '../src/services/runtime';
-import { createMockCommunityService } from '../src/mocks/communityService';
-import { userFixtures } from '../src/mocks/opinions';
+import { createTestApplicationServices } from './doubles/applicationServices';
+import { createMockCommunityService } from './doubles/communityService';
+import { userFixtures } from './doubles/opinions';
 test('identidade arbitrária não autoriza comentário sem autenticação', async () => {
   const service = createMockCommunityService();
   await expect(service.comment('review-2', 'Forjado', userFixtures[0])).rejects.toMatchObject({ code: 'session-required' });
   expect((await service.getComments('review-2')).some((comment) => comment.text === 'Forjado')).toBe(false);
 });
 test('credenciais autorizam e logout revoga comentário mesmo mantendo objeto de usuário', async () => {
-  const adapters = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const adapters = createTestApplicationServices();
   const user = await adapters.auth.login({ email: 'ana@example.com', password: 'teste123' });
   await expect(adapters.community.comment('review-2', 'Autorizado', user)).resolves.toMatchObject({ userId: user.id });
   await expect(adapters.community.comment('review-1', 'Outro autor', userFixtures[1])).rejects.toMatchObject({ code: 'forbidden' });
@@ -20,7 +20,7 @@ test('credenciais autorizam e logout revoga comentário mesmo mantendo objeto de
   await expect(adapters.community.comment('review-2', 'Após sair', user)).rejects.toMatchObject({ code: 'session-required' });
 });
 test('comunidade usa leitura pública e editor existente com sessão revogada pelo botão sair', async () => {
-  const adapters = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const adapters = createTestApplicationServices();
   const interaction = userEvent.setup();
   render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes adapters={adapters} /></MemoryRouter>);
   const cards = await within(screen.getByRole('region', { name: 'Reviews recentes' })).findAllByRole('article');

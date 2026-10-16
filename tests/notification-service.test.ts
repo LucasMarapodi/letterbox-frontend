@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
-import { createMockNotificationService } from '../src/mocks/notificationService';
+import { createMockNotificationService } from './doubles/notificationService';
 import type { NotificationEvent } from '../src/services/notificationContracts';
-import { userFixtures } from '../src/mocks/opinions';
+import { userFixtures } from './doubles/opinions';
 
 const events: NotificationEvent[] = [
   { id: 'old', userId: 'user-1', actorId: 'user-2', reviewId: 'review-2', type: 'new-review', createdAt: '2026-01-01T12:00:00Z' },

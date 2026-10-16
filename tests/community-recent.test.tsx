@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { community } from '../src/services/community';
-import { createMockCommunityService } from '../src/mocks/communityService';
+import { createMockCommunityService } from './doubles/communityService';
 import type { Review } from '../src/models';
 afterEach(() => vi.restoreAllMocks());
 const base: Review = { id: 'old', userId: 'user-1', gameId: 'game-1', text: 'Antiga com atividade nova', createdAt: '2026-01-01T12:00:00Z', updatedAt: '2026-10-01T12:00:00Z' };

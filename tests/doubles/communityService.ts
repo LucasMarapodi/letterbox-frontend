@@ -1,6 +1,6 @@
-import type { CommunityService, ReviewDetails } from '../services/communityContracts';
-import { CommunityError } from '../services/communityContracts';
-import type { Rating, Review, User, Comment, Favorite } from '../models';
+import type { CommunityService, ReviewDetails } from '../../src/services/communityContracts';
+import { CommunityError } from '../../src/services/communityContracts';
+import type { Rating, Review, User, Comment, Favorite } from '../../src/models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
 import type { MockUserStore, MockSessionStore } from './userStore';

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import { AppRoutes } from '../src/App';
-import { createMockServices } from '../src/mocks/services';
+import { createMockServices } from './doubles/services';
 import { authService } from '../src/services/auth';
 
 test('cadastro disponibiliza perfil público antes de qualquer interação do autor', async () => {

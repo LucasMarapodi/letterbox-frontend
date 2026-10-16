@@ -1,5 +1,5 @@
-import type { Game, Rating, Review, User } from '../models';
-import type { GameOpinions, GameQuery, GameService, PublicReview } from '../services/contracts';
+import type { Game, Rating, Review, User } from '../../src/models';
+import type { GameOpinions, GameQuery, GameService, PublicReview } from '../../src/services/contracts';
 import { gameFixtures } from './games';
 import { ratingFixtures, reviewFixtures, userFixtures } from './opinions';
 

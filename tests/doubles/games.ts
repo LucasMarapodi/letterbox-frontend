@@ -1,4 +1,4 @@
-import type { Game } from '../models';
+import type { Game } from '../../src/models';
 
 /** Jogos fictícios para a fundação; não representam dados consultados na IGDB. */
 export const gameFixtures: Game[] = [

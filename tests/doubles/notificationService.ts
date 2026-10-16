@@ -1,4 +1,4 @@
-import type { NotificationEvent, NotificationService } from '../services/notificationContracts';
+import type { NotificationEvent, NotificationService } from '../../src/services/notificationContracts';
 import { notificationFixtures } from './notifications';
 import { userFixtures } from './opinions';
 export function createMockNotificationService(options: { events?: NotificationEvent[] } = {}): NotificationService {

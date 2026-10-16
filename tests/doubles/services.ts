@@ -1,7 +1,7 @@
 import { createMockAuthService } from './authService';
 import { createMockCommunityService } from './communityService';
-import type { AuthService } from '../services/authContracts';
-import type { CommunityService } from '../services/communityContracts';
+import type { AuthService } from '../../src/services/authContracts';
+import type { CommunityService } from '../../src/services/communityContracts';
 import { userFixtures } from './opinions';
 import type { MockUserStore, MockSessionStore } from './userStore';
 

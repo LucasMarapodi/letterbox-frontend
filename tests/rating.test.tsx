@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
-import { createMockCommunityService } from '../src/mocks/communityService';
+import { createMockCommunityService } from './doubles/communityService';
 import type { User } from '../src/models';
 import { community } from '../src/services/community';
 import { RatingForm } from '../src/pages/RatingForm';

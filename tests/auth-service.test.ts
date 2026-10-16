@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
-import { createMockAuthService } from '../src/mocks/authService';
-import type { MockAccount } from '../src/mocks/authService';
+import { createMockAuthService } from './doubles/authService';
+import type { MockAccount } from './doubles/authService';
 import type { User } from '../src/models';
 
 const user: User = { id: 'user-1', displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };

@@ -1,5 +1,5 @@
-import type { Comment } from '../models';
-import { isRankingPeriod, type RankingPeriod } from '../services/communityContracts';
+import type { Comment } from '../../src/models';
+import { isRankingPeriod, type RankingPeriod } from '../../src/services/communityContracts';
 export function commentsInPeriod(comments: Comment[], period: RankingPeriod, clock: () => Date): Comment[] {
   if (!isRankingPeriod(period)) throw new Error('Período inválido.');
   const hours: Record<RankingPeriod, number> = { '24h': 24, '7d': 168, '30d': 720 };

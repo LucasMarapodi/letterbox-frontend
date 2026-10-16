@@ -1,12 +1,10 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. US-01 a US-37 implementadas e verificadas: catálogo, autenticação, reviews, perfis, favoritos, conexões, feed, notificações e Comunidade pública com rankings, sem backend ou acesso direto à IGDB.
-
-Terceira fase: I-PR-02 prepara HTTP/DTOs; I-PR-03 ativa autenticação; I-PR-04 jogos/opiniões; I-PR-05 perfis/social; I-PR-06 dashboard, Comunidade e sino. Configure VITE_API_BASE_URL em .env conforme .env.example e execute Back existente. Retirada final dos mocks/E2E/relatório consolidado aguardam I-PR-07. Consulte [infraestrutura e limites](docs/HTTP-INTEGRATION.md) e [entrega de dashboard e feeds](docs/I-PR-06.md).
+React, TypeScript estrito e Vite. A terceira fase integra catálogo, autenticação, reviews, comentários, perfis, relações, favoritos, dashboard, Comunidade e notificações à API existente. HTTP é a única fonte de negócio do aplicativo; fixtures/doubles ficam exclusivamente em tests.
 
 ## Executar
 
-Em `Front`, com Node.js 24 e npm:
+Em Front, com Node 24 e npm, copie .env.example para .env e ajuste VITE_API_BASE_URL à origem efetiva de Back, sem /api/v1. Execute a API existente com origem CORS permitida para o Vite.
 
 ```sh
 npm ci
@@ -14,79 +12,37 @@ npm run dev
 npm run check
 ```
 
-`check` executa testes (incluindo testes de tipos), lint, TypeScript estrito e build.
-`npm test -- --watch` permite acompanhar os testes durante desenvolvimento.
+check executa 401 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+
+## E2E com API real
+
+```sh
+npx playwright install chromium
+npm run test:e2e
+```
+
+Playwright 1.64.1 fixado. Requer .NET 10 e o binário Release existente de Back. O runner não compila/altera Back: inicia API própria em 5081 e Vite em 5174, sem proxy ou interceptação. As portas devem estar livres. Duas contas interagem pela UI; 34 operações funcionais são comparadas ao OpenAPI. health/OpenAPI são infraestrutura. Host de teste é reiniciado/encerrado pelo runner, sem parar a API habitual. Veja [execução, evidências e limites](docs/I-PR-07.md).
 
 ## Responsabilidades
 
-- `src/pages`: telas e composição dos componentes; acessam dados somente por serviços.
-- `src/components`: elementos de interface reutilizáveis, sem importação de mocks.
-- `src/services`: contratos provisórios e ponto central de seleção do fornecedor dos dados.
-- `src/models`: tipos provisórios de domínio, sem assumir regras definitivas do backend.
-- `src/mocks`: fixtures e implementações em memória; acessíveis apenas pela composição dos serviços e pelos testes.
-- `src/App.tsx`: composição da aplicação.
-- `src/main.tsx`: montagem no DOM.
-- `src/routing`: extração de IDs opacos a partir da URL, preservando percentuais literais.
-- `tests`: testes de comportamento e tipos; dados e DOM isolados entre testes.
-- `docs`: decisões e evidências de TDD.
+- src/pages e src/components: interface, usando serviços pelo provider.
+- src/services/http: transporte, requests permitidos, DTOs e validação de JSON unknown.
+- src/services/runtime.ts: composição HTTP compartilhando cliente e sessão.
+- src/session: usuário confirmado, versão e isolamento de ações privadas.
+- src/routing: IDs opacos, preservando percentuais literais na navegação.
+- tests/doubles: fornecedores/fixtures isolados para testes unitários; nunca importados por src.
+- tests/e2e: navegador real e instância própria do backend existente.
 
-Execute uma US por vez. Antes de qualquer comportamento, escreva e execute o teste RED e faça seu commit. Refatorações sem comportamento novo usam testes existentes; não precisam de um RED artificial.
+## Comportamento
 
-Não publicar contratos provisórios como decisões da API real. Não implementar Mobile, backend, banco, likes ou outras funcionalidades fora da fase.
+Visitantes consultam catálogo, detalhes, reviews, comentários, perfis e Comunidade. Cadastro não autentica automaticamente. Login confirma auth/me e redireciona à Home autenticada, com avatar/perfil, sino e logout. Escritas privadas exigem Bearer da sessão, sem autorizar por um objeto User recebido pelo serviço.
 
-## Rotas provisórias
+Nota é recuperada ao reabrir jogo; publicação atualiza reviews; somente o autor edita. Comentários são publicados por outra conta e atualizam a lista pública. Perfis permitem edição do titular; relações e favoritos refletem as respostas da API. Home autenticada usa dashboard agregado, e atualização do feed faz consulta específica. Rankings vêm do servidor e aceitam períodos 24h/7d/30d. Sino consulta notificações ao abrir/reabrir, com foco e Escape.
 
-`/`, `/comunidade`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
-Os fluxos ativos de Home, jogos/opiniões, perfis/social, Comunidade e sino consomem HTTP. Home autenticada consulta dashboard para favoritos/feed iniciais, sem GET favorites/feed redundantes; Atualizar feed usa feed/following. Comunidade é pública e preserva período dos rankings. Sino consulta ao abrir/reabrir, sem gerar eventos locais. Doubles de testes e imports/fábrica legados aguardam retirada na I-PR-07. Links temporários de exemplo podem apontar a registros ausentes.
-URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
-Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
+Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e invalida solicitações anteriores imediatamente, tentando revogação real. 401 privado atual limpa sessão; respostas antigas não recuperam identidade ou dados pessoais. Falhas de rede têm erro/retry, sem fixtures.
 
-## Componentes básicos
+## Entrega
 
-`Button` usa botão nativo e não submete formulários por padrão. `TextField` associa seu rótulo com ID próprio ou fornecido. `GameCard` oferece link com ID codificado. `Avatar` oferece iniciais sem foto ou quando a imagem falha. `LoadingState`, `ErrorState` e `EmptyState` recebem mensagens; o erro pode oferecer uma nova tentativa.
+[I-PR-07](docs/I-PR-07.md), [TDD](docs/TDD-I-PR-07.md) e [relatório dos endpoints](docs/RELATORIO-ENDPOINTS.md). Os documentos PR-01 a PR-09/TDD-PR-* preservam o histórico da fase anterior; descrições mockadas nesses registros não representam o runtime atual.
 
-`GameCover`, compartilhado por cartões e detalhes, mostra “Sem capa” para URL ausente ou erro de carregamento e permite uma nova tentativa ao receber outra URL. `encodeRouteId` gera URLs seguras inclusive para IDs `.`/`..`; sua representação é documentada em `docs/CONTRACTS.md`.
-
-A prévia inicial `FoundationPreview` permanece como exemplo isolado com testes de componentes; a Home agora apresenta o catálogo. Seus testes usam um serviço substituto e cobrem carregamento, ausência e rejeição com recuperação.
-
-## Catálogo público — PR-02
-
-Visitantes podem listar jogos, buscar pelo nome por Enter ou botão, limpar a busca, ordenar por nome e consultar detalhes, média e reviews. As opções A–Z e Z–A são provisórias. Estado sem notas aparece como ausência de avaliações, e média zero aparece como uma nota válida. Reviews oferecem links para seu conteúdo e para o autor; as páginas de destino serão implementadas nas fases correspondentes.
-
-Fixtures fictícias ilustram jogo completo, lançamento/capa ausentes, média zero e ausência de notas. Capas SVG locais em `public/covers` não usam serviços externos. Os componentes não filtram, ordenam ou calculam média: consomem os resultados da camada de serviços.
-
-Evidências de TDD: `docs/TDD-PR-02.md`. Descrição local da PR: `docs/PR-02.md`. A branch `feat/pr-02-catalogo-publico` deriva da branch da fundação, sem merge. A PR ainda não foi publicada por ausência de remoto.
-
-## Autenticação mockada — PR-03
-
-Login, cadastro sem login automático, sessão em memória e logout. `RequireSession` oferece proteção reutilizável para ações das próximas US. Conteúdo público continua acessível a visitantes.
-
-Credenciais fictícias: `ana@example.com` / `teste123`. Decisões e limitações em `docs/AUTH.md`; evidências em `docs/TDD-PR-03.md`; descrição para revisão em `docs/PR-03.md`.
-
-## Avaliações, reviews e comentários — PR-04
-
-Nos detalhes do jogo, a sessão permite salvar nota e publicar review; quem já publicou encontra o link de edição. A página de review mostra texto completo, autor, jogo, data e comentários públicos. Somente o autor edita; outros usuários podem comentar. Logout remove os formulários autenticados. Nota e review são independentes.
-
-O adaptador `src/services/community.ts` centraliza essas operações. A instância padrão compartilha as opiniões públicas com o catálogo; as factories dos mocks produzem instâncias isoladas para testes. Dados ficam em memória até reload. Comentários na própria review e granularidade das notas permanecem pendentes de definição.
-
-Evidências: `docs/TDD-PR-04.md`. Descrição local para revisão: `docs/PR-04.md`. Branch `feat/pr-04-avaliacoes-reviews-comentarios`, sem merge e sem publicação remota.
-
-
-## Conexões e feed — PR-06
-
-Seguir e deixar de seguir no perfil, com bloqueio de própria conta, duplicidade e visitantes. Listas públicas de seguidores e seguidos com avatares e links. Feed na Home autenticada mostra reviews de pessoas seguidas por publicação decrescente. Falhas e estados vazios são tratados; alterações refletem na próxima consulta. Relações permanecem em memória.
-
-Branch feat/pr-06-conexoes-feed, derivada da PR-05, sem merge. Evidências em docs/TDD-PR-06.md e descrição local em docs/PR-06.md. Publicação pendente por ausência de remoto.
-
-## Notificações — PR-07
-
-O sino exclusivo da sessão autenticada abre um modal com eventos pessoais mockados, mais recentes primeiro. Modal com teclado, retorno de foco, carregamento/vazio/erro e links para reviews. Logout ou troca de conta fecha e descarta dados. Não há rota exclusiva, contador, status de leitura ou geração automática de eventos.
-
-Branch feat/pr-07-notificacoes sobre PR-06, sem merge. Evidências em docs/TDD-PR-07.md; descrição em docs/PR-07.md. 208 testes, lint, tipos e build aprovados. Publicação pendente por ausência de remoto.
-
-
-## Preparação da entrega — PR-08
-
-Atalho para conteúdo por teclado, nomes longos sem overflow e layout conferido em navegador real em 320, 768 e 1280 px. Serviços centralizados em src/services/runtime.ts e substituíveis via AppRoutes.adapters/ServiceProvider. A URL VITE_API_BASE_URL é reservada à integração futura e não ativa HTTP. Consulte docs/SERVICE-INTEGRATION.md para operações e pendências.
-
-218 testes, lint, TypeScript estrito e build aprovados. Evidências em docs/TDD-PR-08.md; descrição em docs/PR-08.md. Branch feat/pr-08-preparacao-entrega sobre PR-07, sem merge. Publicação pendente por ausência de remoto.
+Limites: Back continua em memória, com token simulado e IGDB fake. SQL, autenticação de produção e IGDB externa estão fora da fase. A API não gera IDs . ou .., rejeitados pelo transporte antes de fetch; percentuais literais continuam preservados. Branches preparadas localmente; Front não possui remoto configurado. Nenhum merge foi feito.
