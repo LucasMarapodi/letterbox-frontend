@@ -22,7 +22,7 @@ test('autenticação usa dashboard e não consulta favoritos/feed/notificações
   await interaction.type(screen.getByLabelText('E-mail'),'a@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   expect(await screen.findByLabelText('Usuário conectado')).toHaveTextContent('Ana API');
   expect(favorites).not.toHaveBeenCalled(); expect(feed).not.toHaveBeenCalled(); expect(notifications).not.toHaveBeenCalled();
-  expect(await screen.findByRole('region',{name:'Jogos favoritos'})).toBeVisible(); expect(screen.getByRole('button',{name:'Notificações'})).toBeVisible();
+  expect(await screen.findByRole('region',{name:'Feed de reviews'})).toBeVisible(); expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument(); expect(screen.getByRole('button',{name:'Notificações'})).toBeVisible();
   expect(adapters.privateFeatures?.opinions).toBe(false);
 });
 test('serviços privados não aceitam identidade de usuário sem sessão HTTP', async () => {

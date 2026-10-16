@@ -12,7 +12,7 @@ import type { GamePage, GameQuery, GameSort } from '../services/contracts';
 
 type CatalogState = { status: 'loading' } | { status: 'error'; integration: boolean } | { status: 'ready'; data: GamePage };
 
-export function HomePage({ authenticated = false, favorites, feed }: { authenticated?: boolean; favorites?: ReactNode; feed?: ReactNode }): ReactElement {
+export function HomePage({ authenticated = false, feed }: { authenticated?: boolean; feed?: ReactNode }): ReactElement {
   const { games } = useServices();
   const [state, setState] = useState<CatalogState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
@@ -111,7 +111,6 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
         <Button disabled={!state.data.hasNextPage} onClick={() => { setState({ status: 'loading' }); setQuery((current) => ({ ...current, page: state.data.page + 1 })); }}>Próxima</Button>
       </nav>}
     </section>
-    {favorites}
     {feed}
   </main>;
 }

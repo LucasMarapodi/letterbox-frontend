@@ -11,7 +11,6 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { Avatar } from './components/Avatar';
-import { FavoritesSections } from './components/FavoritesSections';
 import { encodeRouteId } from './routing/encodeRouteId';
 import { FeedSection } from './components/FeedSection';
 import { NotificationBell } from './components/NotificationBell';
@@ -50,7 +49,7 @@ function ApplicationRoutes(): ReactElement {
     {signingOut && <p className="session-notice" role="status">Encerrando sessão…</p>}
     {notice && <p className="session-notice" role="alert">{notice}</p>}
     <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
-      <Route path="/" element={user && privateFeatures?.dashboard === true ? <DashboardHome key={`${version}-${user.id}`} /> : <HomePage authenticated={Boolean(user)} favorites={user && privateFeatures?.favorites !== false && privateFeatures?.dashboard !== false ? <FavoritesSections key={`favorites-${version}-${user.id}`} /> : null} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
+      <Route path="/" element={user && privateFeatures?.dashboard === true ? <DashboardHome key={`${version}-${user.id}`} /> : <HomePage authenticated={Boolean(user)} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
       <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
