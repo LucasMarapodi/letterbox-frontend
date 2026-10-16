@@ -12,13 +12,12 @@ import { RegisterPage } from '../src/pages/RegisterPage';
 import { ProfileEditor } from '../src/pages/ProfileEditor';
 import { PublishReview } from '../src/pages/PublishReview';
 import { EditReview } from '../src/pages/EditReview';
-import { RatingForm } from '../src/pages/RatingForm';
 import { CommentForm } from '../src/pages/CommentForm';
 import { FavoriteButton } from '../src/components/FavoriteButton';
 import { FollowButton } from '../src/components/FollowButton';
 import { AppRoutes } from '../src/App';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireUser, wireReview, wireRating, wireComment, wireFavorite, wirePage } from './http-fixtures';
+import { wireUser, wireReview, wireComment, wireFavorite, wirePage } from './http-fixtures';
 import { deferred } from './fixtures';
 
 interface MutationCase {
@@ -31,9 +30,8 @@ const cases: MutationCase[] = [
   { name: 'login', guest: true, endpoint: '/auth/login', method: 'POST', render: () => <LoginPage />, fields: [{ label: 'E-mail', value: 'test@example.test' }, { label: 'Senha', value: 'test-only' }], button: 'Entrar', pending: 'Entrando…', result: { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' } },
   { name: 'cadastro', guest: true, endpoint: '/auth/register', method: 'POST', render: () => <RegisterPage />, fields: [{ label: 'Nome', value: 'Ana' }, { label: 'E-mail', value: 'test@example.test' }, { label: 'Senha', value: 'test-only' }], button: 'Criar conta', pending: 'Criando conta…', result: wireUser },
   { name: 'perfil', endpoint: '/users/me/profile', method: 'PATCH', render: saved => <ProfileEditor profile={wireUser} onSaved={saved} />, fields: [{ label: 'Biografia', value: 'Rascunho' }], button: 'Salvar perfil', pending: 'Salvando perfil…', result: { ...wireUser, bio: 'Rascunho' } },
-  { name: 'publicar review', endpoint: '/games/1/reviews', method: 'POST', render: saved => <PublishReview gameId={1} onSaved={saved} />, fields: [{ label: 'Sua review', value: 'Rascunho' }], button: 'Publicar review', pending: 'Publicando…', result: wireReview },
-  { name: 'editar review', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}`, method: 'PATCH', render: saved => <EditReview review={wireReview} onSaved={saved} />, fields: [{ label: 'Sua review', value: 'Rascunho' }], button: 'Salvar review', pending: 'Salvando…', result: { ...wireReview, text: 'Rascunho' } },
-  { name: 'nota', endpoint: '/games/1/rating/me', method: 'PUT', render: saved => <RatingForm gameId={1} onSaved={saved} />, fields: [], button: 'Salvar nota', pending: 'Salvando…', result: wireRating },
+  { name: 'publicar review', endpoint: '/games/1/reviews', method: 'POST', render: saved => <PublishReview gameId={1} onSaved={saved} />, fields: [{ label: 'Descrição (opcional)', value: 'Rascunho' }], button: 'Publicar review', pending: 'Publicando…', result: wireReview },
+  { name: 'editar review', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}`, method: 'PATCH', render: saved => <EditReview review={wireReview} onSaved={saved} />, fields: [{ label: 'Descrição (opcional)', value: 'Rascunho' }], button: 'Salvar review', pending: 'Salvando…', result: { ...wireReview, text: 'Rascunho' } },
   { name: 'comentário', endpoint: '/reviews/55/comments', method: 'POST', render: saved => <CommentForm reviewId={55} authorId={2} onSaved={saved} />, fields: [{ label: 'Seu comentário', value: 'Rascunho' }], button: 'Publicar comentário', pending: 'Publicando…', result: wireComment },
   ...(['game', 'review'] as const).map(kind => ({ name: `favorito ${kind}`, endpoint: `/favorites/${kind}/${kind === 'game' ? 1 : 55}`, method: 'PUT', render: () => <FavoriteButton kind={kind} targetId={kind === 'game' ? 1 : 55} />, fields: [], button: `Favoritar ${kind === 'game' ? 'jogo' : 'review'}`, pending: 'Atualizando favorito…', result: { ...wireFavorite, targetType: kind, targetId: kind === 'game' ? 1 : 55 } })),
   { name: 'seguir', endpoint: '/users/2/follow', method: 'PUT', render: saved => <FollowButton targetId={2} name="Outro" onChanged={saved} />, fields: [], button: 'Seguir Outro', pending: 'Atualizando relação…', result: { following: true } },
@@ -59,6 +57,7 @@ test.each(cases)('$name: dois submits/cliques enviam uma mutação, erro libera 
   const saved = vi.fn();
   render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}>{item.render(saved)}</SessionProvider></ServiceProvider></MemoryRouter>);
   const interaction = userEvent.setup();
+  if(item.name==='publicar review'){await interaction.click(await screen.findByRole('button',{name:'Criar review'})); fireEvent.change(screen.getByLabelText('Nota (0 a 5)'),{target:{value:'4.5'}});} if(item.name==='editar review')await interaction.click(screen.getByRole('button',{name:'Editar minha review'}));
   for (const field of item.fields) {
     const input = await screen.findByLabelText(field.label);
     await interaction.clear(input); await interaction.type(input, field.value);
@@ -101,13 +100,13 @@ test.each(['comentário', 'editar review'])('%s: nova tentativa pendente/fracass
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}>{item.render(vi.fn())}</SessionProvider></ServiceProvider></MemoryRouter>);
   const interaction = userEvent.setup();
-  await interaction.type(await screen.findByLabelText(item.fields[0].label), 'Primeira versão');
+  if(name==='editar review')await interaction.click(screen.getByRole('button',{name:'Editar minha review'})); await interaction.type(await screen.findByLabelText(item.fields[0].label), 'Primeira versão');
   await interaction.click(screen.getByRole('button', { name: item.button }));
   await act(async () => { response.resolve(Response.json(item.result)); await response.promise; });
   const success = name === 'comentário' ? 'Comentário publicado.' : 'Review atualizada.';
   await screen.findByText(success);
   response = deferred<Response>();
-  await interaction.clear(screen.getByLabelText(item.fields[0].label));
+  if(name==='editar review')await interaction.click(screen.getByRole('button',{name:'Editar minha review'})); await interaction.clear(screen.getByLabelText(item.fields[0].label));
   await interaction.type(screen.getByLabelText(item.fields[0].label), 'Nova versão');
   await interaction.click(screen.getByRole('button', { name: item.button }));
   expect(screen.queryByText(success)).not.toBeInTheDocument();

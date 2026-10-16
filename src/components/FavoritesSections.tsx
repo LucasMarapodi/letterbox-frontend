@@ -1,3 +1,4 @@
+import { ReviewBody } from './ReviewBody';
 import { CatalogNotice } from './CatalogNotice';
 import { useEffect, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
@@ -26,7 +27,7 @@ export function FavoritesSections(): ReactElement | null {
       </li>)}</ul> : <EmptyState message="Nenhum jogo favorito." />}
     </section>
     {state.lists.reviews.length > 0 && <section aria-label="Reviews favoritas"><h2>Reviews favoritas</h2>
-      {state.lists.reviews.map((review) => <article className="review-card" key={review.id}><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}: {review.game.title}</Link><p className="review-text">{review.text}</p><ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} /></article>)}
+      {state.lists.reviews.map((review) => <article className="review-card" key={review.id}><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}: {review.game.title}</Link><ReviewBody review={review} /><ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} /></article>)}
     </section>}
   </div>;
 }

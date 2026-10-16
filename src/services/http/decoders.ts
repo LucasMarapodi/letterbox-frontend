@@ -70,7 +70,7 @@ export function decodeGame(value: unknown): GameResponse {
 }
 export function decodeReview(value: unknown): ReviewResponse {
   const item = publicRecord(value); const game = publicRecord(item.game);
-  return { id: localId(item.id), userId: localId(item.userId), gameId: localId(item.gameId), text: text(item.text), createdAt: instant(item.createdAt), updatedAt: nullable(item.updatedAt, instant), author: author(item.author), game: { id: localId(game.id), title: text(game.title), coverUrl: nullable(game.coverUrl, text) } };
+  return { id: localId(item.id), userId: localId(item.userId), gameId: localId(item.gameId), text: text(item.text), rating: nullable(item.rating, score), createdAt: instant(item.createdAt), updatedAt: nullable(item.updatedAt, instant), author: author(item.author), game: { id: localId(game.id), title: text(game.title), coverUrl: nullable(game.coverUrl, text) } };
 }
 export function decodeComment(value: unknown): CommentResponse {
   const item = publicRecord(value); return { id: localId(item.id), userId: localId(item.userId), reviewId: localId(item.reviewId), parentCommentId: nullable(item.parentCommentId, localId), likeCount: likeCount(item.likeCount), text: text(item.text), createdAt: instant(item.createdAt), author: author(item.author) };

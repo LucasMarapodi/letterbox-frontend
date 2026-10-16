@@ -1,3 +1,4 @@
+import { ReviewBody } from './ReviewBody';
 import { CatalogNotice } from './CatalogNotice';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
@@ -33,7 +34,7 @@ export function FeedSection({ initialReviews }: { initialReviews?: ReviewDetails
     {state.status === 'ready' && (state.reviews.length ? state.reviews.map((review) => <article className="review-card" key={review.id}>
       <div className="feed-author"><Avatar name={review.author.displayName} src={review.author.avatarUrl} /><Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></div>
       <h3><Link to={`/jogos/${encodeRouteId(review.game.id)}`}>{review.game.title}</Link></h3>
-      <p className="review-text">{review.text}</p><Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review</Link>
+      <ReviewBody review={review} /><Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review</Link>
       <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
     </article>) : <EmptyState message="Nenhuma review de pessoas seguidas." />)}
   </section>;

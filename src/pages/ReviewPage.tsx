@@ -1,3 +1,4 @@
+import { ReviewBody } from '../components/ReviewBody';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useLocalRouteId } from '../routing/useLocalRouteId';
@@ -31,7 +32,7 @@ function ReviewContent({ id }: { id: number }): ReactElement {
     <h2>Review de <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link></h2>
     <Link to={`/jogos/${encodeRouteId(review.game.id)}`}>{review.game.title}</Link>
     <p><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></p>
-    <p className="review-text">{review.text}</p>
+    <ReviewBody review={review} />
     <FavoriteButton kind="review" targetId={review.id} />
     <EditReview review={review} onSaved={(updated) => setState({ status: 'ready', review: updated })} />
     <CommentsSection key={`${review.id}-${commentsVersion}`} reviewId={review.id} />

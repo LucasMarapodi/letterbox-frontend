@@ -1,3 +1,4 @@
+import { ReviewBody } from '../components/ReviewBody';
 import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -60,7 +61,7 @@ export function GameOpinionsSection({ gameId, reviewsVersion = 0 }: GameOpinions
           <Avatar name={review.author.displayName} src={review.author.avatarUrl} />
           <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link>
         </div>
-        <p>{review.text}</p>
+        <ReviewBody review={review} />
         <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
       </article>) : <EmptyState message="Nenhuma review publicada para este jogo." />)}
       </div>

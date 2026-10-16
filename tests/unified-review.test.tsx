@@ -22,6 +22,8 @@ async function open(options: { logged?: boolean; own?: Rated; path?: string; wri
       return Response.json(review, { status: init.method === 'POST' ? 201 : 200 });
     }
     if (path.endsWith('/reviews/me')) return Response.json({ review });
+    if (path.endsWith('/dashboard')) return Response.json({ favorites: { games: [], reviews: review ? [review] : [] }, feed: review ? [review] : [] });
+    if (path.endsWith('/feed/following') || /^\/api\/v1\/users\/\d+\/reviews$/.test(path)) return Response.json(review ? [review] : []);
     if (path.endsWith('/opinions')) return Response.json({ averageRating: review?.rating ?? null, reviews: review ? [review] : [] });
     if (path.endsWith('/favorites')) return Response.json({ games: [], reviews: review ? [review] : [] });
     if (path.includes('/favorites/')) return Response.json({ favorite: null });
@@ -34,7 +36,7 @@ async function open(options: { logged?: boolean; own?: Rated; path?: string; wri
     if (path.endsWith('/auth/logout')) return new Response(null, { status: 204 });
     if (path.includes('/users/')) return Response.json(wireUser);
     return Response.json({ ...wireGame, averageRating: review?.rating ?? null });
-  }));
+  }, { isolateDashboard: false }));
   const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
   if (options.logged !== false) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[options.path ?? '/jogos/12']}><AppRoutes adapters={adapters} /></MemoryRouter>);
@@ -110,4 +112,20 @@ test('conflito oferece edição após consultar a review existente sem sucesso f
 });
 test.each([undefined, '4', -1, 5.1])('decoder não inventa/converte nota inválida %s', rating => {
   expect(() => decodeReview({ ...wireReview, rating })).toThrow();
+});
+test.each(['/jogos/12', '/reviews/55', `/perfil/${wireUser.id}`, '/comunidade', '/'])('review sem descrição e nota zero permanece visível em %s', async path => {
+  await open({ own: { ...wireReview, text: '', rating: 0 }, path });
+  expect((await screen.findAllByText('Nota: 0 de 5')).length).toBeGreaterThan(0);
+  expect(document.querySelectorAll('p.review-text')).toHaveLength(0);
+});
+test.each([-1, 6])('formulário rejeita nota %s antes de escrever', async rating => {
+  const { writes } = await open(); const editor = await form();
+  fireEvent.change(within(editor).getByLabelText('Nota (0 a 5)'), { target: { value: String(rating) } }); fireEvent.submit(editor);
+  expect(within(editor).getByText('Escolha uma nota de 0 a 5.')).toBeVisible(); expect(writes()).toHaveLength(0);
+});
+test('limite de descrição é validado e cancelamento da edição não escreve', async () => {
+  const { writes } = await open({ own: { ...wireReview, rating: 3 } }); const editor = await form(true);
+  fireEvent.change(within(editor).getByLabelText('Descrição (opcional)'), { target: { value: 'a'.repeat(10001) } }); fireEvent.submit(editor);
+  expect(within(editor).getByText('Descrição deve ter até 10000 caracteres.')).toBeVisible();
+  await userEvent.click(within(editor).getByRole('button', { name: 'Cancelar' })); expect(writes()).toHaveLength(0);
 });

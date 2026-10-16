@@ -12,7 +12,7 @@ vi.mock('../src/services', () => ({ services: {
   games: { getFilters: vi.fn<GameService['getFilters']>().mockResolvedValue({ genres: [], platforms: [] }), list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
 } } satisfies { services: Services }));
 
-const review: PublicReview = { id: 1, gameId: 1, userId: 1, text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 1, displayName: 'Ana', avatarUrl: null } };
+const review: PublicReview = { id: 1, gameId: 1, userId: 1, rating: 4, text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 1, displayName: 'Ana', avatarUrl: null } };
 
 beforeEach(() => {
   vi.mocked(services.games.list).mockReset().mockResolvedValue(gamePage([]));

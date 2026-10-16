@@ -6,7 +6,6 @@ import { useServices } from '../services/ServiceProvider';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
 import { GameCover } from '../components/GameCover';
-import { RatingForm } from './RatingForm';
 import { PublishReview } from './PublishReview';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { CatalogNotice } from '../components/CatalogNotice';
@@ -28,7 +27,6 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   const [attempt, setAttempt] = useState<number>(0);
   const [refreshing, setRefreshing] = useState(false);
   const [opinionsVersion, setOpinionsVersion] = useState(0);
-  const [reviewsVersion, setReviewsVersion] = useState(0);
   useEffect(() => {
     let active: boolean = true;
     setRefreshing(true);
@@ -68,11 +66,10 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     </div>
     <aside className="game-actions" aria-label="Avaliar e publicar">
     <FavoriteButton kind="game" targetId={id} />
-    <RatingForm gameId={id} onSaved={() => { setAttempt((value) => value + 1); setOpinionsVersion((version) => version + 1); }} />
-    <PublishReview gameId={id} onSaved={() => setReviewsVersion((version) => version + 1)} />
+    <PublishReview gameId={id} onSaved={() => { setAttempt(value => value + 1); setOpinionsVersion(value => value + 1); }} />
     </aside>
     <div className="game-discussion">
-    <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} reviewsVersion={reviewsVersion} />
+    <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
     </div>
   </section>;
 }
