@@ -19,7 +19,9 @@ function EditControl({ review, onSaved }: { review: ReviewDetails; onSaved(revie
   </section>;
 }
 export function EditReview(props: { review: ReviewDetails; onSaved(review: ReviewDetails): void }): ReactElement | null {
-  const { user } = useSession();
-  return user?.id === props.review.userId ? <EditControl key={`${user.id}-${props.review.id}`} {...props} /> : null;
+  const { user, version } = useSession();
+  const { privateFeatures } = useServices();
+  if (privateFeatures?.opinions === false) return null;
+  return user?.id === props.review.userId ? <EditControl key={`${version}-${user.id}-${props.review.id}`} {...props} /> : null;
 }
 

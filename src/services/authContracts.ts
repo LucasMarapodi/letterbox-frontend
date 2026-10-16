@@ -3,7 +3,10 @@ import type { User } from '../models';
 export interface LoginCredentials { email: string; password: string; }
 export interface RegistrationInput { name: string; email: string; password: string; }
 export interface AuthService {
-  logout?(): void;
+  logout?(): void | Promise<void>;
+  sessionUser?(): User | null;
+  subscribe?(listener: () => void): () => void;
+  sessionVersion?(): number;
   login(credentials: LoginCredentials): Promise<User>;
   register(input: RegistrationInput): Promise<User>;
 }

@@ -32,9 +32,11 @@ function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement
   return <div className="follow-control"><Button disabled={pending} aria-pressed={state.following} onClick={() => { void toggle(); }}>{pending ? 'Atualizando relação…' : `${state.following ? 'Deixar de seguir' : 'Seguir'} ${name}`}</Button>{error && <p role="alert">{error}</p>}</div>;
 }
 export function FollowButton(props: FollowProps): ReactElement | null {
-  const { user } = useSession();
+  const { user, version } = useSession();
+  const { privateFeatures } = useServices();
+  if (privateFeatures?.follows === false) return null;
   if (!user) return <Link to="/login">Entrar para seguir</Link>;
   if (user.id === props.targetId) return null;
-  return <FollowControl key={`${user.id}-${props.targetId}`} {...props} />;
+  return <FollowControl key={`${version}-${user.id}-${props.targetId}`} {...props} />;
 }
 

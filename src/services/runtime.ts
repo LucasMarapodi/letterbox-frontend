@@ -5,9 +5,14 @@ import type { NotificationService } from './notificationContracts';
 import { createMockServices } from '../mocks/services';
 import { createMockGameService } from '../mocks/gameService';
 import { createMockNotificationService } from '../mocks/notificationService';
+import type { FetchTransport } from './http/client';
+import { HttpFailure } from './http/client';
+import { createHttpAdapters, createHttpSessionStore, readHttpConfig, type HttpAdapters, type HttpSessionStore } from './http/adapters';
+import { createHttpAuthService } from './http/authService';
 // Infraestrutura preparada; ativação de cada domínio ocorre nas US de integração.
 export { createHttpAdapters, createHttpSessionStore, readHttpConfig } from './http/adapters';
-export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; }
+export type PrivateFeature = 'opinions' | 'favorites' | 'follows' | 'feed' | 'notifications';
+export interface ApplicationServices { games: GameService; auth: AuthService; community: CommunityService; notifications: NotificationService; privateFeatures?: Partial<Record<PrivateFeature, boolean>>; http?: () => HttpAdapters; }
 export interface ServiceConfig { apiBaseUrl: string; implementation: 'mock' | 'custom'; }
 export function readServiceConfig(input: { apiBaseUrl?: unknown; implementation?: unknown } = {}): ServiceConfig {
   const implementation = input.implementation ?? 'mock';
@@ -23,4 +28,22 @@ export function createApplicationServices(config: ServiceConfig, adapters?: Appl
   return { ...mock, notifications: createMockNotificationService(), games: { ...createMockGameService(), getOpinions: (id) => mock.community.getOpinions(id) } };
 }
 export const serviceConfig = readServiceConfig({ apiBaseUrl: import.meta.env.VITE_API_BASE_URL });
-export const defaultApplicationServices = createApplicationServices(serviceConfig);
+export function createDefaultApplicationServices(config: { apiBaseUrl?: unknown }, options: { transport?: FetchTransport; session?: HttpSessionStore } = {}): ApplicationServices {
+  const previous = createApplicationServices({ apiBaseUrl: '', implementation: 'mock' });
+  const session = options.session ?? createHttpSessionStore();
+  let http: HttpAdapters | undefined;
+  const getHttp = (): HttpAdapters => http ??= createHttpAdapters(readHttpConfig(config), { ...options, session });
+  const unavailable = async (): Promise<never> => { throw new HttpFailure('configuration'); };
+  return {
+    ...previous, auth: createHttpAuthService(getHttp, session), http: getHttp,
+    privateFeatures: { opinions: false, favorites: false, follows: false, feed: false, notifications: false },
+    community: {
+      ...previous.community,
+      getProfile: (id) => previous.community.getProfile(id),
+      rate: unavailable, getRating: unavailable, publish: unavailable, findOwnReview: unavailable, editReview: unavailable, comment: unavailable,
+      getFavorites: unavailable, getFavorite: unavailable, setFavorite: unavailable, getFeed: unavailable, isFollowing: unavailable, setFollowing: unavailable,
+    },
+    notifications: { list: unavailable },
+  };
+}
+export const defaultApplicationServices = createDefaultApplicationServices({ apiBaseUrl: import.meta.env.VITE_API_BASE_URL });

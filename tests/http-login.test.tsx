@@ -1,0 +1,61 @@
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { expect, test, vi } from 'vitest';
+import { AppRoutes } from '../src/App';
+import { createDefaultApplicationServices } from '../src/services/runtime';
+import { createHttpSessionStore } from '../src/services/http/adapters';
+import type { FetchTransport } from '../src/services/http/client';
+import { wireUser, wireReview } from './http-fixtures';
+import { deferred } from './fixtures';
+const credentials = { email: 'test@example.com', password: 'test-only' };
+const login = { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' };
+test('login envia credenciais e confirma me com Bearer antes de retornar User', async () => {
+  const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockResolvedValueOnce(Response.json({ ...wireUser, displayName: 'Nome confirmado' }));
+  const session = createHttpSessionStore();
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session });
+  expect(await adapters.auth.login(credentials)).toEqual({ ...wireUser, displayName: 'Nome confirmado' });
+  expect(transport.mock.calls.map(([url]) => url)).toEqual(['http://localhost:5207/api/v1/auth/login','http://localhost:5207/api/v1/auth/me']);
+  expect(transport.mock.calls[0][1].body).toBe(JSON.stringify(credentials));
+  expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
+  expect(transport.mock.calls[1][1].headers).toHaveProperty('Authorization','Bearer test-only');
+  expect(session.current()?.user.displayName).toBe('Nome confirmado');
+});
+test.each([401,400])('login HTTP %s mapeia erro sem guardar sessão', async (status) => {
+  const transport = vi.fn<FetchTransport>().mockResolvedValue(Response.json({ code: status === 401 ? 'unauthorized' : 'validation_failed', message: 'Seguro' }, { status }));
+  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session });
+  await expect(adapters.auth.login(credentials)).rejects.toMatchObject({ code: status === 401 ? 'invalid-credentials' : 'invalid-fields' });
+  expect(session.current()).toBeNull(); expect(transport).toHaveBeenCalledTimes(1);
+});
+test.each(['401','invalid','identity'])('confirmação %s rejeita login e elimina token pendente', async (scenario) => {
+  const second = scenario === '401' ? Response.json({ code: 'unauthorized', message: 'Seguro' }, { status: 401 }) : Response.json(scenario === 'identity' ? { ...wireUser, id: 'different-user' } : { invalid: true });
+  const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockResolvedValueOnce(second);
+  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session });
+  await expect(adapters.auth.login(credentials)).rejects.toBeInstanceOf(Error);
+  expect(transport).toHaveBeenCalledTimes(2); expect(session.current()).toBeNull();
+});
+test('UI aguarda me e não persiste sessão após remontagem', async () => {
+  const pending = deferred<Response>();
+  const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockReturnValueOnce(pending.promise);
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport });
+  const storage = vi.spyOn(Storage.prototype,'setItem');
+  const interaction = userEvent.setup();
+  const mounted = render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={adapters} /></MemoryRouter>);
+  await interaction.type(screen.getByLabelText('E-mail'),credentials.email); await interaction.type(screen.getByLabelText('Senha'),credentials.password);
+  await interaction.click(screen.getByRole('button',{ name: 'Entrar' }));
+  expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument(); expect(screen.getByRole('button',{ name: 'Entrando…' })).toBeDisabled();
+  await act(async () => { pending.resolve(Response.json(wireUser)); await pending.promise; });
+  expect(await screen.findByLabelText('Usuário conectado')).toHaveTextContent('Ana'); expect(storage).not.toHaveBeenCalled(); storage.mockRestore();
+  mounted.unmount();
+  render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport })} /></MemoryRouter>);
+  expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument();
+});
+test('login concorrente tardio não substitui conta nova', async () => {
+  const pending = deferred<Response>(); const newer = { ...wireUser, id: 'user-b', displayName: 'Bia' };
+  const transport = vi.fn<FetchTransport>().mockReturnValueOnce(pending.promise).mockResolvedValueOnce(Response.json({ ...login, user: newer, token: 'new-test-only' })).mockResolvedValueOnce(Response.json(newer));
+  const session = createHttpSessionStore(); const auth = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session }).auth;
+  const old = auth.login(credentials).catch((error: unknown) => error);
+  expect(await auth.login({ ...credentials, email: 'b@example.com' })).toEqual(newer);
+  pending.resolve(Response.json({ ...login, expiresAt: wireReview.createdAt }));
+  expect(await old).toMatchObject({ kind: 'cancelled' }); expect(session.current()?.user.id).toBe('user-b');
+});

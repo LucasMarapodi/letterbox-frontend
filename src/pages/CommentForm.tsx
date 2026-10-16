@@ -20,8 +20,10 @@ function CommentControl({ reviewId, onSaved }: CommentFormProps): ReactElement {
   </section>;
 }
 export function CommentForm(props: CommentFormProps): ReactElement | null {
-  const { user } = useSession();
+  const { user, version } = useSession();
+  const { privateFeatures } = useServices();
+  if (privateFeatures?.opinions === false) return null;
   if (user?.id === props.authorId) return null;
-  return <RequireSession><CommentControl key={`${user?.id}-${props.reviewId}`} {...props} /></RequireSession>;
+  return <RequireSession><CommentControl key={`${version}-${user?.id}-${props.reviewId}`} {...props} /></RequireSession>;
 }
 

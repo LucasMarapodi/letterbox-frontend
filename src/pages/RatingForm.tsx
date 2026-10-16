@@ -48,7 +48,9 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
   </form>;
 }
 export function RatingForm(props: RatingFormProps): ReactElement {
-  const { user } = useSession();
-  return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={`${user?.id}-${props.gameId}`} {...props} /></RequireSession></section>;
+  const { user, version } = useSession();
+  const { privateFeatures } = useServices();
+  if (privateFeatures?.opinions === false) return <></>;
+  return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={`${version}-${user?.id}-${props.gameId}`} {...props} /></RequireSession></section>;
 }
 
