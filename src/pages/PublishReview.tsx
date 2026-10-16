@@ -6,19 +6,23 @@ import { CommunityError } from '../services/communityContracts';
 import { useSession } from '../session/SessionProvider';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { ReviewTextForm } from '../components/ReviewTextForm';
+import { ErrorState, LoadingState, QueryRegion } from '../components/Feedback';
 
 function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }): ReactElement {
   const { community } = useServices();
   const { user } = useSession();
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   useEffect(() => {
     let active = true;
-    if (user) void community.findOwnReview(gameId, user).then((own) => { if (active) { setReview(own); setLoading(false); } }, () => { if (active) { setError('Não foi possível verificar sua review.'); setLoading(false); } });
+    setLoading(true); setLoadError(false);
+    if (user) void community.findOwnReview(gameId, user).then((own) => { if (active) { setReview(own); setLoading(false); } }, () => { if (active) { setLoadError(true); setLoading(false); } });
     return () => { active = false; };
-  }, [gameId, user]);
+  }, [gameId, user, attempt]);
   async function submit(text: string): Promise<void> {
     if (!user) return;
     setError('');
@@ -30,12 +34,13 @@ function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }
       } else throw failure;
     }
   }
-  if (loading) return <p role="status">Verificando sua review…</p>;
-  return <section className="review-card" aria-label="Publicar review">
+  if (loading) return <LoadingState region="Consulta da sua review" message="Verificando sua review…" />;
+  if (loadError) return <ErrorState region="Consulta da sua review" message="Não foi possível verificar sua review." onRetry={() => { setLoading(true); setAttempt((value) => value + 1); }} />;
+  return <QueryRegion label="Consulta da sua review" busy={false}><section className="review-card" aria-label="Publicar review">
     {success && <p role="status">Review publicada.</p>}
     {error && <p role="alert">{error}</p>}
     {review ? <Link to={`/reviews/${encodeRouteId(review.id)}`}>Editar minha review</Link> : <ReviewTextForm submitLabel="Publicar review" pendingLabel="Publicando…" failureMessage="Não foi possível publicar a review. Tente novamente." onSubmit={submit} />}
-  </section>;
+  </section></QueryRegion>;
 }
 export function PublishReview(props: { gameId: string; onSaved(): void }): ReactElement | null {
   const { user, version } = useSession();
@@ -43,4 +48,3 @@ export function PublishReview(props: { gameId: string; onSaved(): void }): React
   if ((privateFeatures?.publishReview ?? privateFeatures?.opinions) === false) return null;
   return user ? <PublishControl key={`${version}-${user.id}`} {...props} /> : null;
 }
-

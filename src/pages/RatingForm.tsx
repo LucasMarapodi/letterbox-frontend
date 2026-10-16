@@ -3,7 +3,7 @@ import { useSession } from '../session/SessionProvider';
 import { RequireSession } from '../session/RequireSession';
 import { useServices } from '../services/ServiceProvider';
 import { Button } from '../components/Button';
-import { ErrorState, LoadingState } from '../components/Feedback';
+import { ErrorState, LoadingState, QueryRegion } from '../components/Feedback';
 
 interface RatingFormProps { gameId: string; onSaved?: () => void; }
 function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
@@ -32,9 +32,9 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
     catch { setFailed(true); setMessage('Não foi possível salvar a nota. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }
-  if (loadState === 'loading') return <LoadingState message="Carregando sua nota…" />;
-  if (loadState === 'error') return <ErrorState message="Não foi possível carregar sua nota." onRetry={() => { setLoadState('loading'); setAttempt((value) => value + 1); }} />;
-  return <form onSubmit={submit} aria-label="Avaliar jogo" className="review-card">
+  if (loadState === 'loading') return <LoadingState region="Nota pessoal" message="Carregando sua nota…" />;
+  if (loadState === 'error') return <ErrorState region="Nota pessoal" message="Não foi possível carregar sua nota." onRetry={() => { setLoadState('loading'); setAttempt((value) => value + 1); }} />;
+  return <QueryRegion label="Nota pessoal" busy={false}><form onSubmit={submit} aria-label="Avaliar jogo" className="review-card">
     <fieldset className="star-field" disabled={pending}>
       <legend>Sua nota</legend>
       <div className="star-options">{[0, 1, 2, 3, 4, 5].map((note) => <label key={note} className={`star-option ${note > 0 && note <= Number(value) ? 'is-filled' : ''} ${note === 0 ? 'zero-option' : ''}`}>
@@ -45,7 +45,7 @@ function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
     </fieldset>
     <Button type="submit" disabled={pending}>{pending ? 'Salvando…' : 'Salvar nota'}</Button>
     {message && <p role={failed ? 'alert' : 'status'}>{message}</p>}
-  </form>;
+  </form></QueryRegion>;
 }
 export function RatingForm(props: RatingFormProps): ReactElement {
   const { user, version } = useSession();
@@ -53,4 +53,3 @@ export function RatingForm(props: RatingFormProps): ReactElement {
   if ((privateFeatures?.rating ?? privateFeatures?.opinions) === false) return <></>;
   return <section aria-label="Sua avaliação"><RequireSession><RatingControl key={`${version}-${user?.id}-${props.gameId}`} {...props} /></RequireSession></section>;
 }
-

@@ -17,11 +17,14 @@ export function FeedSection({ initialReviews }: { initialReviews?: ReviewDetails
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
-    if (user && (initialReviews === undefined || attempt > 0)) void community.getFeed(user).then((reviews) => { if (active) setState({ status: 'ready', reviews }); }, () => { if (active) setState({ status: 'error' }); });
+    if (user && (initialReviews === undefined || attempt > 0)) {
+      setState({ status: 'loading' });
+      void community.getFeed(user).then((reviews) => { if (active) setState({ status: 'ready', reviews }); }, () => { if (active) setState({ status: 'error' }); });
+    }
     return () => { active = false; };
   }, [user, attempt, initialReviews]);
   if (!user) return null;
-  return <section className="feed-section" aria-label="Feed de reviews"><h2>Feed de reviews</h2><p className="feed-description">As últimas reviews de quem você segue.</p>
+  return <section className="feed-section" aria-label="Feed de reviews" aria-busy={state.status === 'loading'}><h2>Feed de reviews</h2><p className="feed-description">As últimas reviews de quem você segue.</p>
     {state.status === 'ready' && (initialReviews === undefined || attempt > 0) && <CatalogNotice paths={[[ 'feed', 'following' ]]} />}
     <Button disabled={state.status === 'loading'} onClick={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }}>Atualizar feed</Button>
     {state.status === 'loading' && <LoadingState message="Carregando feed…" />}

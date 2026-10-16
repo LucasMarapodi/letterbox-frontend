@@ -19,26 +19,30 @@ function ProfileContent({ id }: { id: string }): ReactElement {
   const { user, version } = useSession();
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const [connectionsVersion, setConnectionsVersion] = useState(0);
   useEffect(() => {
     let active = true;
-    void community.getProfile(id, user).then((profile) => { if (active) setState({ status: 'ready', profile }); }, () => { if (active) setState({ status: 'error' }); });
+    setRefreshing(true);
+    void community.getProfile(id, user).then((profile) => { if (active) { setState({ status: 'ready', profile }); setRefreshing(false); } }, () => { if (active) { setState({ status: 'error' }); setRefreshing(false); } });
     return () => { active = false; };
   }, [id, user, attempt]);
-  if (state.status === 'loading') return <LoadingState message="Carregando perfil…" />;
-  if (state.status === 'error') return <ErrorState message="Não foi possível carregar o perfil." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
+  if (state.status === 'loading') return <LoadingState region="Informações do perfil" message="Carregando perfil…" />;
+  if (state.status === 'error') return <ErrorState region="Informações do perfil" message="Não foi possível carregar o perfil." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
   const profile = state.profile;
-  if (!profile) return <EmptyState message="Perfil não encontrado." />;
+  if (!profile) return <EmptyState region="Informações do perfil" message="Perfil não encontrado." />;
   return <>
     <CatalogNotice paths={[[ 'users', id, 'reviews' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
-    <section className="profile-overview" aria-label="Informações do perfil">
+    <section className="profile-overview" aria-label="Informações do perfil" aria-busy={refreshing}>
+      {refreshing ? <LoadingState message="Carregando perfil…" /> : <>
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
       <div><h2>{profile.user.displayName}</h2><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
       <FollowButton targetId={id} name={profile.user.displayName} onChanged={() => setConnectionsVersion((value) => value + 1)} />
+      </>}
     </section>
     <ProfileEditor profile={profile.user} onSaved={(updated) => setState({ status: 'ready', profile: { ...profile, user: updated } })} />
-    <section aria-label="Reviews do usuário"><h2>Reviews</h2>
-      {profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
+    <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
+      {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
         <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>
         <p className="review-text">{review.text}</p>
         <Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review de {review.game.title}</Link>
@@ -50,5 +54,5 @@ function ProfileContent({ id }: { id: string }): ReactElement {
 }
 export function ProfilePage(): ReactElement {
   const id = useOpaqueRouteId('userId');
-  return <main><h1>Perfil público</h1><p className="game-id">ID do usuário: {id}</p>{id ? <ProfileContent key={id} id={id} /> : <EmptyState message="Perfil não encontrado." />}</main>;
+  return <main><h1>Perfil público</h1><p className="game-id">ID do usuário: {id}</p>{id ? <ProfileContent key={id} id={id} /> : <EmptyState region="Informações do perfil" message="Perfil não encontrado." />}</main>;
 }

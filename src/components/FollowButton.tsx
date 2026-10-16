@@ -17,6 +17,7 @@ function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement
   const sending = useRef(false);
   useEffect(() => {
     let active = true;
+    setState({ status: 'loading' });
     void community.isFollowing(targetId, user).then((following) => { if (active) setState({ status: 'ready', following }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [targetId, user, attempt]);
@@ -27,9 +28,9 @@ function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement
     catch { setError('Não foi possível atualizar a relação. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }
-  if (state.status === 'loading') return <LoadingState message="Consultando relação…" />;
-  if (state.status === 'error') return <ErrorState message="Não foi possível consultar a relação." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
-  return <div className="follow-control"><Button disabled={pending} aria-pressed={state.following} onClick={() => { void toggle(); }}>{pending ? 'Atualizando relação…' : `${state.following ? 'Deixar de seguir' : 'Seguir'} ${name}`}</Button>{error && <p role="alert">{error}</p>}</div>;
+  if (state.status === 'loading') return <LoadingState region="Relação pessoal" message="Consultando relação…" />;
+  if (state.status === 'error') return <ErrorState region="Relação pessoal" message="Não foi possível consultar a relação." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
+  return <div className="follow-control" role="region" aria-label="Relação pessoal" aria-busy={false}><Button disabled={pending} aria-pressed={state.following} onClick={() => { void toggle(); }}>{pending ? 'Atualizando relação…' : `${state.following ? 'Deixar de seguir' : 'Seguir'} ${name}`}</Button>{error && <p role="alert">{error}</p>}</div>;
 }
 export function FollowButton(props: FollowProps): ReactElement | null {
   const { user, version } = useSession();
@@ -39,4 +40,3 @@ export function FollowButton(props: FollowProps): ReactElement | null {
   if (user.id === props.targetId) return null;
   return <FollowControl key={`${version}-${user.id}-${props.targetId}`} {...props} />;
 }
-

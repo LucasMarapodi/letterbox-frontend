@@ -21,6 +21,7 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
   const [query, setQuery] = useState<GameQuery>({ term: '', sort: 'release-desc', page: 1, pageSize: 20 });
   useEffect(() => {
     let active: boolean = true;
+    setState({ status: 'loading' });
     games.list(query).then(
       (data) => { if (active) setState({ status: 'ready', data }); },
       (error: unknown) => { if (active) setState({ status: 'error', integration: error instanceof HttpFailure && [502, 503, 504].includes(error.status ?? 0) }); },
@@ -78,7 +79,7 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
       </select>
     </div>
     </div>
-    <section aria-labelledby="catalog-title">
+    <section aria-labelledby="catalog-title" aria-busy={state.status === 'loading'}>
       <h2 id="catalog-title">Jogos</h2>
       {state.status === 'loading' && <LoadingState message="Carregando jogos…" />}
       {state.status === 'error' && <ErrorState message={state.integration ? 'O catálogo está temporariamente indisponível. Tente novamente.' : 'Não foi possível carregar os jogos.'} onRetry={retry} />}

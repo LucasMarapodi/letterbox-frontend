@@ -20,6 +20,7 @@ function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement 
   const sending = useRef(false);
   useEffect(() => {
     let active = true;
+    setState({ status: 'loading' });
     void community.getFavorite(kind, targetId, user).then((favorite) => { if (active) setState({ status: 'ready', favorite }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [kind, targetId, user, attempt]);
@@ -30,9 +31,9 @@ function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement 
     catch { setError('Não foi possível atualizar o favorito. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }
-  if (state.status === 'loading') return <LoadingState message="Carregando favorito…" />;
-  if (state.status === 'error') return <ErrorState message="Não foi possível carregar o favorito." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
-  return <div className="favorite-control">
+  if (state.status === 'loading') return <LoadingState region="Favorito pessoal" message="Carregando favorito…" />;
+  if (state.status === 'error') return <ErrorState region="Favorito pessoal" message="Não foi possível carregar o favorito." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
+  return <div className="favorite-control" role="region" aria-label="Favorito pessoal" aria-busy={false}>
     <Button disabled={pending} aria-pressed={Boolean(state.favorite)} onClick={() => { void toggle(); }}>{pending ? 'Atualizando favorito…' : state.favorite ? `Remover ${label} dos favoritos` : `Favoritar ${label}`}</Button>
     {error && <p role="alert">{error}</p>}
   </div>;
@@ -43,4 +44,3 @@ export function FavoriteButton(props: FavoriteButtonProps): ReactElement {
   if (privateFeatures?.favorites === false) return <></>;
   return user ? <FavoriteControl key={`${version}-${user.id}-${props.kind}-${props.targetId}`} {...props} /> : <Link className="favorite-login" to="/login">Entrar para favoritar</Link>;
 }
-

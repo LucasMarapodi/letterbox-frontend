@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 422 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 443 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -54,3 +54,7 @@ Catálogo agora usa GamePageResponse, Recentes e páginas do servidor; headers s
 ## Sexta fase — S-PR-01
 
 Sair volta imediatamente ao Início usando replace, preservando revogação/aviso, limpeza e invalidação da sessão. 422 testes, lint, tipos e build aprovados; teste de perfil -> logout -> Home visitante confirmado em navegador/API local. [Descrição e limites](docs/S-PR-01.md). O checklist geral de IDs inteiros permanece pendente da migração da quinta fase; este ajuste preserva o contrato atual.
+
+## Sexta fase — S-PR-02
+
+Consultas indicam loading com status acessível e aria-busy, ocultando resultado/vazio antigos durante atualização. Regiões independentes continuam utilizáveis; falha na consulta da review própria oferece retry. 443 testes, lint, tipos, build e E2E Chromium determinístico aprovados. [Auditoria e limites](docs/S-PR-02.md). Execute `npm exec playwright test -- --config playwright.loading.config.ts` para o cenário sintético; portas 5175/5091 livres. Não é validação IGDB live. O critério global de IDs inteiros continua pendente.

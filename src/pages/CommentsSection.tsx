@@ -12,10 +12,11 @@ export function CommentsSection({ reviewId }: { reviewId: string }): ReactElemen
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
+    setState({ status: 'loading' });
     void community.getComments(reviewId).then((comments) => { if (active) setState({ status: 'ready', comments }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
   }, [reviewId, attempt]);
-  return <section aria-label="Comentários">
+  return <section aria-label="Comentários" aria-busy={state.status === 'loading'}>
     <h3>Comentários</h3>
     {state.status === 'loading' && <LoadingState message="Carregando comentários…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar os comentários." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
@@ -26,4 +27,3 @@ export function CommentsSection({ reviewId }: { reviewId: string }): ReactElemen
     </li>)}</ul> : <EmptyState message="Nenhum comentário nesta review." />)}
   </section>;
 }
-
