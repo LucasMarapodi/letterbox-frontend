@@ -1,3 +1,4 @@
+import { ProfilePagination, useProfilePage } from '../components/ProfilePagination';
 import { ReviewBody } from '../components/ReviewBody';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
@@ -23,6 +24,7 @@ function ProfileContent({ id }: { id: number }): ReactElement {
   const [attempt, setAttempt] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [connectionsVersion, setConnectionsVersion] = useState(0);
+  const reviews = useProfilePage(state.status === 'ready' ? state.profile?.reviews ?? [] : [], 2);
 
   useEffect(() => {
     let active = true;
@@ -44,15 +46,16 @@ function ProfileContent({ id }: { id: number }): ReactElement {
       </>}
     </section>
     <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
-      {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
+      {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? reviews.items.map((review) => <article className="review-card" key={review.id}>
         <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>
         <ReviewBody review={review} />
         <Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review de {review.game.title}</Link>
         <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}
+      <ProfilePagination label="reviews do usuário" {...reviews} />
     </section>
     {user?.id === id && privateFeatures?.favorites !== false && <FavoritesSections key={`${version}-${user.id}`} />}
-    <ConnectionsSections key={`${id}-${connectionsVersion}`} profileId={id} />
+    <ConnectionsSections key={id} profileId={id} revision={connectionsVersion} />
   </>;
 }
 export function ProfilePage(): ReactElement {

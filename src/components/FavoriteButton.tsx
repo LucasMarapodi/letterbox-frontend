@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+
 import type { Favorite } from '../models';
 import { useServices } from '../services/ServiceProvider';
 import type { FavoriteKind } from '../services/communityContracts';
@@ -42,5 +42,5 @@ export function FavoriteButton(props: FavoriteButtonProps): ReactElement {
   const { user, version } = useSession();
   const { privateFeatures } = useServices();
   if (privateFeatures?.favorites === false) return <></>;
-  return user ? <FavoriteControl key={`${version}-${user.id}-${props.kind}-${props.targetId}`} {...props} /> : <Link className="favorite-login" to="/login">Entrar para favoritar</Link>;
+  return user ? <FavoriteControl key={`${version}-${user.id}-${props.kind}-${props.targetId}`} {...props} /> : <></>;
 }

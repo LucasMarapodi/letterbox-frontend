@@ -43,7 +43,7 @@ test('review alterna favorito pessoal e logout remove ação', async () => {
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByRole('button', { name: 'Favoritar review' })).not.toBeInTheDocument();
   await interaction.click(screen.getByRole('link', { name: 'Review de exemplo' }));
-  expect(await screen.findByRole('link', { name: 'Entrar para favoritar' })).toBeVisible();
+  await screen.findByText(/A exploração convida/); expect(screen.queryByText('Entrar para favoritar')).not.toBeInTheDocument();
 });
 test('erro não confirma favorito da review', async () => {
   vi.spyOn(community, 'getFavorite').mockResolvedValue(null);
@@ -69,5 +69,5 @@ test('visitante recebe caminho de login na review', async () => {
   render(<MemoryRouter initialEntries={['/reviews/1']}><AppRoutes /></MemoryRouter>);
   await screen.findByText(/A exploração convida/);
   expect(screen.queryByRole('button', { name: 'Favoritar review' })).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Entrar para favoritar' })).toHaveAttribute('href', '/login');
+  expect(screen.queryByText('Entrar para favoritar')).not.toBeInTheDocument();
 });

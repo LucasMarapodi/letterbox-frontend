@@ -57,6 +57,8 @@ Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e inva
 
 ## Entrega
 
+S-PR-34: perfil com páginas independentes de 3 jogos, 2 reviews por lista e 6 pessoas por lista, usando as coleções completas recebidas da API. Convites textuais para favoritar/criar review removidos; Criar review de visitante abre login diretamente. [Implementação e verificações](docs/S-PR-34.md).
+
 S-PR-33: Editar perfil abre um modal único no cabeçalho do dono, com localização dependente, avatar e seleção de favoritos. Salva alterações parciais por um PATCH da API S-PR-32, sem exigir perfil completo. [Contrato, validação e capturas](docs/S-PR-33.md).
 
 S-PR-09: reviews mostram contagem pública e permitem curtir/descurtir com estado isolado por sessão e confirmação pela API, independentemente dos favoritos. Requer API S-PR-08 com `likeCount` nas projeções e endpoints de curtida. [Implementação, testes e acesso local](docs/S-PR-09.md).

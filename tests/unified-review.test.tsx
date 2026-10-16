@@ -85,7 +85,7 @@ test('legado sem nota permanece legível e exige seleção na edição', async (
 });
 test('visitante recebe convite de login e outro autor não edita', async () => {
   const { writes } = await open({ logged: false }); await userEvent.click(await screen.findByRole('button', { name: 'Criar review' }));
-  expect(screen.getByRole('link', { name: 'Entrar para criar review' })).toHaveAttribute('href', '/login'); expect(writes()).toHaveLength(0);
+  expect(screen.getByRole('form', { name: 'Login' })).toBeVisible(); expect(screen.queryByText('Entrar para criar review')).not.toBeInTheDocument(); expect(writes()).toHaveLength(0);
 });
 test('review de outro usuário não oferece edição', async () => {
   await open({ own: { ...wireReview, rating: 0, text: '' }, other: true, path: '/reviews/55' });
