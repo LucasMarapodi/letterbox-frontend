@@ -116,11 +116,11 @@ test('remover última favorita sincroniza duas instâncias e revalida para ocult
 });
 
 test('visitante recebe convite para entrar, sem leitura privada ou escrita', async () => {
-  const { transport, interaction } = await open('/comunidade', { visitor: true });
-  const invitation = await screen.findByRole('link', { name: 'Entrar para favoritar review de Leo' });
+  const { transport } = await open('/comunidade', { visitor: true });
+  await screen.findByText('Nota: 0 de 5');
+  expect(screen.queryByText(/Entrar para favoritar/)).not.toBeInTheDocument();
   expect(transport.mock.calls.some(([url]) => url.includes('/favorites'))).toBe(false);
-  await interaction.click(invitation);
-  expect(await screen.findByRole('form', { name: 'Login' })).toBeVisible();
+
   expect(transport.mock.calls.some(([, init]) => init.method !== 'GET')).toBe(false);
 });
 

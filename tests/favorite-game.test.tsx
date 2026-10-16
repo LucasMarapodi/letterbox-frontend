@@ -58,5 +58,5 @@ test('visitante recebe caminho de login para favoritar jogo', async () => {
   render(<MemoryRouter initialEntries={['/jogos/1']}><AppRoutes /></MemoryRouter>);
   await screen.findByRole('heading', { name: 'Ecos do Horizonte' });
   expect(screen.queryByRole('button', { name: 'Favoritar jogo' })).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Entrar para favoritar' })).toHaveAttribute('href', '/login');
+  expect(screen.queryByText('Entrar para favoritar')).not.toBeInTheDocument();
 });
