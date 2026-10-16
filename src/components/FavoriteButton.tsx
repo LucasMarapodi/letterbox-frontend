@@ -33,8 +33,9 @@ function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement 
   }
   if (state.status === 'loading') return <LoadingState region="Favorito pessoal" message="Carregando favorito…" />;
   if (state.status === 'error') return <ErrorState region="Favorito pessoal" message="Não foi possível carregar o favorito." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
-  return <div className="favorite-control" role="region" aria-label="Favorito pessoal" aria-busy={false}>
-    <Button disabled={pending} aria-pressed={Boolean(state.favorite)} onClick={() => { void toggle(); }}>{pending ? 'Atualizando favorito…' : state.favorite ? `Remover ${label} dos favoritos` : `Favoritar ${label}`}</Button>
+  const actionLabel = pending ? 'Atualizando favorito…' : state.favorite ? `Remover ${label} dos favoritos` : `Favoritar ${label}`;
+  return <div className={`favorite-control${kind === 'review' ? ' review-favorite-action' : ''}`} role="region" aria-label="Favorito pessoal" aria-busy={pending}>
+    <Button className={kind === 'review' ? 'review-favorite-star' : undefined} aria-label={actionLabel} disabled={pending} aria-pressed={Boolean(state.favorite)} onClick={() => { void toggle(); }}>{kind === 'review' ? <span aria-hidden="true">{state.favorite ? '★' : '☆'}</span> : actionLabel}</Button>
     {error && <p role="alert">{error}</p>}
   </div>;
 }

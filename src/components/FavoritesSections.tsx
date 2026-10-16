@@ -1,6 +1,8 @@
 import { ProfilePagination, useProfilePage } from './ProfilePagination';
 import { ReviewBody } from './ReviewBody';
-import { CatalogNotice } from './CatalogNotice';
+import { ReviewCardLink } from './ReviewCardLink';
+import { ReviewAuthor } from './ReviewAuthor';
+import { ReviewGame } from './ReviewGame';
 import { useEffect, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useSession } from '../session/SessionProvider';
@@ -22,7 +24,6 @@ export function FavoritesSections(): ReactElement | null {
   if (state.status === 'error') return <ErrorState region="Favoritos" message="Não foi possível carregar os favoritos." onRetry={() => { void favorites.load(true); }} />;
   if (!state.lists) return <LoadingState region="Favoritos" message="Carregando favoritos…" />;
   return <div className="favorites-sections" role="region" aria-label="Favoritos" aria-busy={false}>
-    <CatalogNotice paths={[[ 'favorites' ]]} onRetry={() => { void favorites.load(true); }} />
     <section className="favorite-games-section" aria-label="Jogos favoritos"><h2>Jogos favoritos</h2>
       {state.lists.games.length ? <ul className="favorite-games-list" aria-label="Jogos favoritos">{games.items.map((game) => <li className="favorite-game" key={game.id}>
         <GameCover title={game.title} src={game.coverUrl} />
@@ -31,7 +32,7 @@ export function FavoritesSections(): ReactElement | null {
       <ProfilePagination label="jogos favoritos" {...games} />
     </section>
     {state.lists.reviews.length > 0 && <section aria-label="Reviews favoritas"><h2>Reviews favoritas</h2>
-      {reviews.items.map((review) => <article className="review-card" key={review.id}><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}: {review.game.title}</Link><ReviewBody review={review} /><ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} /></article>)}
+      {reviews.items.map((review) => <article className="review-card review-preview" key={review.id}><ReviewAuthor author={review.author} /><h3><ReviewGame game={review.game} /></h3><ReviewCardLink id={review.id} label={`Review de ${review.author.displayName}: ${review.game.title}`} /><ReviewBody review={review} /><ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} /></article>)}
       <ProfilePagination label="reviews favoritas" {...reviews} />
     </section>}
   </div>;

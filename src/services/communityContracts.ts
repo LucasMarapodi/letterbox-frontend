@@ -1,6 +1,6 @@
 import type { ReviewId, UserId, GameId, Rating, User, Review, Comment, Favorite, Game } from '../models';
 import type { GameOpinions, PublicReview } from './contracts';
-export interface ReviewDetails extends PublicReview { game: { id: GameId; title: string }; }
+export interface ReviewDetails extends PublicReview { game: { id: GameId; title: string; coverUrl?: string | null }; }
 export interface ReviewInput { rating: number; text: string; }
 export interface PublicComment extends Comment { author: Pick<User, 'id' | 'displayName' | 'avatarUrl'>; }
 export interface PublicProfile { user: User; reviews: ReviewDetails[]; }

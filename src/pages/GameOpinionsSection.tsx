@@ -1,4 +1,5 @@
 import { ReviewBody } from '../components/ReviewBody';
+import { ReviewCardLink } from '../components/ReviewCardLink';
 import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -55,8 +56,8 @@ export function GameOpinionsSection({ gameId, reviewsVersion = 0 }: GameOpinions
       <div role="region" aria-label="Reviews do jogo" aria-busy={reviewsState === 'loading'}>
       {reviewsState === 'loading' && <LoadingState message="Atualizando reviews…" />}
       {reviewsState === 'error' && <ErrorState message="Não foi possível atualizar as reviews." onRetry={() => setReviewsAttempt((value) => value + 1)} />}
-      {reviewsState === 'ready' && ((updatedReviews ?? state.opinions.reviews).length ? (updatedReviews ?? state.opinions.reviews).map((review) => <article key={review.id} className="review-card">
-        <h3><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}</Link></h3>
+      {reviewsState === 'ready' && ((updatedReviews ?? state.opinions.reviews).length ? (updatedReviews ?? state.opinions.reviews).map((review) => <article key={review.id} className="review-card review-preview">
+        <ReviewCardLink id={review.id} label={`Review de ${review.author.displayName}`} />
         <div className="visitor">
           <Avatar name={review.author.displayName} src={review.author.avatarUrl} />
           <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link>

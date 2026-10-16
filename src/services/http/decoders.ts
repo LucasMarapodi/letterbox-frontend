@@ -5,8 +5,14 @@ import { HttpFailure } from './client';
 import type { CatalogFilters, CatalogFilterOption } from '../contracts';
 import type { ProfileCompletionResponse, ProfileUpdateResponse } from './dtos';
 import type { ReviewLikeStatusResponse } from './dtos';
+import type { CommentLikeStatusResponse } from './dtos';
 import type { SearchResponse, SearchQuery, SearchGroup, SearchError, SearchPerson, SearchGame, SearchMetadata } from '../searchContracts';
 export type Decoder<T> = (value: unknown) => T;
+export function decodeCommentLikeStatus(value: unknown): CommentLikeStatusResponse {
+  const item = publicRecord(value);
+  if (typeof item.likedByMe !== 'boolean') return fail();
+  return { likedByMe: item.likedByMe };
+}
 export function decodeProfileUpdate(value: unknown): ProfileUpdateResponse {
   const item = publicRecord(value);
   const user = decodeUser(item);

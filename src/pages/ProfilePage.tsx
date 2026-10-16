@@ -1,19 +1,19 @@
 import { ProfilePagination, useProfilePage } from '../components/ProfilePagination';
 import { ReviewBody } from '../components/ReviewBody';
+import { ReviewCardLink } from '../components/ReviewCardLink';
+import { ReviewAuthor } from '../components/ReviewAuthor';
+import { ReviewGame } from '../components/ReviewGame';
 import { useEffect, useState, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { useServices } from '../services/ServiceProvider';
 import type { PublicProfile } from '../services/communityContracts';
 import { useLocalRouteId } from '../routing/useLocalRouteId';
-import { encodeRouteId } from '../routing/encodeRouteId';
 import { useSession } from '../session/SessionProvider';
 import { FavoritesSections } from '../components/FavoritesSections';
 import { FollowButton } from '../components/FollowButton';
 import { ConnectionsSections } from '../components/ConnectionsSections';
 import { ProfileEditor } from './ProfileEditor';
-import { CatalogNotice } from '../components/CatalogNotice';
 import { ReviewFavoriteStar } from '../components/ReviewFavoriteStar';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
@@ -37,7 +37,6 @@ function ProfileContent({ id }: { id: number }): ReactElement {
   const profile = state.profile;
   if (!profile) return <EmptyState region="Informações do perfil" message="Perfil não encontrado." />;
   return <>
-    <CatalogNotice paths={[[ 'users', String(id), 'reviews' ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
     <section className="profile-overview" aria-label="Informações do perfil" aria-busy={refreshing}>
       {refreshing ? <LoadingState message="Carregando perfil…" /> : <>
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
@@ -46,10 +45,11 @@ function ProfileContent({ id }: { id: number }): ReactElement {
       </>}
     </section>
     <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
-      {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? reviews.items.map((review) => <article className="review-card" key={review.id}>
-        <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>
+      {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? reviews.items.map((review) => <article className="review-card review-preview" key={review.id}>
+        <ReviewAuthor author={review.author} />
+        <h3><ReviewGame game={review.game} /></h3>
         <ReviewBody review={review} />
-        <Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review de {review.game.title}</Link>
+        <ReviewCardLink id={review.id} label={`Ler review de ${review.game.title}`} />
         <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}
       <ProfilePagination label="reviews do usuário" {...reviews} />
@@ -60,5 +60,5 @@ function ProfileContent({ id }: { id: number }): ReactElement {
 }
 export function ProfilePage(): ReactElement {
   const id = useLocalRouteId('userId');
-  return <main><h1>Perfil público</h1><p className="game-id">ID do usuário: {id}</p>{id ? <ProfileContent key={id} id={id} /> : <EmptyState region="Informações do perfil" message="Perfil não encontrado." />}</main>;
+  return <main><h1>Perfil público</h1>{id ? <ProfileContent key={id} id={id} /> : <EmptyState region="Informações do perfil" message="Perfil não encontrado." />}</main>;
 }

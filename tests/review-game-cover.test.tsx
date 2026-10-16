@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
@@ -24,8 +24,8 @@ async function open(path: string, coverUrl: string | null = '/covers/game.jpg') 
 
 test.each(['/perfil/1','/comunidade','/reviews/55'])('capa do jogo aparece em %s sem buscar detalhes adicionais', async path => {
   const transport = await open(path);
-  const covers = await screen.findAllByRole('img',{name:'Capa de Jogo HTTP'});
-  expect(covers).toHaveLength(path.startsWith('/perfil') ? 2 : 1);
+  await waitFor(() => expect(screen.getAllByRole('img',{name:'Capa de Jogo HTTP'})).toHaveLength(path.startsWith('/perfil') ? 2 : 1));
+  const covers = screen.getAllByRole('img',{name:'Capa de Jogo HTTP'});
   for (const cover of covers) {
     expect(cover).toHaveAttribute('src','/covers/game.jpg');
     expect(cover.closest('a')).toHaveAttribute('href','/jogos/12');

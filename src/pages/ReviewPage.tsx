@@ -1,4 +1,5 @@
 import { ReviewBody } from '../components/ReviewBody';
+import { ReviewGame } from '../components/ReviewGame';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useLocalRouteId } from '../routing/useLocalRouteId';
@@ -12,6 +13,7 @@ import { CommentForm } from './CommentForm';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { CatalogNotice } from '../components/CatalogNotice';
 import { ReviewLikeButton } from '../components/ReviewLikeButton';
+import { Avatar } from '../components/Avatar';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; review: ReviewDetails | null };
 function ReviewContent({ id }: { id: number }): ReactElement {
@@ -28,10 +30,10 @@ function ReviewContent({ id }: { id: number }): ReactElement {
   if (state.status === 'error') return <ErrorState region="Conteúdo da review" message="Não foi possível carregar a review." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
   const review = state.review;
   if (!review) return <EmptyState region="Conteúdo da review" message="Review não encontrada." />;
-  return <QueryRegion label="Conteúdo da review" busy={false}><article className="review-card">
+  return <QueryRegion label="Conteúdo da review" busy={false}><article className="review-card review-details">
     <CatalogNotice paths={[[ 'reviews', String(id) ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
-    <h2>Review de <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link></h2>
-    <Link to={`/jogos/${encodeRouteId(review.game.id)}`}>{review.game.title}</Link>
+    <h2 className="review-author-heading" aria-label={`Review de ${review.author.displayName}`}><Avatar name={review.author.displayName} src={review.author.avatarUrl} /><Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link></h2>
+    <ReviewGame game={review.game} />
     <p><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></p>
     <ReviewBody review={review} showLike={false} />
     <div className="review-actions" role="group" aria-label="Ações da review">

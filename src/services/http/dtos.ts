@@ -7,6 +7,7 @@ export interface GamePageResponse { items: GameResponse[]; page: number; pageSiz
 export type RatingResponse = Rating;
 export type FavoriteResponse = Favorite;
 export interface ReviewLikeStatusResponse { likedByMe: boolean; }
+export interface CommentLikeStatusResponse { likedByMe: boolean; }
 export interface ReviewResponse extends ReviewDetails { game: { id: number; title: string; coverUrl: string | null }; }
 export type CommentResponse = PublicComment;
 export type NotificationResponse = NotificationItem;

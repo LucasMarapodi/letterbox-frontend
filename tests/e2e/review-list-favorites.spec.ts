@@ -26,6 +26,7 @@ test.beforeAll(async () => {
     else if (path.endsWith('/auth/me') || path === '/api/v1/users/2') body = account;
     else if (path === '/api/v1/games') body = wirePage();
     else if (path.endsWith('/dashboard')) body = { favorites: lists(), feed: [] };
+    else if (path.endsWith('/like/me')) body = {likedByMe:false};
     else if (path === '/api/v1/community/reviews/recent') body = reviews;
     else if (path === '/api/v1/users/2/reviews') body = [reviews[0]];
     else if (path.endsWith('/followers') || path.endsWith('/following')) body = [];
