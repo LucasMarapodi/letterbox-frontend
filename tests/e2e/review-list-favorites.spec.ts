@@ -55,6 +55,23 @@ test('estrelas compartilham leitura, respondem ao teclado e removem a última fa
   await expect(page.getByRole('button', { name: 'Remover review de Leo dos favoritos', exact: true })).toHaveText('★');
   const star = page.getByRole('button', { name: 'Favoritar review de Bia', exact: true });
   await expect(star).toHaveAttribute('aria-pressed', 'false');
+  const card = star.locator('xpath=ancestor::article');
+  const favorite = star.locator('..');
+  await page.mouse.move(0, 0);
+  await expect(favorite).toHaveCSS('opacity', '0');
+  await card.hover();
+  await expect(favorite).toHaveCSS('opacity', '1');
+  const cardBox = await card.boundingBox(); const starBox = await star.boundingBox();
+  expect(cardBox).not.toBeNull(); expect(starBox).not.toBeNull();
+  expect(starBox!.x).toBeGreaterThan(cardBox!.x + cardBox!.width - 85);
+  expect(starBox!.y).toBeLessThan(cardBox!.y + 45);
+  await page.mouse.move(0, 0);
+  const chosen = page.getByRole('button', { name: 'Remover review de Leo dos favoritos', exact: true });
+  await expect(chosen.locator('..')).toHaveCSS('opacity', '1');
+  await star.focus();
+  await expect(favorite).toHaveCSS('opacity', '1');
+  await expect(page.getByRole('link', {name: 'Ler review'}).first()).toHaveText('');
+
   expect(favoriteReads).toBe(1);
   expect(paths.some(path => path.startsWith('/api/v1/favorites/review/'))).toBe(false);
   await star.focus(); await page.keyboard.press('Space');
@@ -65,7 +82,7 @@ test('estrelas compartilham leitura, respondem ao teclado e removem a última fa
   await expect(page).toHaveURL(/\/comunidade$/);
   await page.evaluate(() => window.scrollTo(0, 0));
   await mkdir('docs/evidence', { recursive: true });
-  await page.screenshot({ path: 'docs/evidence/S-PR-23-community-stars.png', fullPage: true });
+  await page.screenshot({ path: 'docs/evidence/S-PR-11-community-stars.png', fullPage: true });
   await page.getByRole('link', { name: 'Meu perfil', exact: true }).click();
   const copies = page.getByRole('button', { name: 'Remover review de Leo dos favoritos', exact: true });
   await expect(copies).toHaveCount(2);
@@ -76,5 +93,5 @@ test('estrelas compartilham leitura, respondem ao teclado e removem a última fa
   await expect(page).toHaveURL(/\/perfil\/2$/);
   expect(writes).toEqual(['PUT 56', 'DELETE 56', 'DELETE 55']);
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: 'docs/evidence/S-PR-23-profile-last-removed.png', fullPage: true });
+  await page.screenshot({ path: 'docs/evidence/S-PR-11-profile-last-removed.png', fullPage: true });
 });

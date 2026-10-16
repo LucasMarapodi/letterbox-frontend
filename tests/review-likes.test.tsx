@@ -98,14 +98,18 @@ test('usa a contagem da API, incluindo curtidas concorrentes, sem incremento loc
   const { interaction } = await open('/comunidade', { bonusAfterWrite: 2 });
   await interaction.click(await screen.findByRole('button', { name: 'Curtir review de Ana' }));
   expect(await screen.findByText('5 curtidas')).toBeVisible();
+  const button = screen.getByRole('button', { name: 'Retirar curtida da review de Ana' });
+  expect(button.textContent).toBe('');
+  expect(button.querySelector('svg')).not.toBeNull();
 });
-test('visitante vê contagem e convite ao clicar, sem consultas privadas ou escrita', async () => {
-  const { calls, interaction } = await open('/comunidade', { visitor: true });
+test('guest keeps counts without like controls or private requests', async () => {
+  const { calls } = await open('/comunidade', { visitor: true });
   expect(await screen.findByText('2 curtidas')).toBeVisible();
-  await interaction.click(screen.getByRole('button', { name: 'Curtir review de Ana' }));
-  expect(screen.getByRole('link', { name: 'Entrar para curtir review de Ana' })).toHaveAttribute('href', '/login');
+  expect(screen.queryByRole('button', { name: /curtir review/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: /Entrar para curtir/ })).not.toBeInTheDocument();
   expect(calls('/like/me')).toHaveLength(0); expect(calls('/like')).toHaveLength(0);
 });
+
 test('falha de consulta pessoal permite retry sem escrita', async () => {
   let fail = true;
   const { calls, interaction } = await open('/comunidade', { status: async () => fail ? Response.json({ code: 'storage_unavailable', message: 'Falha' }, { status: 503 }) : Response.json({ likedByMe: false }) });

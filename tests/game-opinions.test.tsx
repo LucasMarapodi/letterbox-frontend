@@ -42,6 +42,8 @@ test('a página exibe a média fornecida sem calculá-la a partir das reviews', 
   expect(await screen.findByText('Nota média: 4,25 de 5')).toBeVisible();
   expect(screen.getByText(review.text)).toBeVisible();
   expect(screen.getByRole('link', { name: 'Review de Ana' })).toHaveAttribute('href', '/reviews/1');
+  expect(screen.getByRole('link', { name: 'Review de Ana' }).textContent).toBe('');
+  expect(screen.queryByText('Review de Ana')).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Ana' })).toHaveAttribute('href', '/perfil/1');
 });
 
@@ -60,7 +62,7 @@ test('o link do autor navega ao perfil público com ID preservado', async () => 
   renderGame();
   await user.click(await screen.findByRole('link', { name: 'Ana' }));
   expect(screen.getByRole('heading', { name: 'Perfil público', level: 1 })).toBeVisible();
-  expect(screen.getByText('ID do usuário: 1')).toBeVisible();
+  expect(screen.queryByText(/ID do usu/)).not.toBeInTheDocument();
 });
 
 test('opiniões pendentes anunciam carregamento sem ocultar dados do jogo', async () => {
