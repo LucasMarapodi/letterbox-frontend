@@ -1,6 +1,31 @@
 import type { ReactElement } from 'react';
+import { HomePage } from './pages/HomePage';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { PlaceholderPage } from './pages/PlaceholderPage';
 
-// Ponto de montagem vazio para executar o primeiro teste, sem interface funcional.
-export default function App(): ReactElement | null {
-  return null;
+export function AppRoutes(): ReactElement {
+  return <>
+    <header>
+      <nav aria-label="Navegação principal">
+        <Link to="/">Início</Link>{' '}
+        <Link to="/login">Entrar</Link>{' '}
+        <Link to="/cadastro">Criar conta</Link>{' '}
+        <Link to="/notificacoes">Notificações</Link>
+      </nav>
+    </header>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/jogos/:gameId" element={<PlaceholderPage title="Detalhes do jogo" parameter="gameId" parameterLabel="ID do jogo" />} />
+      <Route path="/reviews/:reviewId" element={<PlaceholderPage title="Review" parameter="reviewId" parameterLabel="ID da review" />} />
+      <Route path="/perfil/:userId" element={<PlaceholderPage title="Perfil público" parameter="userId" parameterLabel="ID do usuário" />} />
+      <Route path="/login" element={<PlaceholderPage title="Entrar" />} />
+      <Route path="/cadastro" element={<PlaceholderPage title="Criar conta" />} />
+      <Route path="/notificacoes" element={<PlaceholderPage title="Notificações" />} />
+      <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
+    </Routes>
+  </>;
+}
+
+export default function App(): ReactElement {
+  return <BrowserRouter><AppRoutes /></BrowserRouter>;
 }
