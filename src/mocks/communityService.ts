@@ -1,17 +1,54 @@
 import type { CommunityService } from '../services/communityContracts';
 import { CommunityError } from '../services/communityContracts';
-import type { Rating, Review, User, Comment } from '../models';
+import type { Rating, Review, User, Comment, Favorite } from '../models';
 import { reviewFixtures, ratingFixtures, userFixtures } from './opinions';
 import { gameFixtures } from './games';
-export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[] } = {}): CommunityService {
+import type { MockUserStore } from './userStore';
+export function createMockCommunityService(options: { reviews?: Review[]; comments?: Comment[]; users?: User[]; userStore?: MockUserStore } = {}): CommunityService {
   const ratings: Rating[] = structuredClone(ratingFixtures);
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
-  const users: User[] = structuredClone(userFixtures);
+  const users: User[] = options.userStore?.users ?? structuredClone(options.users ?? userFixtures);
   const comments: Comment[] = structuredClone(options.comments ?? [
     { id: 'comment-1', reviewId: 'review-1', userId: 'user-2', text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
   ]);
   let sequence = 1;
+  const favorites: Favorite[] = [];
   return {
+    async getFavorites(user) {
+      if (!user) throw new CommunityError('session-required');
+      const own = favorites.filter((favorite) => favorite.userId === user.id);
+      const games = gameFixtures.filter((game) => own.some((favorite) => favorite.targetType === 'game' && favorite.targetId === game.id));
+      const savedReviews = reviews.filter((review) => own.some((favorite) => favorite.targetType === 'review' && favorite.targetId === review.id)).map((review) => {
+        const author = users.find((item) => item.id === review.userId);
+        const game = gameFixtures.find((item) => item.id === review.gameId);
+        return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
+      });
+      return structuredClone({ games, reviews: savedReviews });
+    },
+    async getFavorite(kind, targetId, user) {
+      if (!user) throw new CommunityError('session-required');
+      return structuredClone(favorites.find((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId) ?? null);
+    },
+    async setFavorite(kind, targetId, selected, user) {
+      if (!user) throw new CommunityError('session-required');
+      const exists = kind === 'game' ? gameFixtures.some((game) => game.id === targetId) : reviews.some((review) => review.id === targetId);
+      if (!exists) throw new CommunityError('not-found');
+      const index = favorites.findIndex((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId);
+      if (!selected) { if (index >= 0) favorites.splice(index, 1); return null; }
+      if (index >= 0) return structuredClone(favorites[index]);
+      const favorite: Favorite = { id: `mock-favorite-${sequence++}`, userId: user.id, targetType: kind, targetId };
+      favorites.push(favorite);
+      return structuredClone(favorite);
+    },
+    async getProfile(id, sessionUser = null) {
+      if (sessionUser?.id === id && !users.some((item) => item.id === id)) users.push(structuredClone(sessionUser));
+      const user = users.find((item) => item.id === id);
+      if (!user) return null;
+      return structuredClone({ user, reviews: reviews.filter((review) => review.userId === id).map((review) => {
+        const game = gameFixtures.find((item) => item.id === review.gameId);
+        return { ...review, author: { id: user.id, displayName: user.displayName, avatarUrl: user.avatarUrl }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
+      }) });
+    },
     async getRating(gameId, user) {
       if (!user) throw new CommunityError('session-required');
       return structuredClone(ratings.find((rating) => rating.gameId === gameId && rating.userId === user.id) ?? null);

@@ -1,3 +1,3 @@
-import { createMockCommunityService } from '../mocks/communityService';
+import { mockServices } from '../mocks/services';
 import type { CommunityService } from './communityContracts';
-export const community: CommunityService = createMockCommunityService();
+export const community: CommunityService = mockServices.community;

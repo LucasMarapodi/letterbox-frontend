@@ -1,6 +1,6 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews e comentários das US-01 a US-20, sem backend ou acesso direto à IGDB.
+React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews, comentários, perfis e favoritos das US-01 a US-24, sem backend ou acesso direto à IGDB.
 
 ## Executar
 
@@ -35,7 +35,7 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 ## Rotas provisórias
 
 `/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
-Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Reviews possuem leitura pública, edição do autor e comentários; perfil permanece provisório. Notificações será acessado pelo sino e modal na US-28, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
+Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Reviews possuem leitura pública, edição do autor e comentários. Perfis públicos mostram biografia, avatar e reviews. Favoritos pessoais de jogos e reviews aparecem na Home e próprio perfil. Notificações será acessado pelo sino e modal na US-28, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 
