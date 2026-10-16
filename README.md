@@ -2,7 +2,7 @@
 
 React + TypeScript + Vite. US-01 a US-37 implementadas e verificadas: catálogo, autenticação, reviews, perfis, favoritos, conexões, feed, notificações e Comunidade pública com rankings, sem backend ou acesso direto à IGDB.
 
-Terceira fase: I-PR-02 prepara cliente HTTP/DTOs; I-PR-03 ativa autenticação e isolamento; I-PR-04 ativa catálogo, notas, reviews e comentários pela API. Configure VITE_API_BASE_URL em .env conforme .env.example e execute Back existente. Perfis/social e Dashboard/Comunidade/sino ainda aguardam integração; ações privadas não migradas ficam bloqueadas na composição HTTP. Consulte [infraestrutura e limites](docs/HTTP-INTEGRATION.md) e [entrega de jogos e opiniões](docs/I-PR-04.md).
+Terceira fase: I-PR-02 prepara cliente HTTP/DTOs; I-PR-03 ativa autenticação; I-PR-04 ativa jogos/opiniões; I-PR-05 ativa perfis, edição, relações e favoritos. Configure VITE_API_BASE_URL em .env conforme .env.example e execute Back existente. Dashboard/Comunidade/sino aguardam I-PR-06; ações privadas não migradas ficam bloqueadas. Consulte [infraestrutura e limites](docs/HTTP-INTEGRATION.md) e [entrega de perfis e social](docs/I-PR-05.md).
 
 ## Executar
 
@@ -37,7 +37,7 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 ## Rotas provisórias
 
 `/`, `/comunidade`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
-Home, detalhes, notas, reviews e comentários consomem HTTP na composição produtiva. Login e cadastro também usam a API. Perfis e Comunidade ainda têm consultas públicas legadas; favoritos, relações, feed e notificações privados estão bloqueados até suas PRs. Doubles de testes preservam a cobertura das telas existentes. Os links de exemplo na Home permanecem temporários e podem apontar a registros ausentes na API.
+Home, detalhes, notas, reviews, comentários e perfis consomem HTTP. Login/cadastro, edição do próprio perfil, seguir/deixar de seguir e favoritos de jogo/review também usam a API. Favoritos pessoais aparecem no próprio perfil; sua seção na Home aguarda o dashboard HTTP da I-PR-06, evitando GET favorites duplicado. Comunidade ainda tem consultas públicas legadas; feed e notificações privados continuam bloqueados. Doubles de testes preservam a cobertura das telas. Links de exemplo permanecem temporários e podem apontar a registros ausentes.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 

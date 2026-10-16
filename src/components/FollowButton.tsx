@@ -23,7 +23,7 @@ function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement
   async function toggle(): Promise<void> {
     if (!user || state.status !== 'ready' || sending.current) return;
     sending.current = true; setPending(true); setError('');
-    try { await community.setFollowing(targetId, !state.following, user); setState({ status: 'ready', following: !state.following }); onChanged?.(); }
+    try { const following = await community.setFollowing(targetId, !state.following, user); setState({ status: 'ready', following: typeof following === 'boolean' ? following : !state.following }); onChanged?.(); }
     catch { setError('Não foi possível atualizar a relação. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }

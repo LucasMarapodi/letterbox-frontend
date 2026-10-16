@@ -1,6 +1,6 @@
 # Infraestrutura HTTP — terceira fase
 
-A I-PR-02 prepara transporte, contratos e adaptadores. A I-PR-03 ativou autenticação HTTP e a I-PR-04 ativou catálogo e opiniões no runtime produtivo. Perfis/social e Dashboard/Comunidade/sino serão ativados nas I-PR-05 e I-PR-06; a retirada final dos mocks pertence à I-PR-07. Isso não constitui integração completa da aplicação.
+A I-PR-02 prepara transporte, contratos e adaptadores. A I-PR-03 ativou autenticação, a I-PR-04 jogos/opiniões e a I-PR-05 perfis/social no runtime produtivo. Dashboard/Comunidade/sino serão ativados na I-PR-06; a retirada final dos mocks pertence à I-PR-07. Isso não constitui integração completa da aplicação.
 
 ## Autenticação ativada — I-PR-03
 
@@ -8,7 +8,17 @@ createDefaultApplicationServices é a entrada produtiva. Cadastro envia somente 
 
 O store publica mudanças sem divulgar credenciais a componentes. AuthService expõe apenas usuário confirmado, subscribe e versão; SessionProvider limpa UI em logout/401. Logout é assíncrono: captura token, limpa sessão e aborta requests privados imediatamente, depois tenta revogação. Falha de revogação é informada sem restaurar usuário. Respostas antigas não removem conta nova.
 
-Contexto e store compartilham versão; componentes privados usam essa versão nas suas keys para descartar estado anterior. O provider preserva toda a composição, inclusive flags e acesso ao mesmo conjunto HTTP. Capacidades individuais rating/publishReview/editReview/comments estão ativadas; favoritos, relações, feed e notificações privados continuam bloqueados e seus serviços rejeitam acesso. Consultas públicas antigas de outros domínios ficam disponíveis até migração, sem receber identidade da sessão para fabricar perfil local.
+Contexto e store compartilham versão; componentes privados usam essa versão nas suas keys para descartar estado anterior. O provider preserva a composição HTTP e as capacidades individuais. Notas, reviews/comentários, favoritos e relações estão ativados; dashboard/feed/notificações privados continuam bloqueados. Consultas públicas antigas da Comunidade ficam disponíveis até I-PR-06, sem receber identidade para fabricar perfil local.
+
+## Perfis e social ativados — I-PR-05
+
+Perfil compõe GET users/{id} e reviews; somente 404 da primeira consulta retorna null. Falha de lista continua erro; conexões compõem followers/following sem Bearer e tratam vazio. IDs vêm da API, sem usar identidade recebida pelo método legado para criar registros.
+
+AuthService.editProfile envia PATCH somente dos campos alterados displayName/bio/avatarUrl. Nome: 1–100 caracteres após trim; biografia até 2000; avatar HTTP(S) até 2048. Campo omitido preserva; avatar null remove. Resposta validada atualiza o usuário confirmado no store e publica mudança para a navbar, mantendo token, versão e sinal. ID diferente é rejeitado; resposta tardia após logout/troca é cancelada. 400/rede mantêm valores; 401 limpa sessão e desmonta editor conforme isolamento global.
+
+Relação desembrulha following e usa PUT/DELETE sem body. Botão reflete resposta validada; sucesso remonta conexões para nova consulta. Visitante e titular não possuem controle de escrita para seguir a si mesmo. Favoritos consultam listas/wrappers privados e usam PUT/DELETE sem corpo; DELETE 204 vira null. Não há cache de listas ou dashboard: nova visita ao próprio perfil consulta dados atuais, descartando estado da montagem anterior. A Home não chama GET favorites; sua integração virá de dashboard na I-PR-06. Logout/troca de conta descarta estado e cancela requests antigos.
+
+Validação: 382 testes, lint, tipos e build; navegador/API reais com Bia/Ana e harness de duas contas novas. [Evidências e limites da I-PR-05](I-PR-05.md).
 
 ## Jogos e opiniões ativados — I-PR-04
 

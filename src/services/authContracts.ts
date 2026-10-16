@@ -2,7 +2,9 @@ import type { User } from '../models';
 
 export interface LoginCredentials { email: string; password: string; }
 export interface RegistrationInput { name: string; email: string; password: string; }
+export interface ProfileChanges { displayName?: string; bio?: string; avatarUrl?: string | null; }
 export interface AuthService {
+  editProfile?(input: ProfileChanges): Promise<User>;
   logout?(): void | Promise<void>;
   sessionUser?(): User | null;
   subscribe?(listener: () => void): () => void;
