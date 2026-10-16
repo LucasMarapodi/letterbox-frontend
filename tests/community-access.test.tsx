@@ -8,16 +8,16 @@ import { createMockCommunityService } from './doubles/communityService';
 import { userFixtures } from './doubles/opinions';
 test('identidade arbitrária não autoriza comentário sem autenticação', async () => {
   const service = createMockCommunityService();
-  await expect(service.comment('review-2', 'Forjado', userFixtures[0])).rejects.toMatchObject({ code: 'session-required' });
-  expect((await service.getComments('review-2')).some((comment) => comment.text === 'Forjado')).toBe(false);
+  await expect(service.comment(2, 'Forjado', userFixtures[0])).rejects.toMatchObject({ code: 'session-required' });
+  expect((await service.getComments(2)).some((comment) => comment.text === 'Forjado')).toBe(false);
 });
 test('credenciais autorizam e logout revoga comentário mesmo mantendo objeto de usuário', async () => {
   const adapters = createTestApplicationServices();
   const user = await adapters.auth.login({ email: 'ana@example.com', password: 'teste123' });
-  await expect(adapters.community.comment('review-2', 'Autorizado', user)).resolves.toMatchObject({ userId: user.id });
-  await expect(adapters.community.comment('review-1', 'Outro autor', userFixtures[1])).rejects.toMatchObject({ code: 'forbidden' });
+  await expect(adapters.community.comment(2, 'Autorizado', user)).resolves.toMatchObject({ userId: user.id });
+  await expect(adapters.community.comment(1, 'Outro autor', userFixtures[1])).rejects.toMatchObject({ code: 'forbidden' });
   adapters.auth.logout?.();
-  await expect(adapters.community.comment('review-2', 'Após sair', user)).rejects.toMatchObject({ code: 'session-required' });
+  await expect(adapters.community.comment(2, 'Após sair', user)).rejects.toMatchObject({ code: 'session-required' });
 });
 test('comunidade usa leitura pública e editor existente com sessão revogada pelo botão sair', async () => {
   const adapters = createTestApplicationServices();
@@ -40,5 +40,5 @@ test('comunidade usa leitura pública e editor existente com sessão revogada pe
   const user = userFixtures[0];
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();
-  await expect(adapters.community.comment('review-2', 'Sessão encerrada', user)).rejects.toMatchObject({ code: 'session-required' });
+  await expect(adapters.community.comment(2, 'Sessão encerrada', user)).rejects.toMatchObject({ code: 'session-required' });
 }, 15000);

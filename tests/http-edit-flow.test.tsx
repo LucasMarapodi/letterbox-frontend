@@ -16,18 +16,18 @@ test('leitura pública e PATCH mínimo preservam projeção, ID e createdAt', as
   expect(await service.getReview(wireReview.id)).toEqual(wireReview);
   expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
   expect(await service.editReview(wireReview.id, updated.text, { ...wireUser, id: 999 })).toEqual(updated);
-  expect(transport.mock.calls[1][0].endsWith('/reviews/r%2F1')).toBe(true);
+  expect(transport.mock.calls[1][0].endsWith('/reviews/55')).toBe(true);
   expect(transport.mock.calls[1][1]).toMatchObject({ method: 'PATCH', body: '{"text":"Texto atualizado"}', headers: { Authorization: 'Bearer test-only' } });
 });
 test('404 público vira ausência, rede/contrato continuam erros; edição distingue 403 e 404', async () => {
   const session = createHttpSessionStore(); session.establish({ user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' });
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json({code:'not_found',message:'Seguro'},{status:404})).mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(Response.json({})).mockResolvedValueOnce(Response.json({code:'forbidden',message:'Seguro'},{status:403})).mockResolvedValueOnce(Response.json({code:'not_found',message:'Seguro'},{status:404}));
   const service = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session }).community;
-  expect(await service.getReview('missing')).toBeNull();
-  await expect(service.getReview('missing')).rejects.toMatchObject({kind:'network'});
-  await expect(service.getReview('missing')).rejects.toMatchObject({kind:'contract'});
-  await expect(service.editReview('r', 'texto', wireUser)).rejects.toMatchObject({code:'forbidden'});
-  await expect(service.editReview('r', 'texto', wireUser)).rejects.toMatchObject({code:'not-found'});
+  expect(await service.getReview(999)).toBeNull();
+  await expect(service.getReview(999)).rejects.toMatchObject({kind:'network'});
+  await expect(service.getReview(999)).rejects.toMatchObject({kind:'contract'});
+  await expect(service.editReview(55, 'texto', wireUser)).rejects.toMatchObject({code:'forbidden'});
+  await expect(service.editReview(55, 'texto', wireUser)).rejects.toMatchObject({code:'not-found'});
 });
 async function open(failure?: number, other = false): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();

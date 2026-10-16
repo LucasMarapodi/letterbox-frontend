@@ -56,7 +56,7 @@ test('consultar novamente detalhe atualiza também opiniões e remove aviso ante
   expect(transport.mock.calls.filter(([url]) => url.endsWith('/opinions'))).toHaveLength(2);
 });
 test('review também sinaliza metadados do jogo projetado', async () => {
-  mount(async (url) => Response.json(url.endsWith('/comments') ? [] : wireReview, { headers }), '/reviews/r%2F1');
+  mount(async (url) => Response.json(url.endsWith('/comments') ? [] : wireReview, { headers }), '/reviews/55');
   await screen.findByText('Review');
   expect(await screen.findByText(/Dados do catálogo desatualizados/)).toBeVisible();
 });

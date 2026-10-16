@@ -11,8 +11,8 @@ export function withAuthentication(transport: FetchTransport, options: { isolate
 }
 export const wireUser: PublicUserResponse = { id: 1, username: 'ana', displayName: 'Ana', bio: '', avatarUrl: null };
 export const wireGame: GameResponse = { id: 12, igdbId: 345447, title: 'Jogo HTTP', summary: '', coverUrl: null, genres: ['RPG'], platforms: ['PC'], releaseDate: '2024-02-29', averageRating: 4.5 };
-export const wireReview: ReviewResponse = { id: 'r/1', userId: wireUser.id, gameId: wireGame.id, text: 'Review', createdAt: '2026-10-13T12:30:00+00:00', updatedAt: null, author: { id: wireUser.id, displayName: wireUser.displayName, avatarUrl: null }, game: { id: wireGame.id, title: wireGame.title, coverUrl: null } };
+export const wireReview: ReviewResponse = { id: 55, userId: wireUser.id, gameId: wireGame.id, text: 'Review', createdAt: '2026-10-13T12:30:00+00:00', updatedAt: null, author: { id: wireUser.id, displayName: wireUser.displayName, avatarUrl: null }, game: { id: wireGame.id, title: wireGame.title, coverUrl: null } };
 export const wireComment: CommentResponse = { id: 'c', userId: wireUser.id, reviewId: wireReview.id, text: 'Comentário', createdAt: wireReview.createdAt, author: wireReview.author };
-export const wireRating: RatingResponse = { id: 'rating', userId: wireUser.id, gameId: wireGame.id, value: 0 };
+export const wireRating: RatingResponse = { id: 77, userId: wireUser.id, gameId: wireGame.id, value: 0 };
 export const wireFavorite: FavoriteResponse = { id: 'f', userId: wireUser.id, targetType: 'game', targetId: wireGame.id };
 export const wireNotification: NotificationResponse = { id: 'n', userId: 2, actorId: wireUser.id, reviewId: wireReview.id, createdAt: wireReview.createdAt, actor: wireReview.author, type: 'new-review' };

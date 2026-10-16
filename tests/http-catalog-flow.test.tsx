@@ -32,7 +32,7 @@ test('Home busca/ordena e abre detalhes/opiniões reais com zero e capa ausente'
   await interaction.selectOptions(screen.getByLabelText('Ordenar por'),'name-desc');
   await interaction.click(screen.getByRole('link',{name:wireGame.title}));
   expect(await screen.findByText('Nota média: 0 de 5')).toBeVisible();
-  expect(screen.getByText('29/02/2024')).toBeVisible(); expect(screen.getByRole('link',{name:'Review de Ana'})).toHaveAttribute('href','/reviews/r%2F1');
+  expect(screen.getByText('29/02/2024')).toBeVisible(); expect(screen.getByRole('link',{name:'Review de Ana'})).toHaveAttribute('href','/reviews/55');
   expect(transport.mock.calls.some(([url])=>url.includes('term=a+%26+b&sort=name-desc'))).toBe(true);
   expect(screen.queryByText('Ecos do Horizonte')).not.toBeInTheDocument();
 });

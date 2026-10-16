@@ -83,14 +83,14 @@ function localId(value: unknown): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0 || value > 2_147_483_647) throw new Error('ID local inválido.');
   return value;
 }
-async function publish(page: Page, id: number, text: string): Promise<string> {
+async function publish(page: Page, id: number, text: string): Promise<number> {
   await game(page, id);
   await page.getByLabel('Sua review', { exact: true }).fill(text);
   const response = page.waitForResponse((r) => r.url() === `${api}/api/v1/games/${id}/reviews` && r.request().method() === 'POST');
   await page.getByRole('button', { name: 'Publicar review', exact: true }).click();
   const body: unknown = await (await response).json();
   await expect(page.getByText('Review publicada.', { exact: true })).toBeVisible();
-  return string(record(body).id);
+  return localId(record(body).id);
 }
 
 test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilidade reais', async ({ browser, request }) => {

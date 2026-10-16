@@ -9,6 +9,7 @@ const game = { ...wireGame, id: 12, igdbId: 345447 };
 const review = { ...wireReview, userId: 42, gameId: 12, author: { ...wireReview.author, id: 42 }, game: { ...wireReview.game, id: 12 } };
 let server: Server;
 let storageUnavailable = true;
+let savedRating = 3;
 const paths: string[] = [];
 test.beforeAll(async () => {
   // Contratos P-PR-01/02 sintéticos; nenhuma credencial/conta real.
@@ -30,21 +31,29 @@ test.beforeAll(async () => {
     else if (path === '/api/v1/games') body = { items: [game], page: 1, pageSize: 20, hasNextPage: false };
     else if (path === '/api/v1/games/12') body = game;
     else if (path.endsWith('/opinions')) body = { averageRating: 3, reviews: [review] };
-    else if (path.endsWith('/rating/me')) body = { rating: { id: 'rating-test', userId: 42, gameId: 12, value: 3 } };
+    else if (path.endsWith('/rating/me')) {
+      if (request.method === 'PUT') savedRating = 5;
+      const rating = { id: 77, userId: 42, gameId: 12, value: savedRating };
+      body = request.method === 'PUT' ? rating : { rating };
+    }
     else if (path.endsWith('/reviews/me')) body = { review };
     else if (path === '/api/v1/favorites/game/12') body = { favorite: { id: 'favorite-test', userId: 42, targetType: 'game', targetId: '12' } };
+    else if (path === '/api/v1/favorites/review/55') body = { favorite: { id: 'favorite-review', userId: 42, targetType: 'review', targetId: '55' } };
     else if (path.includes('/favorites/')) body = { favorite: null };
     else if (path.endsWith('/dashboard')) body = { favorites: { games: [game], reviews: [] }, feed: [review] };
     else if (path.endsWith('/favorites')) body = { games: [game], reviews: [] };
     else if (path === '/api/v1/users/42/reviews') body = [review];
-    else if (path === `/api/v1/reviews/${encodeURIComponent(review.id)}`) body = review;
+    else if (path === `/api/v1/reviews/${encodeURIComponent(review.id)}`) {
+      if (request.method === 'PATCH') review.text = 'Review numérica editada';
+      body = review;
+    }
     response.end(JSON.stringify(body));
   });
   server.listen(5091, '127.0.0.1'); await once(server, 'listening');
 });
 test.afterAll(async () => { await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve())); });
 
-test('contrato numérico: cadastro, storage_unavailable, login/me, jogo local e perfil/autoria', async ({ page }) => {
+test('contrato P-PR-03: identidade, nota, review, favorito decimal e autoria numéricos', async ({ page }) => {
   await page.goto('/cadastro');
   await page.getByLabel('Nome', { exact: true }).fill('Conta de teste');
   await page.getByLabel('E-mail', { exact: true }).fill('test@example.test');
@@ -62,6 +71,9 @@ test('contrato numérico: cadastro, storage_unavailable, login/me, jogo local e 
   await page.getByRole('region', { name: 'Jogos', exact: true }).getByRole('link', { name: game.title, exact: true }).click();
   await expect(page).toHaveURL(/\/jogos\/12$/);
   await expect(page.getByRole('radio', { name: '3 estrelas', exact: true })).toBeChecked();
+  await page.getByRole('radio', { name: '5 estrelas', exact: true }).check();
+  await page.getByRole('button', { name: 'Salvar nota', exact: true }).click();
+  await expect(page.getByText('Nota 5 salva.', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Remover jogo dos favoritos' })).toBeVisible();
   expect(paths).toContain('/api/v1/games/12');
   expect(paths.some(path => path.includes('345447'))).toBe(false);
@@ -69,7 +81,12 @@ test('contrato numérico: cadastro, storage_unavailable, login/me, jogo local e 
   await expect(page.getByRole('form', { name: 'Editar perfil', exact: true })).toBeVisible();
   await page.getByRole('link', { name: `Ler review de ${game.title}`, exact: true }).click();
   await expect(page.getByRole('form', { name: 'Salvar review', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/reviews\/55$/);
+  await expect(page.getByRole('button', { name: 'Remover review dos favoritos', exact: true })).toBeVisible();
+  await page.getByLabel('Sua review', { exact: true }).fill('Review numérica editada');
+  await page.getByRole('button', { name: 'Salvar review', exact: true }).click();
+  await expect(page.getByText('Review atualizada.', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Seu comentário', { exact: true })).toHaveCount(0);
   await mkdir('docs/evidence', { recursive: true });
-  await page.screenshot({ path: 'docs/evidence/numeric-contract-owner.png', fullPage: true });
+  await page.screenshot({ path: 'docs/evidence/numeric-opinions-owner.png', fullPage: true });
 });

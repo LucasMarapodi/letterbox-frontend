@@ -6,7 +6,7 @@ import { encodeRouteId } from '../routing/encodeRouteId';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 
 type CommentsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; comments: PublicComment[] };
-export function CommentsSection({ reviewId }: { reviewId: string }): ReactElement {
+export function CommentsSection({ reviewId }: { reviewId: number }): ReactElement {
   const { community } = useServices();
   const [state, setState] = useState<CommentsState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);

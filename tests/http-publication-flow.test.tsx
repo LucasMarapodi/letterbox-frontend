@@ -41,7 +41,7 @@ test('publicação refresca lista por GET reviews sem recarregar opinions',async
   const transport=backend(); const interaction=await open(transport);
   await interaction.type(await screen.findByLabelText('Sua review'),'Review'); await interaction.click(screen.getByRole('button',{name:'Publicar review'}));
   expect(await screen.findByText('Review publicada.')).toBeVisible(); expect(await screen.findByRole('link',{name:'Review de Ana'})).toBeVisible();
-  expect(screen.getByRole('link',{name:'Editar minha review'})).toHaveAttribute('href','/reviews/r%2F1');
+  expect(screen.getByRole('link',{name:'Editar minha review'})).toHaveAttribute('href','/reviews/55');
   expect(transport.mock.calls.filter(([url])=>url.endsWith('/opinions'))).toHaveLength(1);
   expect(transport.mock.calls.filter(([url,init])=>url.endsWith('/reviews')&&init.method==='GET')).toHaveLength(1);
   expect(screen.getByText('Nota média: 0 de 5')).toBeVisible();

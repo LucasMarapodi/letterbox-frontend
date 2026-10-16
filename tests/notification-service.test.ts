@@ -4,10 +4,10 @@ import type { NotificationEvent } from '../src/services/notificationContracts';
 import { userFixtures } from './doubles/opinions';
 
 const events: NotificationEvent[] = [
-  { id: 'old', userId: 1, actorId: 2, reviewId: 'review-2', type: 'new-review', createdAt: '2026-01-01T12:00:00Z' },
-  { id: 'z', userId: 1, actorId: 2, reviewId: 'review-1', type: 'review-comment', commentId: 'comment-1', createdAt: '2026-01-02T12:00:00Z' },
-  { id: 'other', userId: 2, actorId: 1, reviewId: 'review-1', type: 'new-review', createdAt: '2026-01-03T12:00:00Z' },
-  { id: 'a', userId: 1, actorId: 2, reviewId: 'review-2', type: 'new-review', createdAt: '2026-01-02T12:00:00Z' },
+  { id: 'old', userId: 1, actorId: 2, reviewId: 2, type: 'new-review', createdAt: '2026-01-01T12:00:00Z' },
+  { id: 'z', userId: 1, actorId: 2, reviewId: 1, type: 'review-comment', commentId: 'comment-1', createdAt: '2026-01-02T12:00:00Z' },
+  { id: 'other', userId: 2, actorId: 1, reviewId: 1, type: 'new-review', createdAt: '2026-01-03T12:00:00Z' },
+  { id: 'a', userId: 1, actorId: 2, reviewId: 2, type: 'new-review', createdAt: '2026-01-02T12:00:00Z' },
 ];
 test('notificações são pessoais ordenadas por ocorrência e ID com os dois eventos', async () => {
   const service = createMockNotificationService({ events });

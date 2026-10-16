@@ -13,10 +13,10 @@ import { deferred } from './fixtures';
 const [ana, leo] = userFixtures;
 const bia: User = { id: 3, displayName: 'Bia', username: 'bia', avatarUrl: null, bio: '' };
 const reviews: Review[] = [
-  { id: 'old', userId: leo.id, gameId: 1, text: 'Antiga', createdAt: '2026-01-01T12:00:00Z', updatedAt: '2026-10-01T12:00:00Z' },
-  { id: 'new', userId: leo.id, gameId: 2, text: 'Recente', createdAt: '2026-02-01T12:00:00Z', updatedAt: null },
-  { id: 'other', userId: bia.id, gameId: 1, text: 'Não seguida', createdAt: '2026-03-01T12:00:00Z', updatedAt: null },
-  { id: 'own', userId: ana.id, gameId: 1, text: 'Própria', createdAt: '2026-04-01T12:00:00Z', updatedAt: null },
+  { id: 1, userId: leo.id, gameId: 1, text: 'Antiga', createdAt: '2026-01-01T12:00:00Z', updatedAt: '2026-10-01T12:00:00Z' },
+  { id: 2, userId: leo.id, gameId: 2, text: 'Recente', createdAt: '2026-02-01T12:00:00Z', updatedAt: null },
+  { id: 3, userId: bia.id, gameId: 1, text: 'Não seguida', createdAt: '2026-03-01T12:00:00Z', updatedAt: null },
+  { id: 4, userId: ana.id, gameId: 1, text: 'Própria', createdAt: '2026-04-01T12:00:00Z', updatedAt: null },
 ];
 afterEach(() => vi.restoreAllMocks());
 test('feed filtra autores e ordena por publicação, remoção e nova publicação refletem próxima consulta', async () => {
@@ -24,7 +24,7 @@ test('feed filtra autores e ordena por publicação, remoção e nova publicaç�
   expect(await service.getFeed(ana)).toEqual([]);
   await service.setFollowing(leo.id, true, ana);
   const feed = await service.getFeed(ana);
-  expect(feed.map((review) => review.id)).toEqual(['new', 'old']);
+  expect(feed.map((review) => review.id)).toEqual([2, 1]);
   expect(feed[0]).toMatchObject({ author: { displayName: 'Leo' }, game: { title: 'Circuito Aurora' } });
   feed[0].text = 'Mudou';
   expect((await service.getFeed(ana))[0].text).toBe('Recente');
@@ -55,7 +55,7 @@ test('Home exibe feed ordenado com texto autor jogo data e destino da review', a
   expect(within(cards[1]).getByText('Antiga')).toBeVisible();
   expect(within(cards[0]).getByRole('link', { name: 'Leo' })).toHaveAttribute('href', '/perfil/2');
   expect(within(cards[0]).getByRole('link', { name: 'Circuito Aurora' })).toHaveAttribute('href', '/jogos/2');
-  expect(within(cards[0]).getByRole('link', { name: 'Ler review' })).toHaveAttribute('href', '/reviews/new');
+  expect(within(cards[0]).getByRole('link', { name: 'Ler review' })).toHaveAttribute('href', '/reviews/2');
   expect(within(cards[0]).getByText('01/02/2026')).toHaveAttribute('datetime', '2026-02-01T12:00:00Z');
 });
 test('deixar de seguir no perfil remove review ao voltar à Home', async () => {

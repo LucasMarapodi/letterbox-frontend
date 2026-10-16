@@ -12,18 +12,18 @@ const author: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avat
 afterEach(() => vi.restoreAllMocks());
 test('comentário em review alheia aparece somente na review correta', async () => {
   const service = createMockCommunityService({ comments: [], sessionStore: { user: author } });
-  const comment = await service.comment('review-2', ' Uma boa review ', author);
-  expect(comment).toMatchObject({ text: 'Uma boa review', reviewId: 'review-2', userId: author.id });
-  expect((await service.getComments('review-2'))[0].author.displayName).toBe('Ana');
-  expect(await service.getComments('review-1')).toEqual([]);
+  const comment = await service.comment(2, ' Uma boa review ', author);
+  expect(comment).toMatchObject({ text: 'Uma boa review', reviewId: 2, userId: author.id });
+  expect((await service.getComments(2))[0].author.displayName).toBe('Ana');
+  expect(await service.getComments(1)).toEqual([]);
 });
 test.each(['', '   '])('serviço rejeita comentário vazio %s', async (text) => {
-  await expect(createMockCommunityService({ sessionStore: { user: author } }).comment('review-2', text, author)).rejects.toMatchObject({ code: 'empty-text' });
+  await expect(createMockCommunityService({ sessionStore: { user: author } }).comment(2, text, author)).rejects.toMatchObject({ code: 'empty-text' });
 });
 test('serviço exige sessão e review existente', async () => {
   const service = createMockCommunityService({ sessionStore: { user: author } });
-  await expect(service.comment('review-2', 'Texto', null)).rejects.toMatchObject({ code: 'session-required' });
-  await expect(service.comment('ausente', 'Texto', author)).rejects.toMatchObject({ code: 'not-found' });
+  await expect(service.comment(2, 'Texto', null)).rejects.toMatchObject({ code: 'session-required' });
+  await expect(service.comment(999, 'Texto', author)).rejects.toMatchObject({ code: 'not-found' });
 });
 async function open(): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();
@@ -59,7 +59,7 @@ test('pendência bloqueia duplo envio e comentário publicado aparece', async ()
   await act(async () => { fireEvent.submit(form); fireEvent.submit(form); });
   expect(send).toHaveBeenCalledTimes(1);
   expect(screen.getByRole('button', { name: 'Publicando…' })).toBeDisabled();
-  const comment: Comment = { id: 'c-new', userId: author.id, reviewId: 'review-2', text: 'Comentário enviado', createdAt: '2026-01-04T12:00:00Z' };
+  const comment: Comment = { id: 'c-new', userId: author.id, reviewId: 2, text: 'Comentário enviado', createdAt: '2026-01-04T12:00:00Z' };
   get.mockResolvedValue([{ ...comment, author }]);
   await act(async () => { pending.resolve(comment); await pending.promise; });
   expect(await screen.findByText('Comentário enviado')).toBeVisible();
@@ -71,7 +71,7 @@ test('pendência bloqueia duplo envio e comentário publicado aparece', async ()
   expect(await screen.findByRole('link', { name: 'Entrar para continuar' })).toBeVisible();
 });
 test('visitante lê mas não envia comentário', async () => {
-  render(<MemoryRouter initialEntries={['/reviews/review-2']}><AppRoutes /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/reviews/2']}><AppRoutes /></MemoryRouter>);
   await screen.findByText(/Um mundo pequeno/);
   expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Entrar para continuar' })).toHaveAttribute('href', '/login');

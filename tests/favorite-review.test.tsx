@@ -12,16 +12,16 @@ const ana: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avatarU
 afterEach(() => vi.restoreAllMocks());
 test('favorito de review não duplica e mantém isolamento entre usuários', async () => {
   const service = createMockCommunityService();
-  const first = await service.setFavorite('review', 'review-2', true, ana);
-  expect(await service.setFavorite('review', 'review-2', true, ana)).toEqual(first);
-  expect(await service.getFavorite('review', 'review-2', { ...ana, id: 2 })).toBeNull();
-  await service.setFavorite('review', 'review-2', false, ana);
-  expect(await service.getFavorite('review', 'review-2', ana)).toBeNull();
+  const first = await service.setFavorite('review', 2, true, ana);
+  expect(await service.setFavorite('review', 2, true, ana)).toEqual(first);
+  expect(await service.getFavorite('review', 2, { ...ana, id: 2 })).toBeNull();
+  await service.setFavorite('review', 2, false, ana);
+  expect(await service.getFavorite('review', 2, ana)).toBeNull();
 });
 test('review inexistente e visitante não podem ser favoritados', async () => {
   const service = createMockCommunityService();
-  await expect(service.setFavorite('review', 'ausente', true, ana)).rejects.toMatchObject({ code: 'not-found' });
-  await expect(service.setFavorite('review', 'review-2', true, null)).rejects.toMatchObject({ code: 'session-required' });
+  await expect(service.setFavorite('review', 999, true, ana)).rejects.toMatchObject({ code: 'not-found' });
+  await expect(service.setFavorite('review', 2, true, null)).rejects.toMatchObject({ code: 'session-required' });
 });
 async function open(): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();
@@ -62,11 +62,11 @@ test('envio de favorito pendente impede duplicação', async () => {
   await act(async () => { fireEvent.click(button); fireEvent.click(button); });
   expect(set).toHaveBeenCalledTimes(1);
   expect(screen.getByRole('button', { name: 'Atualizando favorito…' })).toBeDisabled();
-  await act(async () => { pending.resolve({ id: 'fav', userId: ana.id, targetType: 'review', targetId: 'review-1' }); await pending.promise; });
+  await act(async () => { pending.resolve({ id: 'fav', userId: ana.id, targetType: 'review', targetId: 1 }); await pending.promise; });
   expect(screen.getByRole('button', { name: 'Remover review dos favoritos' })).toHaveAttribute('aria-pressed', 'true');
 });
 test('visitante recebe caminho de login na review', async () => {
-  render(<MemoryRouter initialEntries={['/reviews/review-1']}><AppRoutes /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/reviews/1']}><AppRoutes /></MemoryRouter>);
   await screen.findByText(/A exploração convida/);
   expect(screen.queryByRole('button', { name: 'Favoritar review' })).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Entrar para favoritar' })).toHaveAttribute('href', '/login');

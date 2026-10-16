@@ -3,15 +3,15 @@ import { createMockGameService } from './doubles/gameService';
 import type { Rating, Review, User } from '../src/models';
 
 const user: User = { id: 1, username: 'ana', displayName: 'Ana', bio: '', avatarUrl: null };
-const review: Review = { id: 'review-1', gameId: 1, userId: user.id, text: 'Review do primeiro jogo.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null };
+const review: Review = { id: 1, gameId: 1, userId: user.id, text: 'Review do primeiro jogo.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null };
 const ratings: Rating[] = [
-  { id: 'rating-1', gameId: 1, userId: 1, value: 0 },
-  { id: 'rating-2', gameId: 1, userId: 2, value: 4 },
-  { id: 'rating-3', gameId: 2, userId: 3, value: 5 },
+  { id: 1, gameId: 1, userId: 1, value: 0 },
+  { id: 2, gameId: 1, userId: 2, value: 4 },
+  { id: 3, gameId: 2, userId: 3, value: 5 },
 ];
 
 test('serviço calcula média somente das notas do jogo e filtra suas reviews', async () => {
-  const other: Review = { ...review, id: 'review-2', gameId: 2 };
+  const other: Review = { ...review, id: 2, gameId: 2 };
   const service = createMockGameService({ ratings, reviews: [review, other], users: [user] });
   const result = await service.getOpinions(1);
   expect(result.averageRating).toBe(2);
@@ -19,7 +19,7 @@ test('serviço calcula média somente das notas do jogo e filtra suas reviews', 
 });
 
 test('zero é média válida e nenhuma nota produz null', async () => {
-  const rating: Rating = { id: 'zero', gameId: 99, userId: user.id, value: 0 };
+  const rating: Rating = { id: 99, gameId: 99, userId: user.id, value: 0 };
   const service = createMockGameService({ ratings: [rating], reviews: [], users: [] });
   await expect(service.getOpinions(99)).resolves.toEqual({ averageRating: 0, reviews: [] });
   await expect(service.getOpinions(100)).resolves.toEqual({ averageRating: null, reviews: [] });
