@@ -22,3 +22,7 @@ Sem suíte completa, escrita em dados reais ou IGDB live nesta entrega. Para rep
 ```sh
 npm exec playwright test -- --config playwright.menu-search.config.ts
 ```
+
+## Integração posterior — PR-28
+
+A [PR-28](S-PR-28.md), baseada no commit desta entrega `6dac1a6`, conecta o Enter à rota real de resultados. Nessa integração, o menu permanece montado ao navegar: a mudança de rota fecha/cancela as sugestões sem apagar o texto. Isso corrige a corrida reproduzida no navegador e por teste RED `aaef6a6`. A branch original da PR-27 preserva o limite de integração descrito acima; a branch da PR-28 contém o fluxo completo, sem merge.

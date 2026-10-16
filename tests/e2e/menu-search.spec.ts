@@ -58,7 +58,7 @@ for (const mobile of [false, true]) {
     await page.getByRole('option', { name: /Mario @mario/ }).click();
     await expect(page).toHaveURL(/\/perfil\/7$/);
     input = page.getByRole('combobox', { name: 'Buscar pessoas e jogos' });
-    await input.fill('mario'); await expect(page.getByRole('option')).toHaveCount(2);
+    await input.fill('mario'); await input.click(); await expect(page.getByRole('option')).toHaveCount(2);
     await input.press('ArrowDown'); await input.press('ArrowDown'); await input.press('Enter');
     await expect(page).toHaveURL(/\/jogos\/12$/);
     input = page.getByRole('combobox', { name: 'Buscar pessoas e jogos' });

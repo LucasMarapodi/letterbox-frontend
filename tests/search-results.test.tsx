@@ -118,6 +118,7 @@ test('Enter no menu codifica termo e reinicia Pessoas/1 sem sugestões redundant
   expect(queries()).toEqual([{ q: 'a & b', mode: 'results', scope: 'all', page: '1' }]);
   await interaction.click(screen.getByRole('tab', { name: 'Jogos' }));
   await screen.findByRole('link', { name: 'Mario World' });
+  await interaction.clear(screen.getByRole('combobox', { name: 'Buscar pessoas e jogos' }));
   await interaction.type(screen.getByRole('combobox', { name: 'Buscar pessoas e jogos' }), 'novo{Enter}');
   await waitFor(() => expect(screen.getByLabelText('URL atual')).toHaveTextContent('q=novo&aba=pessoas&page=1'));
   expect(queries().at(-1)).toEqual({ q: 'novo', mode: 'results', scope: 'all', page: '1' });
