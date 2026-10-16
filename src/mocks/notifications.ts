@@ -1,0 +1,8 @@
+import type { NotificationEvent } from '../services/notificationContracts';
+
+/** Eventos fictícios já ocorridos; não são gerados pelas ações da aplicação. */
+export const notificationFixtures: NotificationEvent[] = [
+  { id: 'notification-1', userId: 'user-1', actorId: 'user-2', reviewId: 'review-2', type: 'new-review', createdAt: '2026-01-02T12:00:00Z' },
+  { id: 'notification-2', userId: 'user-1', actorId: 'user-2', reviewId: 'review-1', type: 'review-comment', commentId: 'comment-1', createdAt: '2026-01-03T12:00:00Z' },
+  { id: 'notification-3', userId: 'user-2', actorId: 'user-1', reviewId: 'review-1', type: 'new-review', createdAt: '2026-01-01T12:00:00Z' },
+];

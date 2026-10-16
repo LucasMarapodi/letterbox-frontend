@@ -1,6 +1,6 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews, comentários, perfis, favoritos, conexões e feed das US-01 a US-27, sem backend ou acesso direto à IGDB.
+React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews, comentários, perfis, favoritos, conexões, feed e notificações das US-01 a US-28, sem backend ou acesso direto à IGDB.
 
 ## Executar
 
@@ -35,7 +35,7 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 ## Rotas provisórias
 
 `/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
-Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Reviews possuem leitura pública, edição do autor e comentários. Perfis públicos mostram biografia, avatar e reviews. Favoritos pessoais de jogos e reviews aparecem na Home e próprio perfil. Notificações será acessado pelo sino e modal na US-28, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
+Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Reviews possuem leitura pública, edição do autor e comentários. Perfis públicos mostram biografia, avatar e reviews. Favoritos pessoais de jogos e reviews aparecem na Home e próprio perfil. Notificações são acessadas pelo sino e modal, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 
@@ -75,3 +75,10 @@ Evidências: `docs/TDD-PR-04.md`. Descrição local para revisão: `docs/PR-04.m
 Seguir e deixar de seguir no perfil, com bloqueio de própria conta, duplicidade e visitantes. Listas públicas de seguidores e seguidos com avatares e links. Feed na Home autenticada mostra reviews de pessoas seguidas por publicação decrescente. Falhas e estados vazios são tratados; alterações refletem na próxima consulta. Relações permanecem em memória.
 
 Branch feat/pr-06-conexoes-feed, derivada da PR-05, sem merge. Evidências em docs/TDD-PR-06.md e descrição local em docs/PR-06.md. Publicação pendente por ausência de remoto.
+
+## Notificações — PR-07
+
+O sino exclusivo da sessão autenticada abre um modal com eventos pessoais mockados, mais recentes primeiro. Modal com teclado, retorno de foco, carregamento/vazio/erro e links para reviews. Logout ou troca de conta fecha e descarta dados. Não há rota exclusiva, contador, status de leitura ou geração automática de eventos.
+
+Branch feat/pr-07-notificacoes sobre PR-06, sem merge. Evidências em docs/TDD-PR-07.md; descrição em docs/PR-07.md. 208 testes, lint, tipos e build aprovados. Publicação pendente por ausência de remoto.
+
