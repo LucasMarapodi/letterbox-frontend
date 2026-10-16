@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { notifications } from '../services/notifications';
+import { useServices } from '../services/ServiceProvider';
 import type { NotificationItem } from '../services/notificationContracts';
 import { useSession } from '../session/SessionProvider';
 import { encodeRouteId } from '../routing/encodeRouteId';
@@ -10,6 +10,7 @@ import { EmptyState, ErrorState, LoadingState } from './Feedback';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NotificationItem[] };
 function NotificationModal({ onClose, trigger }: { onClose: () => void; trigger: HTMLButtonElement | null }): ReactElement {
+  const { notifications } = useServices();
   const { user } = useSession();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -63,3 +64,4 @@ export function NotificationBell(): ReactElement | null {
   const { user } = useSession();
   return user ? <SessionBell key={user.id} /> : null;
 }
+

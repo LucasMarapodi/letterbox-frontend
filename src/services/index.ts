@@ -1,9 +1,8 @@
 import type { Services } from './contracts';
-import { createMockGameService } from '../mocks/gameService';
-import { community } from './community';
+import { defaultApplicationServices } from './runtime';
 
 export function createServices(overrides: Partial<Services> = {}): Services {
-  return { games: overrides.games ?? { ...createMockGameService(), getOpinions: (id) => community.getOpinions(id) } };
+  return { games: overrides.games ?? defaultApplicationServices.games };
 }
 
 export const services: Services = createServices();

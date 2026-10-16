@@ -1,3 +1,3 @@
-import { createMockNotificationService } from '../mocks/notificationService';
+import { defaultApplicationServices } from './runtime';
 import type { NotificationService } from './notificationContracts';
-export const notifications: NotificationService = createMockNotificationService();
+export const notifications: NotificationService = defaultApplicationServices.notifications;

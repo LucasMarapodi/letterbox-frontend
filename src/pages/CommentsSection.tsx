@@ -1,12 +1,13 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import type { PublicComment } from '../services/communityContracts';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 
 type CommentsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; comments: PublicComment[] };
 export function CommentsSection({ reviewId }: { reviewId: string }): ReactElement {
+  const { community } = useServices();
   const [state, setState] = useState<CommentsState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -25,3 +26,4 @@ export function CommentsSection({ reviewId }: { reviewId: string }): ReactElemen
     </li>)}</ul> : <EmptyState message="Nenhum comentário nesta review." />)}
   </section>;
 }
+

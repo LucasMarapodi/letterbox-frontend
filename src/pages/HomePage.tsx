@@ -2,7 +2,7 @@ import type { FormEvent, ReactElement, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { Game } from '../models';
-import { services } from '../services';
+import { useServices } from '../services/ServiceProvider';
 import { GameCard } from '../components/GameCard';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { Button } from '../components/Button';
@@ -12,13 +12,14 @@ import type { GameQuery, GameSort } from '../services/contracts';
 type CatalogState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; games: Game[] };
 
 export function HomePage({ authenticated = false, favorites, feed }: { authenticated?: boolean; favorites?: ReactNode; feed?: ReactNode }): ReactElement {
+  const { games } = useServices();
   const [state, setState] = useState<CatalogState>({ status: 'loading' });
   const [attempt, setAttempt] = useState<number>(0);
   const [term, setTerm] = useState<string>('');
   const [query, setQuery] = useState<GameQuery>({ term: '', sort: 'name-asc' });
   useEffect(() => {
     let active: boolean = true;
-    services.games.list(query).then(
+    games.list(query).then(
       (games) => { if (active) setState({ status: 'ready', games }); },
       () => { if (active) setState({ status: 'error' }); },
     );
@@ -90,3 +91,4 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
     {feed}
   </main>;
 }
+

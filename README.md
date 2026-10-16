@@ -1,6 +1,6 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. Fundação, catálogo, autenticação, avaliações, reviews, comentários, perfis, favoritos, conexões, feed e notificações das US-01 a US-28, sem backend ou acesso direto à IGDB.
+React + TypeScript + Vite. US-01 a US-31 implementadas e verificadas: catálogo, autenticação, reviews, perfis, favoritos, conexões, feed, notificações e preparação da entrega, sem backend ou acesso direto à IGDB.
 
 ## Executar
 
@@ -82,3 +82,9 @@ O sino exclusivo da sessão autenticada abre um modal com eventos pessoais mocka
 
 Branch feat/pr-07-notificacoes sobre PR-06, sem merge. Evidências em docs/TDD-PR-07.md; descrição em docs/PR-07.md. 208 testes, lint, tipos e build aprovados. Publicação pendente por ausência de remoto.
 
+
+## Preparação da entrega — PR-08
+
+Atalho para conteúdo por teclado, nomes longos sem overflow e layout conferido em navegador real em 320, 768 e 1280 px. Serviços centralizados em src/services/runtime.ts e substituíveis via AppRoutes.adapters/ServiceProvider. A URL VITE_API_BASE_URL é reservada à integração futura e não ativa HTTP. Consulte docs/SERVICE-INTEGRATION.md para operações e pendências.
+
+218 testes, lint, TypeScript estrito e build aprovados. Evidências em docs/TDD-PR-08.md; descrição em docs/PR-08.md. Branch feat/pr-08-preparacao-entrega sobre PR-07, sem merge. Publicação pendente por ausência de remoto.

@@ -1,10 +1,10 @@
-import type { ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
 import { HomePage } from './pages/HomePage';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { ProfilePage } from './pages/ProfilePage';
 import { GameDetailsPage } from './pages/GameDetailsPage';
 import type { AuthService } from './services/authContracts';
-import { authService as defaultAuthService } from './services/auth';
+import { ServiceProvider, useServices } from './services/ServiceProvider';
 import { SessionProvider, useSession } from './session/SessionProvider';
 import { LoginPage } from './pages/LoginPage';
 
@@ -15,12 +15,15 @@ import { FavoritesSections } from './components/FavoritesSections';
 import { encodeRouteId } from './routing/encodeRouteId';
 import { FeedSection } from './components/FeedSection';
 import { NotificationBell } from './components/NotificationBell';
+import type { ApplicationServices } from './services/runtime';
 
-export interface AppRoutesProps { authService?: AuthService; }
+export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
 function ApplicationRoutes(): ReactElement {
   const { user, signOut } = useSession();
+  const contentRef = useRef<HTMLDivElement>(null);
   return <>
+    <a className="skip-link" href="#conteudo-principal" onClick={(event) => { event.preventDefault(); contentRef.current?.focus(); }}>Ir para o conteúdo principal</a>
     <header className="site-header">
       <div className="header-inner">
       <Link className="brand" to="/" aria-label="Game Reviews"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>Game Reviews</Link>
@@ -34,7 +37,7 @@ function ApplicationRoutes(): ReactElement {
       </div>
       </div>
     </header>
-    <Routes>
+    <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
       <Route path="/" element={<HomePage authenticated={Boolean(user)} favorites={user ? <FavoritesSections key={user.id} /> : null} feed={user ? <FeedSection key={user.id} /> : null} />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
@@ -42,12 +45,16 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
-    </Routes>
+    </Routes></div>
   </>;
 }
 
-export function AppRoutes({ authService = defaultAuthService }: AppRoutesProps): ReactElement {
-  return <SessionProvider service={authService}><ApplicationRoutes /></SessionProvider>;
+function ConfiguredRoutes({ authService }: Pick<AppRoutesProps, 'authService'>): ReactElement {
+  const { auth } = useServices();
+  return <SessionProvider service={authService ?? auth}><ApplicationRoutes /></SessionProvider>;
+}
+export function AppRoutes({ authService, adapters }: AppRoutesProps): ReactElement {
+  return <ServiceProvider value={adapters}><ConfiguredRoutes authService={authService} /></ServiceProvider>;
 }
 
 export default function App(): ReactElement {

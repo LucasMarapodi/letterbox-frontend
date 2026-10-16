@@ -1,10 +1,11 @@
 import { useState, type ReactElement } from 'react';
 import type { ReviewDetails } from '../services/communityContracts';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import { useSession } from '../session/SessionProvider';
 import { ReviewTextForm } from '../components/ReviewTextForm';
 
 function EditControl({ review, onSaved }: { review: ReviewDetails; onSaved(review: ReviewDetails): void }): ReactElement {
+  const { community } = useServices();
   const { user } = useSession();
   const [success, setSuccess] = useState(false);
   return <section aria-label="Editar minha review">
@@ -21,3 +22,4 @@ export function EditReview(props: { review: ReviewDetails; onSaved(review: Revie
   const { user } = useSession();
   return user?.id === props.review.userId ? <EditControl key={`${user.id}-${props.review.id}`} {...props} /> : null;
 }
+

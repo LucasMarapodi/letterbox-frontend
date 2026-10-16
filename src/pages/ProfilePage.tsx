@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
-import { community } from '../services/community';
+import { useServices } from '../services/ServiceProvider';
 import type { PublicProfile } from '../services/communityContracts';
 import { useOpaqueRouteId } from '../routing/useOpaqueRouteId';
 import { encodeRouteId } from '../routing/encodeRouteId';
@@ -13,6 +13,7 @@ import { ConnectionsSections } from '../components/ConnectionsSections';
 
 type ProfileState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; profile: PublicProfile | null };
 function ProfileContent({ id }: { id: string }): ReactElement {
+  const { community } = useServices();
   const { user } = useSession();
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -47,3 +48,4 @@ export function ProfilePage(): ReactElement {
   const id = useOpaqueRouteId('userId');
   return <main><h1>Perfil público</h1><p className="game-id">ID do usuário: {id}</p>{id ? <ProfileContent key={id} id={id} /> : <EmptyState message="Perfil não encontrado." />}</main>;
 }
+
