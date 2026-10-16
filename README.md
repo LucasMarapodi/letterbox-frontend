@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 443 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 459 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -58,3 +58,7 @@ Sair volta imediatamente ao Início usando replace, preservando revogação/avis
 ## Sexta fase — S-PR-02
 
 Consultas indicam loading com status acessível e aria-busy, ocultando resultado/vazio antigos durante atualização. Regiões independentes continuam utilizáveis; falha na consulta da review própria oferece retry. 443 testes, lint, tipos, build e E2E Chromium determinístico aprovados. [Auditoria e limites](docs/S-PR-02.md). Execute `npm exec playwright test -- --config playwright.loading.config.ts` para o cenário sintético; portas 5175/5091 livres. Não é validação IGDB live. O critério global de IDs inteiros continua pendente.
+
+## Sexta fase — S-PR-03
+
+Logout tem trava síncrona e informa revogação pendente sem bloquear novo login/navegação. Comentário e edição de review limpam sucesso anterior ao tentar novamente. Proteções das demais mutações auditadas e verificadas com HTTP pendente. 459 testes, lint, tipos, build e E2E Chromium sintético aprovados. [Auditoria e limites](docs/S-PR-03.md). Execute `npm exec playwright test -- --config playwright.mutations.config.ts`, com portas 5175/5091 livres. Marcar notificações não existe no contrato atual; IDs inteiros seguem pendentes da migração própria.

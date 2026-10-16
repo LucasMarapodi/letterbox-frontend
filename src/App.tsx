@@ -22,7 +22,7 @@ import { DashboardHome } from './pages/DashboardHome';
 export interface AppRoutesProps { authService?: AuthService; adapters?: ApplicationServices; }
 
 function ApplicationRoutes(): ReactElement {
-  const { user, signOut, notice, version } = useSession();
+  const { user, signOut, signingOut, notice, version } = useSession();
   const navigate = useNavigate();
   function logout(): void {
     // signOut limpa a sessão antes do primeiro await; a resposta remota não navega.
@@ -43,10 +43,11 @@ function ApplicationRoutes(): ReactElement {
         {user && privateFeatures?.notifications !== false && <NotificationBell key={`${version}-${user.id}`} />}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
-      {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" onClick={logout}>Sair <span aria-hidden="true">↗</span></button></div>}
+      {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" disabled={signingOut} onClick={logout}>Sair <span aria-hidden="true">↗</span></button></div>}
       </div>
       </div>
     </header>
+    {signingOut && <p className="session-notice" role="status">Encerrando sessão…</p>}
     {notice && <p className="session-notice" role="alert">{notice}</p>}
     <div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
       <Route path="/" element={user && privateFeatures?.dashboard === true ? <DashboardHome key={`${version}-${user.id}`} /> : <HomePage authenticated={Boolean(user)} favorites={user && privateFeatures?.favorites !== false && privateFeatures?.dashboard !== false ? <FavoritesSections key={`favorites-${version}-${user.id}`} /> : null} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
