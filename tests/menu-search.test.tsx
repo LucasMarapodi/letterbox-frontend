@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, configure, fireEvent, getConfig, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
@@ -14,8 +14,11 @@ const ready = (items: unknown[]) => ({ status: 'ready', items, page: 1, pageSize
 const skipped = { status: 'notRequested', items: [], page: null, pageSize: null, hasNextPage: null, error: null, metadata: null };
 const unavailable = { ...skipped, status: 'unavailable', error: { code: 'integration_unavailable', message: 'Indisponível.' } };
 const result = (query = 'mario') => ({ query, people: ready([person]), games: ready([game]), error: null });
-beforeEach(() => vi.useFakeTimers());
-afterEach(() => vi.useRealTimers());
+const asyncWrapper = getConfig().asyncWrapper;
+// O wrapper padrão usa um timer zero para drenar microtasks e detecta apenas Jest.
+// Os eventos já passam por act; o avanço controlado abaixo drena as respostas.
+beforeEach(() => { vi.useFakeTimers(); configure({ asyncWrapper: callback => callback() }); });
+afterEach(() => { configure({ asyncWrapper }); vi.useRealTimers(); });
 async function advance(ms = 300) { await act(async () => { await vi.advanceTimersByTimeAsync(ms); }); }
 function Location() { return <output aria-label="URL atual">{useLocation().pathname}{useLocation().search}</output>; }
 function open(respond: FetchTransport = async url => Response.json(result(new URL(url).searchParams.get('q') ?? 'mario'))) {

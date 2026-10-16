@@ -14,6 +14,7 @@ export interface HttpRequest {
   body?: unknown;
   token?: string;
   signal?: AbortSignal;
+  acceptedStatuses?: readonly number[];
   root?: boolean;
   onCatalogMetadata?: (metadata: CatalogMetadata | null) => void;
 }
@@ -54,7 +55,7 @@ export function createHttpClient(baseUrl: string, transport: FetchTransport = (u
       if (input.signal?.aborted) throw new HttpFailure('cancelled');
       throw new HttpFailure('contract', response.status);
     }
-    if (!response.ok) {
+    if (!response.ok && !input.acceptedStatuses?.includes(response.status)) {
       if (!isApiError(payload)) throw new HttpFailure('contract', response.status);
       throw new HttpFailure('http', response.status, payload.code);
     }

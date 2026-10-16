@@ -1,5 +1,7 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import type { GameQuery } from '../contracts';
+import { validSearchTerm, type SearchService } from '../searchContracts';
+import { decodeSearch } from './decoders';
 import { isLocalId, type User, type UserId, type GameId, type ReviewId } from '../../models';
 import { catalogKey, createCatalogStore, type CatalogMetadata, type CatalogStore } from '../catalogMetadata';
 import type { LoginRequest, RegisterRequest, LoginResponse, PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, GameOpinionsResponse, FavoriteListsResponse, DashboardResponse, RankedReviewResponse, RankedGameResponse, NotificationResponse, ProfilePatchRequest, TextRequest, RatingRequest } from './dtos';
@@ -13,6 +15,7 @@ export interface SessionSnapshot { token: string; user: User; expiresAt: string;
 export interface HttpSessionStore { current(): SessionSnapshot | null; version(): number; establish(login: LoginResponse): void; updateUser(user: User): void; clear(): void; subscribe(listener: () => void): () => void; }
 export interface HttpAdapterConfig { apiBaseUrl: string; }
 export interface HttpAdapters {
+  search: SearchService['search'];
   catalog: CatalogStore;
   session: HttpSessionStore;
   auth: {
@@ -167,5 +170,9 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       dashboard: (signal) => call({ path: ['dashboard'], signal }, decodeDashboard, true),
     },
     notifications: { list: (signal) => call({ path: ['notifications'], signal }, list(decodeNotification), true) },
+    search: (query, signal) => {
+      if (!validSearchTerm(query.q) || !['suggestions', 'results'].includes(query.mode) || !['all', 'people', 'games'].includes(query.scope) || !Number.isInteger(query.page) || query.page < 1 || (query.page - 1) * 20 > 2_147_483_647 || (query.mode === 'suggestions' && query.page !== 1)) throw new HttpFailure('configuration');
+      return call({ path: ['search'], query: { ...query, q: query.q.trim() }, signal, acceptedStatuses: [503] }, value => decodeSearch(value, query));
+    },
   };
 }

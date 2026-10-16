@@ -7,6 +7,22 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.menu-search { position: relative; width: 13rem; max-width: 100%; min-width: 0; }
+.menu-search input { width: 100%; border-radius: 999px; background: #1c272c; color: #eceff5; border-color: #405259; padding: 0.55rem 0.9rem; font-size: 0.85rem; }
+.menu-search-panel, .menu-search-hint { position: absolute; right: 0; top: calc(100% + 0.5rem); z-index: 120; width: min(22rem, calc(100vw - 3rem)); padding: 0.75rem; background: #1c272c; border: 1px solid #405259; border-radius: 1rem; box-shadow: 0 12px 32px #0006; }
+.menu-search-hint { margin: 0; font-size: 0.85rem; }
+.menu-search-panel { max-height: min(65vh, 32rem); overflow-y: auto; }
+.menu-search-panel h3 { margin: 0.4rem 0; font-size: 0.75rem; text-transform: uppercase; color: #93b6ac; letter-spacing: 0.1em; }
+.menu-search-panel p { margin: 0.6rem 0; font-size: 0.85rem; }
+.menu-search-panel [role="option"] { display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem; border-radius: 0.65rem; text-decoration: none; overflow-wrap: anywhere; }
+.menu-search-panel [role="option"][aria-selected="true"], .menu-search-panel [role="option"]:hover { background: #34534a; }
+.menu-search-panel [role="option"] > span { min-width: 0; }
+.menu-search-panel small { display: block; color: #9db7ae; }
+.menu-search-panel .avatar { width: 2rem; height: 2rem; flex-shrink: 0; font-size: 0.75rem; }
+.menu-search-panel .menu-search-cover { width: 2rem; height: 2.7rem; object-fit: cover; flex-shrink: 0; border-radius: 0.3rem; font-size: 0.5rem; }
+.menu-search-panel button { margin: 0.4rem 0; font-size: 0.8rem; }
+@media (max-width: 760px) { .menu-search { flex: 1 1 100%; } .menu-search-panel, .menu-search-hint { width: 100%; } }
 html { scrollbar-gutter: stable; }
 .catalog-loading-overlay { position: fixed; inset: 0; width: 100vw; z-index: 1000; display: grid; place-items: center; background: #101b20d9; color: #eceff5; cursor: wait; touch-action: none; overscroll-behavior: contain; }
 .catalog-loading-overlay [role="status"] { padding: 1rem 1.5rem; border: 1px solid #405259; border-radius: 1rem; background: #1c272c; }
