@@ -46,8 +46,9 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
   if (state.status === 'error') return <ErrorState region="Informações do jogo" message="Não foi possível carregar o jogo." onRetry={retry} />;
   const game: Game | null = state.game;
   if (!game) return <EmptyState region="Informações do jogo" message="Jogo não encontrado." />;
-  return <section className="game-information" aria-labelledby="game-title">
+  return <>
     <CatalogNotice paths={[[ 'games', String(id) ], ['games', String(id), 'opinions'], ['games', String(id), 'reviews']]} onRetry={retry} />
+    <section className="game-information" aria-labelledby="game-title">
     <div className="game-facts" role="region" aria-label="Informações do jogo" aria-busy={refreshing}>
     {refreshing ? <LoadingState message="Carregando informações do jogo…" /> : <>
     <aside className="game-poster" aria-label="Capa do jogo">
@@ -71,7 +72,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     <div className="game-discussion">
     <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
     </div>
-  </section>;
+  </section></>;
 }
 
 export function GameDetailsPage(): ReactElement {
