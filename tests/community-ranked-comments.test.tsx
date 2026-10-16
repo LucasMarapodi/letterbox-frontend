@@ -5,7 +5,7 @@ import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireComment, wireReview, wireUser, withAuthentication, withFilterOptions } from './http-fixtures';
+import { wireComment, wireReview, withAuthentication, withFilterOptions } from './http-fixtures';
 import { deferred } from './fixtures';
 
 const first = {commentId:81,reviewId:55,gameId:12,parentCommentId:null,text:'Comentário antigo popular',createdAt:'2020-01-01T12:00:00Z',author:wireReview.author,likeCount:9,periodLikeCount:4,lastLikeAt:'2026-10-16T12:00:00Z'};
@@ -33,16 +33,16 @@ async function open(options:Options={}) {
   if(options.authenticated)await adapters.auth.login({email:'ranking@example.test',password:'test-only'});
   render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes adapters={adapters}/></MemoryRouter>);
   const interaction=userEvent.setup();
-  await interaction.click(screen.getByRole('button',{name:'Mais curtidos',exact:true}));
+  await interaction.click(screen.getByRole('button',{name:'Mais curtidos'}));
   const calls=()=>transport.mock.calls.filter(([url])=>url.includes('/comments/most-liked'));
   return {interaction,transport,calls};
 }
-const region=()=>screen.getByRole('region',{name:'Comentários mais curtidos',exact:true});
+const region=()=>screen.getByRole('region',{name:'Comentários mais curtidos'});
 
 test('ranking público usa 7d/1/20, mantém seções e distingue total e período sem estado pessoal',async()=>{
   const {transport,calls}=await open();
   expect(await screen.findByText(first.text)).toBeVisible();
-  for(const label of ['Recentes','Mais comentadas','Jogos em discussão','Feed de reviews'])expect(screen.getByRole('button',{name:label,exact:true})).toBeVisible();
+  for(const label of ['Recentes','Mais comentadas','Jogos em discussão','Feed de reviews'])expect(screen.getByRole('button',{name:label})).toBeVisible();
   const [url,request]=calls()[0];expect(Object.fromEntries(new URL(url).searchParams)).toEqual({period:'7d',page:'1',pageSize:'20'});
   expect(request.headers).not.toHaveProperty('Authorization');expect(request.method).toBe('GET');
   expect(within(region()).getByText('4 curtidas no período')).toBeVisible();expect(within(region()).getByText('9 curtidas no total')).toBeVisible();
@@ -57,13 +57,13 @@ test('ranking público usa 7d/1/20, mantém seções e distingue total e períod
 test('paginação vem da API e período/tamanho resetam página preservando tamanho',async()=>{
   const {interaction,calls}=await open({ranking:async q=>Response.json(envelope(q,[Number(q.get('page'))===1?first:second],Number(q.get('page'))===1))});
   await screen.findByText(first.text);
-  expect(screen.getByRole('button',{name:'Anterior',exact:true})).toBeDisabled();
-  await interaction.click(screen.getByRole('button',{name:'Próxima',exact:true}));await screen.findByText(second.text);
+  expect(screen.getByRole('button',{name:'Anterior'})).toBeDisabled();
+  await interaction.click(screen.getByRole('button',{name:'Próxima'}));await screen.findByText(second.text);
   expect(screen.queryByText(first.text)).not.toBeInTheDocument();expect(screen.getByText('Página 2')).toBeVisible();
-  expect(screen.getByRole('button',{name:'Próxima',exact:true})).toBeDisabled();
+  expect(screen.getByRole('button',{name:'Próxima'})).toBeDisabled();
   await interaction.selectOptions(screen.getByLabelText('Comentários por página'),'50');await screen.findByText(first.text);
   expect(screen.getByText('Exibindo 1 comentário · até 50 por página')).toBeVisible();
-  await interaction.click(screen.getByRole('button',{name:'Próxima',exact:true}));await screen.findByText(second.text);
+  await interaction.click(screen.getByRole('button',{name:'Próxima'}));await screen.findByText(second.text);
   await interaction.selectOptions(screen.getByLabelText('Período dos rankings'),'24h');await screen.findByText(first.text);
   await interaction.selectOptions(screen.getByLabelText('Período dos rankings'),'30d');await waitFor(()=>expect(calls()).toHaveLength(6));
   expect(calls().map(([url])=>Object.fromEntries(new URL(url).searchParams))).toEqual([
@@ -78,7 +78,7 @@ test('10 itens por página é opção real e página vazia não inventa total',a
   await screen.findByText('Nenhum comentário curtido neste período.');
   await interaction.selectOptions(screen.getByLabelText('Comentários por página'),'10');
   expect(await screen.findByText('Exibindo 0 comentários · até 10 por página')).toBeVisible();
-  expect(screen.getByRole('button',{name:'Próxima',exact:true})).toBeDisabled();
+  expect(screen.getByRole('button',{name:'Próxima'})).toBeDisabled();
 });
 
 test('loading oculta resultados anteriores e resposta atrasada não substitui período atual',async()=>{
