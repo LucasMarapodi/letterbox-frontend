@@ -3,7 +3,7 @@ import type { Game } from '../src/models';
 import { createMockGameService } from './doubles/gameService';
 
 function gameFixture(): Game {
-  return { id: 'game-1', title: 'Aventura de exemplo', summary: 'Um jogo fictício.', coverUrl: null, genres: ['Aventura'], platforms: ['PC'], releaseDate: null, averageRating: null };
+  return { id: 1, igdbId: 345447, title: 'Aventura de exemplo', summary: 'Um jogo fictício.', coverUrl: null, genres: ['Aventura'], platforms: ['PC'], releaseDate: null, averageRating: null };
 }
 
 test('leitura assíncrona retorna jogos tipados', async () => {
@@ -15,15 +15,15 @@ test('leitura assíncrona retorna jogos tipados', async () => {
 test('localiza por ID e representa jogo inexistente sem inventar dados', async () => {
   const game: Game = gameFixture();
   const service = createMockGameService({ games: [game] });
-  await expect(service.getById('game-1')).resolves.toEqual(game);
-  await expect(service.getById('inexistente')).resolves.toBeNull();
+  await expect(service.getById(1)).resolves.toEqual(game);
+  await expect(service.getById(99)).resolves.toBeNull();
 });
 
 test('permite simular rejeição nas duas leituras', async () => {
   const error: Error = new Error('Falha simulada de leitura.');
   const service = createMockGameService({ error });
   await expect(service.list()).rejects.toBe(error);
-  await expect(service.getById('game-1')).rejects.toBe(error);
+  await expect(service.getById(1)).rejects.toBe(error);
 });
 
 test('isola cada instância, os dados recebidos e os objetos retornados', async () => {
@@ -41,7 +41,7 @@ test('isola cada instância, os dados recebidos e os objetos retornados', async 
   returned.genres.push('Alteração no retorno');
   result.length = 0;
   await expect(first.list()).resolves.toMatchObject({ items: [gameFixture()] });
-  await expect(second.getById('game-1')).resolves.toEqual(gameFixture());
+  await expect(second.getById(1)).resolves.toEqual(gameFixture());
 });
 
 test('instâncias padrão possuem fixtures independentes e determinísticas', async () => {
@@ -61,7 +61,7 @@ test('permite conjunto vazio explícito', async () => {
 
 test('busca provisória filtra por trecho do nome sem diferenciar maiúsculas', async () => {
   const first: Game = gameFixture();
-  const second: Game = { ...gameFixture(), id: 'game-2', title: 'Corrida' };
+  const second: Game = { ...gameFixture(), id: 2, title: 'Corrida' };
   const service = createMockGameService({ games: [first, second] });
   await expect(service.list({ term: '  AVENTURA  ' })).resolves.toMatchObject({ items: [first] });
   await expect(service.list({ term: 'inexistente' })).resolves.toMatchObject({ items: [] });
@@ -70,9 +70,9 @@ test('busca provisória filtra por trecho do nome sem diferenciar maiúsculas', 
 });
 
 test('ordena por nome nos dois sentidos sem alterar a origem e mantém o filtro', async () => {
-  const zeta: Game = { ...gameFixture(), id: 'z', title: 'Zeta game' };
-  const alpha: Game = { ...gameFixture(), id: 'a', title: 'Alpha game' };
-  const other: Game = { ...gameFixture(), id: 'o', title: 'Outro' };
+  const zeta: Game = { ...gameFixture(), id: 2, title: 'Zeta game' };
+  const alpha: Game = { ...gameFixture(), id: 1, title: 'Alpha game' };
+  const other: Game = { ...gameFixture(), id: 3, title: 'Outro' };
   const seed: Game[] = [zeta, other, alpha];
   const service = createMockGameService({ games: seed });
   await expect(service.list({ term: 'game', sort: 'name-asc' })).resolves.toMatchObject({ items: [alpha, zeta] });

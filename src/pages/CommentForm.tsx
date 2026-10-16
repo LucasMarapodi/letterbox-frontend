@@ -5,7 +5,7 @@ import { RequireSession } from '../session/RequireSession';
 import { useServices } from '../services/ServiceProvider';
 import { CommunityError } from '../services/communityContracts';
 
-interface CommentFormProps { reviewId: string; authorId: string; onSaved(): void; }
+interface CommentFormProps { reviewId: string; authorId: number; onSaved(): void; }
 function CommentControl({ reviewId, onSaved }: CommentFormProps): ReactElement {
   const { community } = useServices();
   const { user } = useSession();
@@ -32,4 +32,3 @@ export function CommentForm(props: CommentFormProps): ReactElement | null {
   if (user?.id === props.authorId) return null;
   return <RequireSession><CommentControl key={`${version}-${user?.id}-${props.reviewId}`} {...props} /></RequireSession>;
 }
-

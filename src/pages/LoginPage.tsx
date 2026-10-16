@@ -35,7 +35,7 @@ export function LoginPage(): ReactElement {
       await signIn({ email, password });
       navigate('/', { replace: true });
     } catch (error: unknown) {
-      setFeedback({ status: 'error', message: error instanceof AuthError && error.code === 'invalid-credentials'
+      setFeedback({ status: 'error', message: error instanceof AuthError && error.code === 'storage-unavailable' ? 'O armazenamento está temporariamente indisponível. Tente novamente.' : error instanceof AuthError && error.code === 'invalid-credentials'
         ? 'E-mail ou senha inválidos.' : 'Não foi possível entrar. Tente novamente.' });
     } finally { sending.current = false; }
   }

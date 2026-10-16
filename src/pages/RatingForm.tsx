@@ -5,7 +5,7 @@ import { useServices } from '../services/ServiceProvider';
 import { Button } from '../components/Button';
 import { ErrorState, LoadingState, QueryRegion } from '../components/Feedback';
 
-interface RatingFormProps { gameId: string; onSaved?: () => void; }
+interface RatingFormProps { gameId: number; onSaved?: () => void; }
 function RatingControl({ gameId, onSaved }: RatingFormProps): ReactElement {
   const { community } = useServices();
   const { user } = useSession();

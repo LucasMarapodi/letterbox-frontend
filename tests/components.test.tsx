@@ -9,7 +9,7 @@ import { Avatar } from '../src/components/Avatar';
 import { LoadingState, EmptyState, ErrorState } from '../src/components/Feedback';
 import type { Game } from '../src/models';
 
-const game: Game = { id: 'game/42', title: 'Jogo de exemplo', summary: '', coverUrl: null, genres: [], platforms: [], releaseDate: null, averageRating: null };
+const game: Game = { id: 42, igdbId: 345447, title: 'Jogo de exemplo', summary: '', coverUrl: null, genres: [], platforms: [], releaseDate: null, averageRating: null };
 
 test('botão recebe foco e funciona por Enter e Espaço sem submeter por padrão', async () => {
   const user = userEvent.setup();
@@ -55,7 +55,7 @@ test('cartão possui link acessível e codifica o ID no destino', async () => {
   const user = userEvent.setup();
   render(<MemoryRouter><GameCard game={game} /></MemoryRouter>);
   const link = screen.getByRole('link', { name: game.title });
-  expect(link).toHaveAttribute('href', '/jogos/game%2F42');
+  expect(link).toHaveAttribute('href', '/jogos/42');
   await user.tab();
   expect(link).toHaveFocus();
 });

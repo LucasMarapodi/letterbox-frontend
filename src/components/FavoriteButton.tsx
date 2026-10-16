@@ -7,7 +7,7 @@ import { useSession } from '../session/SessionProvider';
 import { Button } from './Button';
 import { ErrorState, LoadingState } from './Feedback';
 
-export interface FavoriteButtonProps { kind: FavoriteKind; targetId: string; }
+export interface FavoriteButtonProps { kind: FavoriteKind; targetId: number | string; }
 type FavoriteState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; favorite: Favorite | null };
 function FavoriteControl({ kind, targetId }: FavoriteButtonProps): ReactElement {
   const { community } = useServices();

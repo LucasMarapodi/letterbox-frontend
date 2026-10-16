@@ -32,7 +32,7 @@ function Editor({ profile, onSaved }: { profile: User; onSaved(user: User): void
     }
     sending.current = true; setPending(true);
     try { const updated = await authService.editProfile(changes); setDisplayName(updated.displayName); setBio(updated.bio); setAvatarUrl(updated.avatarUrl ?? ''); onSaved(updated); setSuccess(true); }
-    catch (error: unknown) { setError(error instanceof AuthError && error.code === 'invalid-fields' ? 'Verifique os dados do perfil.' : 'Não foi possível atualizar o perfil. Tente novamente.'); }
+    catch (error: unknown) { setError(error instanceof AuthError && error.code === 'storage-unavailable' ? 'O armazenamento está temporariamente indisponível. Tente novamente.' : error instanceof AuthError && error.code === 'invalid-fields' ? 'Verifique os dados do perfil.' : 'Não foi possível atualizar o perfil. Tente novamente.'); }
     finally { sending.current = false; setPending(false); }
   }
   return <section className="review-card" aria-label="Editar meu perfil"><h2>Editar meu perfil</h2>

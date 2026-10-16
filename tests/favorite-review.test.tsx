@@ -8,13 +8,13 @@ import { createMockCommunityService } from './doubles/communityService';
 import type { Favorite, User } from '../src/models';
 import { deferred } from './fixtures';
 
-const ana: User = { id: 'user-1', displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
+const ana: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
 afterEach(() => vi.restoreAllMocks());
 test('favorito de review não duplica e mantém isolamento entre usuários', async () => {
   const service = createMockCommunityService();
   const first = await service.setFavorite('review', 'review-2', true, ana);
   expect(await service.setFavorite('review', 'review-2', true, ana)).toEqual(first);
-  expect(await service.getFavorite('review', 'review-2', { ...ana, id: 'user-2' })).toBeNull();
+  expect(await service.getFavorite('review', 'review-2', { ...ana, id: 2 })).toBeNull();
   await service.setFavorite('review', 'review-2', false, ana);
   expect(await service.getFavorite('review', 'review-2', ana)).toBeNull();
 });

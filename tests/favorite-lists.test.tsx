@@ -9,11 +9,11 @@ import type { User } from '../src/models';
 import type { FavoriteLists } from '../src/services/communityContracts';
 import { deferred } from './fixtures';
 
-const ana: User = { id: 'user-1', displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
+const ana: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
 afterEach(() => vi.restoreAllMocks());
 async function login(): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();
-  render(<MemoryRouter initialEntries={['/login']}><AppRoutes /><Link to="/perfil/user-2">Outro perfil</Link></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/login']}><AppRoutes /><Link to="/perfil/2">Outro perfil</Link></MemoryRouter>);
   await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'ana@example.com');
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
@@ -22,28 +22,28 @@ async function login(): Promise<ReturnType<typeof userEvent.setup>> {
 }
 test('consulta separa tipos, isola usuários, clona dados e reflete remoção', async () => {
   const service = createMockCommunityService();
-  await service.setFavorite('game', 'game-1', true, ana);
-  await service.setFavorite('game', 'game-1', true, ana);
+  await service.setFavorite('game', 1, true, ana);
+  await service.setFavorite('game', 1, true, ana);
   await service.setFavorite('review', 'review-2', true, ana);
   const lists = await service.getFavorites(ana);
-  expect(lists.games.map((game) => game.id)).toEqual(['game-1']);
+  expect(lists.games.map((game) => game.id)).toEqual([1]);
   expect(lists.reviews.map((review) => review.id)).toEqual(['review-2']);
   lists.games[0].title = 'Alterado';
   expect((await service.getFavorites(ana)).games[0].title).toBe('Ecos do Horizonte');
-  expect(await service.getFavorites({ ...ana, id: 'user-2' })).toEqual({ games: [], reviews: [] });
-  await service.setFavorite('game', 'game-1', false, ana);
+  expect(await service.getFavorites({ ...ana, id: 2 })).toEqual({ games: [], reviews: [] });
+  await service.setFavorite('game', 1, false, ana);
   await service.setFavorite('review', 'review-2', false, ana);
   expect(await service.getFavorites(ana)).toEqual({ games: [], reviews: [] });
   await expect(service.getFavorites(null)).rejects.toMatchObject({ code: 'session-required' });
 });
 test('Home e próprio perfil mostram tipos separados com destinos corretos', async () => {
   const service = createMockCommunityService();
-  await service.setFavorite('game', 'game-1', true, ana);
+  await service.setFavorite('game', 1, true, ana);
   await service.setFavorite('review', 'review-2', true, ana);
   vi.spyOn(community, 'getFavorites').mockImplementation(service.getFavorites);
   const interaction = await login();
   const games = await screen.findByRole('region', { name: 'Jogos favoritos' });
-  expect(within(games).getByRole('link', { name: 'Ecos do Horizonte' })).toHaveAttribute('href', '/jogos/game-1');
+  expect(within(games).getByRole('link', { name: 'Ecos do Horizonte' })).toHaveAttribute('href', '/jogos/1');
   const reviews = screen.getByRole('region', { name: 'Reviews favoritas' });
   expect(within(reviews).getByRole('link', { name: /Review de Leo/ })).toHaveAttribute('href', '/reviews/review-2');
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
@@ -52,11 +52,11 @@ test('Home e próprio perfil mostram tipos separados com destinos corretos', asy
 });
 test('consulta novamente após remoção e apresenta vazio', async () => {
   const service = createMockCommunityService();
-  await service.setFavorite('game', 'game-1', true, ana);
+  await service.setFavorite('game', 1, true, ana);
   vi.spyOn(community, 'getFavorites').mockImplementation(service.getFavorites);
   const interaction = await login();
   await screen.findByRole('region', { name: 'Jogos favoritos' });
-  await service.setFavorite('game', 'game-1', false, ana);
+  await service.setFavorite('game', 1, false, ana);
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
   expect(await screen.findByText('Nenhum jogo favorito.')).toBeVisible();
   expect(screen.getByText('Nenhuma review favorita.')).toBeVisible();

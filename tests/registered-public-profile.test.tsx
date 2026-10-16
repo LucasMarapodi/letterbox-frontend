@@ -12,7 +12,7 @@ test('cadastro disponibiliza perfil público antes de qualquer interação do au
   registered.displayName = 'Alterado';
   expect((await services.community.getProfile(registered.id))?.user.displayName).toBe('Nova pessoa');
   await expect(services.auth.register({ name: 'Duplicado', email: 'nova@example.com', password: 'outra' })).rejects.toMatchObject({ code: 'duplicate-email' });
-  expect(await services.community.getProfile('mock-user-2')).toBeNull();
+  expect(await services.community.getProfile(999)).toBeNull();
   expect(await createMockServices().community.getProfile(registered.id)).toBeNull();
 });
 

@@ -1,4 +1,4 @@
-import type { Game, Id, Review, User } from '../models';
+import type { Game, GameId, Review, User } from '../models';
 
 /** Fronteira provisória; ampliar operações apenas nas US correspondentes. */
 export type GameSort = 'release-desc' | 'name-asc' | 'name-desc';
@@ -12,8 +12,8 @@ export interface GameOpinions { averageRating: number | null; reviews: PublicRev
 
 export interface GameService {
   list(query?: GameQuery): Promise<GamePage>;
-  getById(id: Id): Promise<Game | null>;
-  getOpinions(id: Id): Promise<GameOpinions>;
+  getById(id: GameId): Promise<Game | null>;
+  getOpinions(id: GameId): Promise<GameOpinions>;
 }
 
 export interface Services {

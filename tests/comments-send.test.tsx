@@ -8,7 +8,7 @@ import { createMockCommunityService } from './doubles/communityService';
 import type { Comment, User } from '../src/models';
 import { deferred } from './fixtures';
 
-const author: User = { id: 'user-1', displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
+const author: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
 afterEach(() => vi.restoreAllMocks());
 test('comentário em review alheia aparece somente na review correta', async () => {
   const service = createMockCommunityService({ comments: [], sessionStore: { user: author } });

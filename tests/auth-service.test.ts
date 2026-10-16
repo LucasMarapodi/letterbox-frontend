@@ -3,7 +3,7 @@ import { createMockAuthService } from './doubles/authService';
 import type { MockAccount } from './doubles/authService';
 import type { User } from '../src/models';
 
-const user: User = { id: 'user-1', displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };
+const user: User = { id: 1, displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };
 const account: MockAccount = { email: 'ana@example.com', password: 'teste123', user };
 
 test('credenciais válidas retornam usuário público, sem senha', async () => {

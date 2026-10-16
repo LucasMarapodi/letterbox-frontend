@@ -8,7 +8,7 @@ import { RequireSession } from '../src/session/RequireSession';
 import type { AuthService } from '../src/services/authContracts';
 import type { User } from '../src/models';
 
-const user: User = { id: 'user-1', displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };
+const user: User = { id: 1, displayName: 'Ana', username: 'ana', avatarUrl: null, bio: '' };
 function service(): AuthService {
   return { login: vi.fn<AuthService['login']>().mockResolvedValue(user), register: vi.fn<AuthService['register']>().mockResolvedValue(user) };
 }

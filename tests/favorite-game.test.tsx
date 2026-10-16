@@ -7,22 +7,22 @@ import { community } from '../src/services/community';
 import { createMockCommunityService } from './doubles/communityService';
 import type { User } from '../src/models';
 
-const ana: User = { id: 'user-1', displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
+const ana: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
 afterEach(() => vi.restoreAllMocks());
 test('favorito de jogo é idempotente, removível e isolado por usuário', async () => {
   const service = createMockCommunityService();
-  const first = await service.setFavorite('game', 'game-1', true, ana);
-  expect(await service.setFavorite('game', 'game-1', true, ana)).toEqual(first);
-  expect(await service.getFavorite('game', 'game-1', ana)).toEqual(first);
-  expect(await service.getFavorite('game', 'game-1', { ...ana, id: 'user-2' })).toBeNull();
-  await service.setFavorite('game', 'game-1', false, ana);
-  expect(await service.getFavorite('game', 'game-1', ana)).toBeNull();
-  expect(await service.setFavorite('game', 'game-1', false, ana)).toBeNull();
+  const first = await service.setFavorite('game', 1, true, ana);
+  expect(await service.setFavorite('game', 1, true, ana)).toEqual(first);
+  expect(await service.getFavorite('game', 1, ana)).toEqual(first);
+  expect(await service.getFavorite('game', 1, { ...ana, id: 2 })).toBeNull();
+  await service.setFavorite('game', 1, false, ana);
+  expect(await service.getFavorite('game', 1, ana)).toBeNull();
+  expect(await service.setFavorite('game', 1, false, ana)).toBeNull();
 });
 test('favorito exige sessão e jogo existente', async () => {
   const service = createMockCommunityService();
-  await expect(service.setFavorite('game', 'game-1', true, null)).rejects.toMatchObject({ code: 'session-required' });
-  await expect(service.getFavorite('game', 'game-1', null)).rejects.toMatchObject({ code: 'session-required' });
+  await expect(service.setFavorite('game', 1, true, null)).rejects.toMatchObject({ code: 'session-required' });
+  await expect(service.getFavorite('game', 1, null)).rejects.toMatchObject({ code: 'session-required' });
   await expect(service.setFavorite('game', 'ausente', true, ana)).rejects.toMatchObject({ code: 'not-found' });
 });
 async function open(): Promise<ReturnType<typeof userEvent.setup>> {
@@ -55,7 +55,7 @@ test('falha não confirma favorito nem altera estado do botão', async () => {
   expect(screen.getByRole('button', { name: 'Favoritar jogo' })).toHaveAttribute('aria-pressed', 'false');
 });
 test('visitante recebe caminho de login para favoritar jogo', async () => {
-  render(<MemoryRouter initialEntries={['/jogos/game-1']}><AppRoutes /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/jogos/1']}><AppRoutes /></MemoryRouter>);
   await screen.findByRole('heading', { name: 'Ecos do Horizonte' });
   expect(screen.queryByRole('button', { name: 'Favoritar jogo' })).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Entrar para favoritar' })).toHaveAttribute('href', '/login');

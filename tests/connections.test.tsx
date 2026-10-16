@@ -10,7 +10,7 @@ import type { User } from '../src/models';
 import { encodeRouteId } from '../src/routing/encodeRouteId';
 
 const [ana, leo] = userFixtures;
-const bia: User = { id: 'bia%2F42', displayName: 'Bia', username: 'bia', avatarUrl: '/bia.png', bio: '' };
+const bia: User = { id: 3, displayName: 'Bia', username: 'bia', avatarUrl: '/bia.png', bio: '' };
 afterEach(() => vi.restoreAllMocks());
 test('três usuários mantêm direção das relações e remoção atualiza a consulta', async () => {
   const service = createMockCommunityService({ users: [ana, leo, bia] });
@@ -25,17 +25,17 @@ test('três usuários mantêm direção das relações e remoção atualiza a co
 });
 test('visitante vê listas públicas com nome foto e links de IDs opacos', async () => {
   vi.spyOn(community, 'getConnections').mockResolvedValue({ followers: [bia], following: [leo] });
-  render(<MemoryRouter initialEntries={['/perfil/user-1']}><AppRoutes /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/perfil/1']}><AppRoutes /></MemoryRouter>);
   const followers = await screen.findByRole('region', { name: 'Seguidores' });
   expect(within(followers).getByRole('link', { name: 'Bia' })).toHaveAttribute('href', `/perfil/${encodeRouteId(bia.id)}`);
   expect(within(followers).getByRole('img', { name: 'Bia' })).toHaveAttribute('src', '/bia.png');
   const following = screen.getByRole('region', { name: 'Seguindo' });
-  expect(within(following).getByRole('link', { name: 'Leo' })).toHaveAttribute('href', '/perfil/user-2');
+  expect(within(following).getByRole('link', { name: 'Leo' })).toHaveAttribute('href', '/perfil/2');
 });
 test('listas vazias e falha de consulta são tratadas com recuperação', async () => {
   vi.spyOn(community, 'getConnections').mockRejectedValueOnce(new Error('Falha')).mockResolvedValue({ followers: [], following: [] });
   const interaction = userEvent.setup();
-  render(<MemoryRouter initialEntries={['/perfil/user-1']}><AppRoutes /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/perfil/1']}><AppRoutes /></MemoryRouter>);
   expect(await screen.findByText('Não foi possível carregar as conexões.')).toBeVisible();
   await interaction.click(screen.getByRole('button', { name: 'Tentar novamente' }));
   expect(await screen.findByText('Nenhum seguidor.')).toBeVisible();
@@ -47,7 +47,7 @@ test('seguir e deixar de seguir atualizam listas no perfil atual', async () => {
   vi.spyOn(community, 'isFollowing').mockImplementation(service.isFollowing);
   vi.spyOn(community, 'setFollowing').mockImplementation(service.setFollowing);
   const interaction = userEvent.setup();
-  render(<MemoryRouter initialEntries={['/login']}><AppRoutes /><Link to="/perfil/user-2">Perfil de Leo</Link></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/login']}><AppRoutes /><Link to="/perfil/2">Perfil de Leo</Link></MemoryRouter>);
   await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'ana@example.com');
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));

@@ -1,14 +1,14 @@
 import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { Id } from '../models';
+import type { GameId } from '../models';
 import type { GameOpinions, PublicReview } from '../services/contracts';
 import { useServices } from '../services/ServiceProvider';
 import { Avatar } from '../components/Avatar';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 
-interface GameOpinionsSectionProps { gameId: Id; reviewsVersion?: number; }
+interface GameOpinionsSectionProps { gameId: GameId; reviewsVersion?: number; }
 type OpinionsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; opinions: GameOpinions };
 
 export function GameOpinionsSection({ gameId, reviewsVersion = 0 }: GameOpinionsSectionProps): ReactElement {
@@ -65,4 +65,3 @@ export function GameOpinionsSection({ gameId, reviewsVersion = 0 }: GameOpinions
     </>}
   </section>;
 }
-

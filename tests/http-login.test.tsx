@@ -51,11 +51,11 @@ test('UI aguarda me e não persiste sessão após remontagem', async () => {
   expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument();
 });
 test('login concorrente tardio não substitui conta nova', async () => {
-  const pending = deferred<Response>(); const newer = { ...wireUser, id: 'user-b', displayName: 'Bia' };
+  const pending = deferred<Response>(); const newer = { ...wireUser, id: 2, displayName: 'Bia' };
   const transport = vi.fn<FetchTransport>().mockReturnValueOnce(pending.promise).mockResolvedValueOnce(Response.json({ ...login, user: newer, token: 'new-test-only' })).mockResolvedValueOnce(Response.json(newer));
   const session = createHttpSessionStore(); const auth = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session }).auth;
   const old = auth.login(credentials).catch((error: unknown) => error);
   expect(await auth.login({ ...credentials, email: 'b@example.com' })).toEqual(newer);
   pending.resolve(Response.json({ ...login, expiresAt: wireReview.createdAt }));
-  expect(await old).toMatchObject({ kind: 'cancelled' }); expect(session.current()?.user.id).toBe('user-b');
+  expect(await old).toMatchObject({ kind: 'cancelled' }); expect(session.current()?.user.id).toBe(2);
 });

@@ -15,7 +15,7 @@ test.beforeAll(async () => {
     const page = Number(query.get('page') ?? 1);
     const pageSize = Number(query.get('pageSize') ?? 20);
     const count = page === 3 ? Math.min(13, pageSize) : pageSize;
-    const body: GamePageResponse = { items: Array.from({ length: count }, (_, index) => ({ ...wireGame, id: `igdb-${index}`, title: `Jogo ${index + 1}` })), page, pageSize, hasNextPage: page < 3 };
+    const body: GamePageResponse = { items: Array.from({ length: count }, (_, index) => ({ ...wireGame, id: index + 1, title: `Jogo ${index + 1}` })), page, pageSize, hasNextPage: page < 3 };
     response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5175');
     response.setHeader('Content-Type', 'application/json');
     response.end(JSON.stringify(body));

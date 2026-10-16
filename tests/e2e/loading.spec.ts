@@ -62,7 +62,7 @@ test('catálogo comunica pendência, vazio, erro e retry sem manter vazio antigo
   await catalog.getByRole('button', { name: 'Tentar novamente' }).click();
   await expect(catalog).toHaveAttribute('aria-busy', 'true');
   await expect.poll(() => pending.size).toBeGreaterThan(0);
-  release(200, { ...empty, items: [{ id: 'igdb-1', title: 'Jogo de teste', summary: 'Contrato sintético.', coverUrl: null, genres: [], platforms: ['PC'], releaseDate: null, averageRating: null }] } satisfies GamePageResponse);
+  release(200, { ...empty, items: [{ id: 1, igdbId: 1001, title: 'Jogo de teste', summary: 'Contrato sintético.', coverUrl: null, genres: [], platforms: ['PC'], releaseDate: null, averageRating: null }] } satisfies GamePageResponse);
   await expect(catalog.getByRole('link', { name: 'Jogo de teste', exact: true })).toBeVisible();
   await expect(catalog).toHaveAttribute('aria-busy', 'false');
 });

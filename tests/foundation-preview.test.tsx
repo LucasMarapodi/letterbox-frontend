@@ -6,7 +6,7 @@ import { FoundationPreview } from './doubles/FoundationPreview';
 import type { Game } from '../src/models';
 import type { GameService } from '../src/services/contracts';
 
-const game: Game = { id: 'game-1', title: 'Jogo fictício', summary: '', coverUrl: null, genres: [], platforms: [], releaseDate: null, averageRating: null };
+const game: Game = { id: 1, igdbId: 345447, title: 'Jogo fictício', summary: '', coverUrl: null, genres: [], platforms: [], releaseDate: null, averageRating: null };
 
 function renderPreview(gameService: Pick<GameService, 'getById'>): void {
   render(<MemoryRouter><FoundationPreview gameService={gameService} /></MemoryRouter>);
@@ -16,7 +16,7 @@ test('a prévia compõe cartão, avatar, campo e botão sem publicar conteúdo',
   const user = userEvent.setup();
   const gameService: Pick<GameService, 'getById'> = { async getById() { return game; } };
   renderPreview(gameService);
-  expect(await screen.findByRole('link', { name: game.title })).toHaveAttribute('href', '/jogos/game-1');
+  expect(await screen.findByRole('link', { name: game.title })).toHaveAttribute('href', '/jogos/1');
   expect(screen.getByRole('img', { name: 'Visitante' })).toBeVisible();
   const field = screen.getByRole('textbox', { name: 'Texto de exemplo' });
   await user.type(field, 'Teste local');
@@ -53,6 +53,6 @@ test('a rejeição mostra erro e a nova tentativa usa o mesmo contrato', async (
   await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));
   expect(await screen.findByRole('link', { name: game.title })).toBeVisible();
   expect(getById).toHaveBeenCalledTimes(2);
-  expect(getById).toHaveBeenNthCalledWith(1, 'game-1');
-  expect(getById).toHaveBeenNthCalledWith(2, 'game-1');
+  expect(getById).toHaveBeenNthCalledWith(1, 1);
+  expect(getById).toHaveBeenNthCalledWith(2, 1);
 });

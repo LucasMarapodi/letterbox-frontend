@@ -6,7 +6,7 @@ import type { AuthService } from '../src/services/authContracts';
 import type { User } from '../src/models';
 import { deferred } from './fixtures';
 
-const ana: User = { id: 'user-1', displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
+const ana: User = { id: 1, displayName: 'Ana', username: 'ana', bio: '', avatarUrl: null };
 function SessionExample(): React.ReactElement {
   const { user, signIn, signOut } = useSession();
   return <><p>{user ? user.displayName : 'Visitante'}</p><button onClick={() => { void signIn({ email: 'ana@example.com', password: 'x' }).catch(() => undefined); }}>Entrar</button><button onClick={signOut}>Sair</button></>;

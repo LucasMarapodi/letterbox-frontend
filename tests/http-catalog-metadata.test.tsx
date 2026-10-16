@@ -30,7 +30,7 @@ test.each(headerCases)('headers sem stale confirmado não inventam aviso: %j', a
 });
 test('detalhe propaga metadata sem contaminar Game e sem chamada para headers', async () => {
   const transport = vi.fn<FetchTransport>().mockImplementation(async (url) => Response.json(url.endsWith('/opinions') ? { averageRating: null, reviews: [] } : wireGame, { headers }));
-  mount(transport, '/jogos/game%252F42');
+  mount(transport, '/jogos/12');
   await screen.findByRole('heading', { name: wireGame.title });
   expect(await screen.findByText(/Dados do catálogo desatualizados/)).toBeVisible();
   expect(transport).toHaveBeenCalledTimes(2);
@@ -47,7 +47,7 @@ test('headers tardios de busca antiga não mudam freshness da página nova', asy
 test('consultar novamente detalhe atualiza também opiniões e remove aviso anterior', async () => {
   let fresh = false;
   const transport = vi.fn<FetchTransport>().mockImplementation(async (url) => Response.json(url.endsWith('/opinions') ? { averageRating: null, reviews: [] } : wireGame, { headers: { ...headers, 'X-Catalog-Stale': fresh ? 'false' : 'true' } }));
-  mount(transport, '/jogos/game%252F42');
+  mount(transport, '/jogos/12');
   await screen.findByText(/Dados do catálogo desatualizados/);
   fresh = true;
   await userEvent.setup().click(screen.getByRole('button', { name: 'Consultar novamente' }));

@@ -13,7 +13,7 @@ test('comentários públicos e POST com apenas text/Bearer usam DTO validado',as
   const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json([wireComment])).mockResolvedValueOnce(Response.json(wireComment,{status:201}));
   const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
   expect(await service.getComments(wireReview.id)).toEqual([wireComment]); expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
-  expect(await service.comment(wireReview.id,wireComment.text,{...wireUser,id:'forged'})).toEqual(wireComment);
+  expect(await service.comment(wireReview.id,wireComment.text,{...wireUser,id: 999})).toEqual(wireComment);
   expect(transport.mock.calls[1][0].endsWith('/reviews/r%2F1/comments')).toBe(true); expect(transport.mock.calls[1][1]).toMatchObject({method:'POST',body:'{"text":"Comentário"}',headers:{Authorization:'Bearer test-only'}});
 });
 test('visitante/logout não autorizam User forjado; 401 limpa sessão e impede nova escrita',async()=>{
@@ -42,7 +42,7 @@ async function open(status?:number,visitor=false):Promise<{interaction:ReturnTyp
       }
       return Response.json(sent?[wireComment]:[]);
     }
-    return Response.json({...wireReview,userId:'other',author:{...wireReview.author,id:'other',displayName:'Outro'}});
+    return Response.json({...wireReview,userId: 2,author:{...wireReview.author,id: 2,displayName:'Outro'}});
   }));
   const interaction=userEvent.setup();render(<MemoryRouter initialEntries={[visitor?'/reviews/r%2F1':'/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
   if(!visitor){await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await interaction.click(await screen.findByRole('link',{name:'Review de exemplo'}));}

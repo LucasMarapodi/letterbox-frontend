@@ -8,7 +8,7 @@ import { encodeRouteId } from '../routing/encodeRouteId';
 import { ReviewTextForm } from '../components/ReviewTextForm';
 import { ErrorState, LoadingState, QueryRegion } from '../components/Feedback';
 
-function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }): ReactElement {
+function PublishControl({ gameId, onSaved }: { gameId: number; onSaved(): void }): ReactElement {
   const { community } = useServices();
   const { user } = useSession();
   const [review, setReview] = useState<Review | null>(null);
@@ -42,7 +42,7 @@ function PublishControl({ gameId, onSaved }: { gameId: string; onSaved(): void }
     {review ? <Link to={`/reviews/${encodeRouteId(review.id)}`}>Editar minha review</Link> : <ReviewTextForm submitLabel="Publicar review" pendingLabel="Publicando…" failureMessage="Não foi possível publicar a review. Tente novamente." onSubmit={submit} />}
   </section></QueryRegion>;
 }
-export function PublishReview(props: { gameId: string; onSaved(): void }): ReactElement | null {
+export function PublishReview(props: { gameId: number; onSaved(): void }): ReactElement | null {
   const { user, version } = useSession();
   const { privateFeatures } = useServices();
   if ((privateFeatures?.publishReview ?? privateFeatures?.opinions) === false) return null;

@@ -10,11 +10,11 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = options.userStore?.users ?? structuredClone(options.users ?? userFixtures);
   const comments: Comment[] = structuredClone(options.comments ?? [
-    { id: 'comment-1', reviewId: 'review-1', userId: 'user-2', text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
+    { id: 'comment-1', reviewId: 'review-1', userId: 2, text: 'Também gostei de explorar cada caminho.', createdAt: '2026-01-03T12:00:00Z' },
   ]);
   let sequence = 1;
   const favorites: Favorite[] = [];
-  const follows: { followerId: string; followedId: string }[] = [];
+  const follows: { followerId: number; followedId: number }[] = [];
   function reviewDetails(review: Review): ReviewDetails {
     const author = users.find((item) => item.id === review.userId);
     const game = gameFixtures.find((item) => item.id === review.gameId);
@@ -28,7 +28,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       return structuredClone(gameFixtures.map((game) => {
         const activity = eligible.filter((comment) => gameByReview.get(comment.reviewId) === game.id).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
         return { game, commentCount: activity.length, lastCommentAt: activity[0]?.createdAt ?? '' };
-      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || a.game.id.localeCompare(b.game.id)));
+      }).filter((item) => item.commentCount > 0).sort((a, b) => b.commentCount - a.commentCount || Date.parse(b.lastCommentAt) - Date.parse(a.lastCommentAt) || (a.game.id - b.game.id)));
     },
     async getMostCommented(period) {
       const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));

@@ -13,10 +13,10 @@ test('publicação envia só text, usa token e distingue wrapper null de recurso
   const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json({review:null})).mockResolvedValueOnce(Response.json(wireReview,{status:201})).mockResolvedValueOnce(Response.json([wireReview])).mockResolvedValueOnce(Response.json({code:'not_found',message:'Seguro'},{status:404}));
   const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
   expect(await service.findOwnReview(wireGame.id,wireUser)).toBeNull();
-  expect(await service.publish(wireGame.id,'Review',{...wireUser,id:'forged'})).toEqual(wireReview);
+  expect(await service.publish(wireGame.id,'Review',{...wireUser,id: 999})).toEqual(wireReview);
   expect(transport.mock.calls[1][1].body).toBe('{"text":"Review"}'); expect(transport.mock.calls[1][1].headers).toHaveProperty('Authorization','Bearer test-only');
   expect(await service.getGameReviews(wireGame.id)).toEqual([wireReview]); expect(transport.mock.calls[2][1].headers).not.toHaveProperty('Authorization');
-  await expect(service.findOwnReview('missing',wireUser)).rejects.toMatchObject({code:'not-found'});
+  await expect(service.findOwnReview(99,wireUser)).rejects.toMatchObject({code:'not-found'});
 });
 async function open(transport:FetchTransport):Promise<ReturnType<typeof userEvent.setup>>{
   const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);

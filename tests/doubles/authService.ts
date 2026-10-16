@@ -15,9 +15,9 @@ export function createMockAuthService(options: MockAuthOptions = {}): AuthServic
       if (options.error) throw options.error;
       const email = input.email.trim().toLowerCase();
       if (accounts.some((account) => account.email.trim().toLowerCase() === email)) throw new AuthError('duplicate-email');
-      while (accounts.some((account) => account.user.id === `mock-user-${sequence}`) || options.userStore?.users.some((user) => user.id === `mock-user-${sequence}`)) sequence++;
-      const id = `mock-user-${sequence++}`;
-      const user: User = { id, username: id, displayName: input.name.trim(), avatarUrl: null, bio: '' };
+      while (accounts.some((account) => account.user.id === sequence) || options.userStore?.users.some((user) => user.id === sequence)) sequence++;
+      const id = sequence++;
+      const user: User = { id, username: `user-${id}`, displayName: input.name.trim(), avatarUrl: null, bio: '' };
       accounts.push({ email, password: input.password, user });
       options.userStore?.users.push(structuredClone(user));
       return structuredClone(user);

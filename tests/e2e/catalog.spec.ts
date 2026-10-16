@@ -21,7 +21,7 @@ test.beforeAll(async () => {
     const number = Number(url.searchParams.get('page') ?? 1);
     response.setHeader('X-Catalog-Stale', number === 2 && !fresh ? 'true' : 'false');
     response.setHeader('X-Catalog-Fetched-At', '2026-10-14T10:00:00Z');
-    const page: GamePageResponse = { items: [{ id: `igdb-${number}`, title: `Jogo de teste ${number}`, summary: 'Contrato sintético para verificar a interface.', coverUrl: null, genres: [], platforms: ['PC'], releaseDate: '2026-10-01', averageRating: null }], page: number, pageSize: 20, hasNextPage: number === 1 };
+    const page: GamePageResponse = { items: [{ id: number, igdbId: number + 1000, title: `Jogo de teste ${number}`, summary: 'Contrato sintético para verificar a interface.', coverUrl: null, genres: [], platforms: ['PC'], releaseDate: '2026-10-01', averageRating: null }], page: number, pageSize: 20, hasNextPage: number === 1 };
     response.end(JSON.stringify(page));
   });
   server.listen(5091, '127.0.0.1');

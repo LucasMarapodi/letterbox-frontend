@@ -46,7 +46,7 @@ const cases: QueryCase[] = [
   { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/rating/me`, region: 'Nota pessoal', authenticated: true },
   { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/reviews/me`, region: 'Consulta da sua review', authenticated: true },
   { route: gameRoute, endpoint: `/favorites/game/${encodeURIComponent(wireGame.id)}`, region: 'Favorito pessoal', authenticated: true },
-  { route: '/perfil/outro', endpoint: '/users/outro/follow/me', region: 'Relação pessoal', authenticated: true },
+  { route: '/perfil/2', endpoint: '/users/2/follow/me', region: 'Relação pessoal', authenticated: true },
 ];
 test.each(cases)('região $region anuncia pendência e não fica busy após resposta', async ({ route, endpoint, region, authenticated, action }) => {
   const pending = deferred<Response>();
@@ -63,10 +63,10 @@ test.each(cases)('região $region anuncia pendência e não fica busy após resp
 });
 test('nova consulta de opiniões esconde resultado anterior antes de receber resposta', async () => {
   const pending = deferred<Response>();
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: async (url) => url.includes('/primeiro/') ? Response.json({ averageRating: 4, reviews: [] }) : pending.promise });
-  const view = render(<MemoryRouter><ServiceProvider value={adapters}><GameOpinionsSection gameId="primeiro" /></ServiceProvider></MemoryRouter>);
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: async (url) => url.includes('/1/') ? Response.json({ averageRating: 4, reviews: [] }) : pending.promise });
+  const view = render(<MemoryRouter><ServiceProvider value={adapters}><GameOpinionsSection gameId={1} /></ServiceProvider></MemoryRouter>);
   await screen.findByText('Nota média: 4 de 5');
-  view.rerender(<MemoryRouter><ServiceProvider value={adapters}><GameOpinionsSection gameId="segundo" /></ServiceProvider></MemoryRouter>);
+  view.rerender(<MemoryRouter><ServiceProvider value={adapters}><GameOpinionsSection gameId={2} /></ServiceProvider></MemoryRouter>);
   expect(screen.queryByText('Nota média: 4 de 5')).not.toBeInTheDocument();
   expect(screen.getByText('Carregando avaliações…')).toBeVisible();
   await act(async () => { pending.resolve(Response.json({ averageRating: null, reviews: [] })); await pending.promise; });

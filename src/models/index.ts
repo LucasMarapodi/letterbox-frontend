@@ -1,10 +1,17 @@
 /** Identificador opaco retornado pela API. */
 export type Id = string;
+/** PK local de usuário/jogo gerada pelo PostgreSQL (int positivo). */
+export type LocalId = number;
+export type UserId = LocalId;
+export type GameId = LocalId;
+export function isLocalId(value: unknown): value is LocalId {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 2_147_483_647;
+}
 /** Data/data-hora ISO validada na fronteira HTTP. */
 export type DateTime = string;
 
 export interface User {
-  id: Id;
+  id: UserId;
   username: string;
   displayName: string;
   bio: string;
@@ -12,7 +19,9 @@ export interface User {
 }
 
 export interface Game {
-  id: Id;
+  id: GameId;
+  /** Identificador externo; nunca usado como PK local ou rota de jogo. */
+  igdbId: number;
   title: string;
   summary: string;
   coverUrl: string | null;
@@ -24,16 +33,16 @@ export interface Game {
 
 export interface Rating {
   id: Id;
-  userId: Id;
-  gameId: Id;
+  userId: UserId;
+  gameId: GameId;
   /** Faixa do produto: 0–5. Incrementos e validação pertencem às US futuras. */
   value: number;
 }
 
 export interface Review {
   id: Id;
-  userId: Id;
-  gameId: Id;
+  userId: UserId;
+  gameId: GameId;
   text: string;
   createdAt: DateTime;
   updatedAt: DateTime | null;
@@ -41,7 +50,7 @@ export interface Review {
 
 export interface Comment {
   id: Id;
-  userId: Id;
+  userId: UserId;
   reviewId: Id;
   text: string;
   createdAt: DateTime;
@@ -49,15 +58,15 @@ export interface Comment {
 
 export interface Favorite {
   id: Id;
-  userId: Id;
+  userId: UserId;
   targetType: 'game' | 'review';
-  targetId: Id;
+  targetId: GameId | Id;
 }
 
 interface NotificationBase {
   id: Id;
-  userId: Id;
-  actorId: Id;
+  userId: UserId;
+  actorId: UserId;
   reviewId: Id;
   createdAt: DateTime;
   read: boolean;

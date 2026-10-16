@@ -12,23 +12,23 @@ afterEach(() => vi.restoreAllMocks());
 const ana = userFixtures[0];
 test('seguir e deixar de seguir são direcionais e duplicidade é rejeitada', async () => {
   const service = createMockCommunityService();
-  expect(await service.isFollowing('user-2', ana)).toBe(false);
-  await service.setFollowing('user-2', true, ana);
-  expect(await service.isFollowing('user-2', ana)).toBe(true);
-  expect(await service.isFollowing('user-1', userFixtures[1])).toBe(false);
-  await expect(service.setFollowing('user-2', true, ana)).rejects.toMatchObject({ code: 'duplicate-follow' });
-  await service.setFollowing('user-2', false, ana);
-  expect(await service.isFollowing('user-2', ana)).toBe(false);
+  expect(await service.isFollowing(2, ana)).toBe(false);
+  await service.setFollowing(2, true, ana);
+  expect(await service.isFollowing(2, ana)).toBe(true);
+  expect(await service.isFollowing(1, userFixtures[1])).toBe(false);
+  await expect(service.setFollowing(2, true, ana)).rejects.toMatchObject({ code: 'duplicate-follow' });
+  await service.setFollowing(2, false, ana);
+  expect(await service.isFollowing(2, ana)).toBe(false);
 });
 test('serviço bloqueia visitante própria conta e destino inexistente', async () => {
   const service = createMockCommunityService();
-  await expect(service.setFollowing('user-2', true, null)).rejects.toMatchObject({ code: 'session-required' });
+  await expect(service.setFollowing(2, true, null)).rejects.toMatchObject({ code: 'session-required' });
   await expect(service.setFollowing(ana.id, true, ana)).rejects.toMatchObject({ code: 'self-follow' });
-  await expect(service.setFollowing('ausente', true, ana)).rejects.toMatchObject({ code: 'not-found' });
+  await expect(service.setFollowing(999, true, ana)).rejects.toMatchObject({ code: 'not-found' });
 });
 async function open(): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();
-  render(<MemoryRouter initialEntries={['/login']}><AppRoutes /><Link to="/perfil/user-2">Perfil de Leo</Link></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/login']}><AppRoutes /><Link to="/perfil/2">Perfil de Leo</Link></MemoryRouter>);
   await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'ana@example.com');
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
@@ -50,7 +50,7 @@ test('perfil consulta estado alterna relação e próprio perfil não permite se
 });
 test('visitante tem acesso público mas não altera relações', async () => {
   const set = vi.spyOn(community, 'setFollowing');
-  render(<MemoryRouter initialEntries={['/perfil/user-2']}><AppRoutes /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/perfil/2']}><AppRoutes /></MemoryRouter>);
   await screen.findByRole('heading', { name: 'Leo' });
   expect(screen.getByRole('link', { name: 'Entrar para seguir' })).toHaveAttribute('href', '/login');
   expect(set).not.toHaveBeenCalled();

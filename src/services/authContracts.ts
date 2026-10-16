@@ -12,7 +12,7 @@ export interface AuthService {
   login(credentials: LoginCredentials): Promise<User>;
   register(input: RegistrationInput): Promise<User>;
 }
-export type AuthErrorCode = 'invalid-credentials' | 'duplicate-email' | 'invalid-fields';
+export type AuthErrorCode = 'invalid-credentials' | 'duplicate-email' | 'invalid-fields' | 'storage-unavailable';
 export class AuthError extends Error {
   constructor(public readonly code: AuthErrorCode) { super(code); this.name = 'AuthError'; }
 }
