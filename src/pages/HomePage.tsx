@@ -7,62 +7,83 @@ import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { CatalogNotice } from '../components/CatalogNotice';
+import { CatalogLoadingOverlay } from '../components/CatalogLoadingOverlay';
 import { HttpFailure } from '../services/http/client';
 import type { GamePage, GameQuery, GameSort } from '../services/contracts';
 
-type CatalogState = { status: 'loading' } | { status: 'error'; integration: boolean } | { status: 'ready'; data: GamePage };
+type CatalogState = { status: 'loading'; data: GamePage | null; blocking: boolean; focus?: HTMLElement | null }
+  | { status: 'error'; data: GamePage | null; integration: boolean; retryBlocking: boolean }
+  | { status: 'ready'; data: GamePage };
 
 export function HomePage({ authenticated = false, feed }: { authenticated?: boolean; feed?: ReactNode }): ReactElement {
   const { games } = useServices();
-  const [state, setState] = useState<CatalogState>({ status: 'loading' });
+  const [state, setState] = useState<CatalogState>({ status: 'loading', data: null, blocking: false });
+  const blocking = useRef(false);
   const [attempt, setAttempt] = useState<number>(0);
   const [term, setTerm] = useState<string>('');
   const explicitSort = useRef(false);
   const [query, setQuery] = useState<GameQuery>({ term: '', sort: 'release-desc', page: 1, pageSize: 20 });
   useEffect(() => {
     let active: boolean = true;
-    setState({ status: 'loading' });
     games.list(query).then(
-      (data) => { if (active) setState({ status: 'ready', data }); },
-      (error: unknown) => { if (active) setState({ status: 'error', integration: error instanceof HttpFailure && [502, 503, 504].includes(error.status ?? 0) }); },
+      (data) => { if (active) { blocking.current = false; setState({ status: 'ready', data }); } },
+      (error: unknown) => { if (active) {
+        blocking.current = false;
+        setState(previous => ({ status: 'error', data: previous.data, retryBlocking: previous.status === 'loading' && previous.blocking, integration: error instanceof HttpFailure && [502, 503, 504].includes(error.status ?? 0) }));
+      } },
     );
     return () => { active = false; };
-  }, [attempt, query]);
+  }, [games, attempt, query]);
+
+  function startLoading(block = false): boolean {
+    if (blocking.current) return false;
+    blocking.current = block;
+    const focus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setState(previous => ({ status: 'loading', data: block ? previous.data : null, blocking: block, focus }));
+    return true;
+  }
 
   function search(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    setState({ status: 'loading' });
-    setQuery((previous) => ({ ...previous, term, page: 1, sort: explicitSort.current ? previous.sort : term.trim() ? 'name-asc' : 'release-desc' }));
+    const nextTerm = term.trim();
+    const sort = explicitSort.current ? query.sort : nextTerm ? 'name-asc' : 'release-desc';
+    if (nextTerm === query.term?.trim() && sort === query.sort && query.page === 1) return;
+    if (!startLoading(true)) return;
+    setQuery(previous => ({ ...previous, term: nextTerm, page: 1, sort }));
   }
 
   function clearSearch(): void {
+    if (blocking.current) return;
     if (!term.trim() && !query.term?.trim()) return;
     setTerm('');
     if (!query.term?.trim()) return;
-    setState({ status: 'loading' });
+    if (!startLoading(true)) return;
     setQuery((previous) => ({ ...previous, term: '', sort: explicitSort.current ? previous.sort : 'release-desc', page: 1 }));
   }
 
   function changeSort(value: string): void {
     if (value !== 'release-desc' && value !== 'name-asc' && value !== 'name-desc') return;
     const sort: GameSort = value;
+    if (blocking.current || sort === query.sort) return;
     explicitSort.current = true;
-    setState({ status: 'loading' });
+    startLoading();
     setQuery((previous) => ({ ...previous, sort, page: 1 }));
   }
 
   function retry(): void {
-    setState({ status: 'loading' });
+    if (!startLoading(state.status === 'error' && state.retryBlocking)) return;
     setAttempt((previous) => previous + 1);
   }
   function changePageSize(value: string): void {
     if (value !== '10' && value !== '20' && value !== '50') return;
     const pageSize = Number(value);
     if (pageSize === query.pageSize) return;
-    setState({ status: 'loading' });
+    if (!startLoading(true)) return;
     setQuery((previous) => ({ ...previous, pageSize, page: 1 }));
   }
+  const data = state.data;
   return <main className="dashboard">
+    {state.status === 'loading' && state.blocking && <CatalogLoadingOverlay restoreFocus={state.focus ?? null} />}
     {authenticated ? <section className="dashboard-welcome" aria-labelledby="dashboard-title">
       <span className="eyebrow">SEU PRÓXIMO JOGO COMEÇA AQUI</span>
       <h1 id="dashboard-title">Game Reviews</h1>
@@ -98,18 +119,21 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
     </div>
     <section aria-labelledby="catalog-title" aria-busy={state.status === 'loading'}>
       <h2 id="catalog-title">Jogos</h2>
-      {state.status === 'loading' && <LoadingState message="Carregando jogos…" />}
+      {state.status === 'loading' && !state.blocking && <LoadingState message="Carregando jogos…" />}
       {state.status === 'error' && <ErrorState message={state.integration ? 'O catálogo está temporariamente indisponível. Tente novamente.' : 'Não foi possível carregar os jogos.'} onRetry={retry} />}
       {state.status === 'ready' && <CatalogNotice paths={[['games']]} onRetry={retry} />}
-      {state.status === 'ready' && <p className="catalog-count">Exibindo {state.data.items.length} {state.data.items.length === 1 ? 'jogo' : 'jogos'} · até {state.data.pageSize} por página</p>}
-      {state.status === 'ready' && (state.data.items.length
-        ? <div className="game-grid">{state.data.items.map((game) => <GameCard key={game.id} game={game} />)}</div>
-        : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />)}
-      {state.status === 'ready' && <nav className="catalog-pagination" aria-label="Páginas do catálogo">
-        <Button disabled={state.data.page <= 1} onClick={() => { setState({ status: 'loading' }); setQuery((current) => ({ ...current, page: state.data.page - 1 })); }}>Anterior</Button>
-        <span aria-live="polite">Página {state.data.page}</span>
-        <Button disabled={!state.data.hasNextPage} onClick={() => { setState({ status: 'loading' }); setQuery((current) => ({ ...current, page: state.data.page + 1 })); }}>Próxima</Button>
-      </nav>}
+      {state.status === 'error' && data && <p>Resultados anteriores; a atualização não foi concluída.</p>}
+      {data && <div className="catalog-results" aria-hidden={state.status !== 'ready'} inert={state.status !== 'ready'}>
+        <p className="catalog-count" style={{ visibility: state.status === 'ready' ? 'visible' : 'hidden' }}>Exibindo {data.items.length} {data.items.length === 1 ? 'jogo' : 'jogos'} · até {data.pageSize} por página</p>
+        {data.items.length
+          ? <div className="game-grid">{data.items.map((game) => <GameCard key={game.id} game={game} />)}</div>
+          : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />}
+        <nav className="catalog-pagination" aria-label="Páginas do catálogo">
+          <Button disabled={state.status !== 'ready' || data.page <= 1} onClick={() => { if (!startLoading()) return; setQuery(current => ({ ...current, page: data.page - 1 })); }}>Anterior</Button>
+          <span aria-live="polite">Página {data.page}</span>
+          <Button disabled={state.status !== 'ready' || !data.hasNextPage} onClick={() => { if (!startLoading()) return; setQuery(current => ({ ...current, page: data.page + 1 })); }}>Próxima</Button>
+        </nav>
+      </div>}
     </section>
     {feed}
   </main>;

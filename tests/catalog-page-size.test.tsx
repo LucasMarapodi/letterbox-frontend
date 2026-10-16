@@ -83,12 +83,12 @@ test.each(['', '15', '10abc', 'NaN'])('seleção inválida %s não dispara consu
   expect(screen.getByText('Página 1')).toBeVisible();
 });
 
-test('quantidade mantém loading/erro/retry e descarta resposta da seleção anterior', async () => {
+test('quantidade mantém loading/erro/retry e descarta resposta regional anterior', async () => {
   const old = deferred<Response>(); const latest = deferred<Response>();
   let retry = false;
-  const { interaction, queries } = await open(false, async query => query.get('pageSize') === '10' ? old.promise : query.get('pageSize') === '50' ? retry ? Response.json({ ...pageFor(query, 2), hasNextPage: false }) : latest.promise : Response.json(pageFor(query)));
+  const { interaction, queries } = await open(false, async query => query.get('pageSize') === '50' ? retry ? Response.json({ ...pageFor(query, 2), hasNextPage: false }) : latest.promise : query.get('sort') === 'name-desc' ? old.promise : Response.json(pageFor(query)));
   await screen.findByText('Página 1');
-  await interaction.selectOptions(screen.getByLabelText('Itens por página'), '10');
+  await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
   const region = screen.getByRole('region', { name: 'Jogos' });
   expect(region).toHaveAttribute('aria-busy', 'true');
   expect(screen.queryByText(/Exibindo/)).not.toBeInTheDocument();

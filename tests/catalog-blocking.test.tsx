@@ -26,7 +26,7 @@ test.each(['busca', 'tamanho'])('%s mantém o catálogo montado, isola a página
   const pending = deferred<Response>();
   const { interaction, container, queries } = await open(() => pending.promise);
   const previous = screen.getByRole('link', { name: 'Jogo anterior' });
-  const control = action === 'busca' ? screen.getByRole('button', { name: 'Buscar', exact: true }) : screen.getByLabelText('Itens por página');
+  const control = action === 'busca' ? screen.getByRole('button', { name: 'Buscar' }) : screen.getByLabelText('Itens por página');
   if (action === 'busca') {
     await interaction.type(screen.getByLabelText('Buscar jogos'), 'aventura');
     await interaction.click(control);
@@ -50,10 +50,13 @@ test.each(['busca', 'tamanho'])('%s mantém o catálogo montado, isola a página
 
 test.each(['falha', 'cancelamento'])('%s libera bloqueio, conserva contexto anterior e retry volta a bloquear', async outcome => {
   const pending = deferred<Response>(); const retry = deferred<Response>(); let count = 0;
-  const { interaction, queries } = await open(() => ++count === 1 ? pending.promise : retry.promise);
+  const { interaction, queries } = await open(() => ++count === 1 ? pending.promise.then(response => {
+    if (outcome === 'cancelamento') throw new DOMException('Cancelado', 'AbortError');
+    return response;
+  }) : retry.promise);
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'aventura{Enter}');
   expect(screen.getByRole('dialog', { name: 'Carregando jogos' })).toBeInTheDocument();
-  await act(async () => { if (outcome === 'falha') pending.resolve(Response.json({ code: 'internal_error', message: 'Falha de teste' }, { status: 500 })); else pending.reject(new DOMException('Cancelado', 'AbortError')); await pending.promise.catch(() => undefined); });
+  await act(async () => { pending.resolve(Response.json({ code: 'internal_error', message: 'Falha de teste' }, { status: 500 })); await pending.promise; });
   await screen.findByRole('alert');
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(document.documentElement.style.overflow).toBe('');
@@ -74,7 +77,7 @@ test('limpeza vazia/rascunho, mesmo tamanho e busca idêntica não consultam nem
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'rascunho');
   await interaction.click(screen.getByRole('button', { name: 'Limpar busca' }));
   fireEvent.change(screen.getByLabelText('Itens por página'), { target: { value: '20' } });
-  await interaction.click(screen.getByRole('button', { name: 'Buscar', exact: true }));
+  await interaction.click(screen.getByRole('button', { name: 'Buscar' }));
   expect(queries()).toHaveLength(1);
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
@@ -88,6 +91,8 @@ test('limpar busca aplicada bloqueia; ordenação e paginação mantêm loading 
   await interaction.click(screen.getByRole('button', { name: 'Limpar busca' }));
   expect(screen.getByRole('dialog', { name: 'Carregando jogos' })).toBeInTheDocument();
   await act(async () => { pending.resolve(result()); await pending.promise; });
+  await screen.findByRole('link', { name: 'Jogo anterior' });
+  hold = false;
   await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   await screen.findByRole('link', { name: 'Jogo anterior' });
