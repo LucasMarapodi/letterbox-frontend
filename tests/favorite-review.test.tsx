@@ -62,7 +62,7 @@ test('envio de favorito pendente impede duplicação', async () => {
   await act(async () => { fireEvent.click(button); fireEvent.click(button); });
   expect(set).toHaveBeenCalledTimes(1);
   expect(screen.getByRole('button', { name: 'Atualizando favorito…' })).toBeDisabled();
-  await act(async () => { pending.resolve({ id: 'fav', userId: ana.id, targetType: 'review', targetId: 1 }); await pending.promise; });
+  await act(async () => { pending.resolve({ id: 91, userId: ana.id, targetType: 'review', targetId: 1 }); await pending.promise; });
   expect(screen.getByRole('button', { name: 'Remover review dos favoritos' })).toHaveAttribute('aria-pressed', 'true');
 });
 test('visitante recebe caminho de login na review', async () => {

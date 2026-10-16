@@ -93,7 +93,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       const index = favorites.findIndex((favorite) => favorite.userId === user.id && favorite.targetType === kind && favorite.targetId === targetId);
       if (!selected) { if (index >= 0) favorites.splice(index, 1); return null; }
       if (index >= 0) return structuredClone(favorites[index]);
-      const favorite: Favorite = { id: `mock-favorite-${sequence++}`, userId: user.id, targetType: kind, targetId };
+      const favorite: Favorite = { id: sequence++, userId: user.id, targetType: kind, targetId };
       favorites.push(favorite);
       return structuredClone(favorite);
     },

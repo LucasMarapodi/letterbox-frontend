@@ -15,7 +15,7 @@ async function openProfile(options: { reviews?: ReviewResponse[]; favorites?: Fe
     const path = new URL(url).pathname;
     if (path === '/api/v1/favorites') return options.favorites ? options.favorites(url, init) : Response.json({ games: [wireGame], reviews });
     if (path === '/api/v1/favorites/review/55') {
-      const favorite = { id: 'favorite-review', userId: wireUser.id, targetType: 'review', targetId: wireReview.id };
+      const favorite = { id: 91, userId: wireUser.id, targetType: 'review', targetId: wireReview.id };
       if (init.method === 'GET') return Response.json({ favorite: reviews.length ? favorite : null });
       reviews = init.method === 'PUT' ? [wireReview] : [];
       return init.method === 'PUT' ? Response.json(favorite) : new Response(null, { status: 204 });

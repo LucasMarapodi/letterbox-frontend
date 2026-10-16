@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 586 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 612 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -47,7 +47,7 @@ Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e inva
 
 [I-PR-07](docs/I-PR-07.md), [TDD](docs/TDD-I-PR-07.md) e [relatório dos endpoints](docs/RELATORIO-ENDPOINTS.md). Os documentos PR-01 a PR-09/TDD-PR-* preservam o histórico da fase anterior; descrições mockadas nesses registros não representam o runtime atual.
 
-Contratos atuais: identidade, catálogo, opiniões e comentários acompanham P-PR-01 a P-PR-04 do Back com PostgreSQL. Usuários/jogos/reviews/notas/comentários e suas referências usam IDs locais numéricos; o identificador externo IGDB é um campo separado. Comentários incluem `parentCommentId` nullable e `likeCount` inteiro não negativo; controles de resposta/curtida dependem de US próprias de interface. IDs próprios de favoritos e notificações continuam textuais nesta etapa. As seções de entregas abaixo preservam seus limites históricos; veja as adaptações de [identidade/catálogo](docs/FIX-CONTRATOS-NUMERICOS.md), [opiniões](docs/FIX-P-PR-03.md) e [comentários](docs/FIX-P-PR-04.md). Branches preparadas localmente; Front não possui remoto configurado. Nenhum merge foi feito.
+Contratos atuais: identidade, catálogo, opiniões, comentários e favoritos acompanham P-PR-01 a P-PR-05 do Back com PostgreSQL. Usuários/jogos/reviews/notas/comentários/favoritos e suas referências usam IDs locais numéricos; o identificador externo IGDB é um campo separado. Comentários incluem `parentCommentId` nullable e `likeCount` inteiro não negativo; controles de resposta/curtida dependem de US próprias de interface. Somente IDs próprios de notificações continuam textuais nesta etapa. As seções de entregas abaixo preservam seus limites históricos; veja as adaptações de [identidade/catálogo](docs/FIX-CONTRATOS-NUMERICOS.md), [opiniões](docs/FIX-P-PR-03.md), [comentários](docs/FIX-P-PR-04.md) e [favoritos](docs/FIX-P-PR-05.md). Branches preparadas localmente; Front não possui remoto configurado. Nenhum merge foi feito.
 
 ## Quarta fase — G-PR-05
 

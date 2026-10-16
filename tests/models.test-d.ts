@@ -33,8 +33,8 @@ test('representa notas, reviews e comentários sem exigir nota junto à review',
 });
 
 test('distingue favoritos e os dois eventos de notificação previstos', () => {
-  const gameFavorite = { id: 'favorite-1', userId: 1, targetType: 'game', targetId: 1 } satisfies Favorite;
-  const reviewFavorite = { ...gameFavorite, id: 'favorite-2', targetType: 'review', targetId: 1 } satisfies Favorite;
+  const gameFavorite = { id: 1, userId: 1, targetType: 'game', targetId: 1 } satisfies Favorite;
+  const reviewFavorite = { ...gameFavorite, id: 2, targetType: 'review', targetId: 1 } satisfies Favorite;
   const reviewNotification = { id: 'notification-1', userId: 1, actorId: 2, type: 'new-review', reviewId: 1, createdAt: '2026-01-01T00:00:00Z', read: false } satisfies Notification;
   const commentNotification = { ...reviewNotification, type: 'review-comment', commentId: 1 } satisfies Notification;
   expectTypeOf(gameFavorite).toExtend<Favorite>();

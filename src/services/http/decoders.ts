@@ -26,11 +26,6 @@ function id(value: unknown): string { const result = text(value); return result.
 function nullable<T>(value: unknown, decode: Decoder<T>): T | null { return value === null ? null : decode(value); }
 function localId(value: unknown): LocalId { return isLocalId(value) ? value : fail(); }
 function externalId(value: unknown): number { return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : fail(); }
-function favoriteTargetId(value: unknown): number {
-  if (isLocalId(value)) return value;
-  if (typeof value !== 'string' || !/^[1-9]\d*$/.test(value)) return fail();
-  return localId(Number(value));
-}
 function score(value: unknown): number { return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 5 ? value : fail(); }
 function count(value: unknown): number { return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : fail(); }
 function likeCount(value: unknown): number { return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 2_147_483_647 ? value : fail(); }
@@ -66,7 +61,7 @@ export function decodeRating(value: unknown): RatingResponse {
 export function decodeFavorite(value: unknown): FavoriteResponse {
   const item = publicRecord(value); const targetType = item.targetType;
   if (targetType !== 'game' && targetType !== 'review') return fail();
-  return { id: id(item.id), userId: localId(item.userId), targetId: favoriteTargetId(item.targetId), targetType };
+  return { id: localId(item.id), userId: localId(item.userId), targetId: localId(item.targetId), targetType };
 }
 export function decodeNotification(value: unknown): NotificationResponse {
   const item = publicRecord(value);
