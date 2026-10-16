@@ -149,9 +149,14 @@ export function ProfileEditor({ profile, onSaved }: { profile: User; onSaved(use
   const { user } = useSession(); const { http } = useServices(); const favorites = useFavorites();
   const [open, setOpen] = useState(false); const [success, setSuccess] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null); const close = useCallback(() => setOpen(false), []);
+  useEffect(() => {
+    if (!success) return;
+    const timer = setTimeout(() => setSuccess(false), 4000);
+    return () => clearTimeout(timer);
+  }, [success]);
   if (user?.id !== profile.id || !http) return null;
   return <><button ref={trigger} type="button" className="button" aria-haspopup="dialog" onClick={() => { setSuccess(false); setOpen(true); }}>Editar perfil</button>
-    {success && <span role="status">Perfil atualizado.</span>}
+    {success && createPortal(<div className="profile-success-toast" role="status">Perfil atualizado.</div>, document.body)}
     {open && <ProfileModal profile={profile} trigger={trigger.current} onClose={close} onSaved={saved => {
       const updated: User = { id: saved.id, username: saved.username, displayName: saved.displayName, bio: saved.bio, avatarUrl: saved.avatarUrl };
       http().session.updateUser(updated); onSaved(updated); void favorites?.load(true); setOpen(false); setSuccess(true);

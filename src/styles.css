@@ -300,6 +300,7 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .profile-overview-copy { flex: 1; min-width: 0; }
 .profile-name-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
 .profile-name-row h2 { margin: 0; }
+.profile-success-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 110; max-width: calc(100vw - 3rem); padding: 0.85rem 1.25rem; border: 1px solid #67daa3; border-radius: 1rem; background: #203d32; color: #d5f7e6; box-shadow: 0 0.5rem 2rem #0005; pointer-events: none; }
 .profile-edit-modal { background: #1b292d; border: 1px solid #405256; border-radius: 1.3rem; padding: 1.5rem; width: min(43rem, 100%); max-height: 90dvh; overflow-y: auto; }
 .profile-edit-form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.75rem; min-width: 0; }
 .profile-edit-form input, .profile-edit-form textarea, .profile-edit-form select { width: 100%; min-width: 0; }

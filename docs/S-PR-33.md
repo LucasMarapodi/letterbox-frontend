@@ -29,3 +29,5 @@ Fluxo Chromium com PostgreSQL/API reais, sem mock de respostas: contas locais no
 Foco inicial, ciclo Tab, Escape/retorno ao botão, selects na mesma linha em 375 px e ausência de overflow horizontal conferidos. [Desktop 1280](evidence/S-PR-33-modal-1280.png) e [mobile 375](evidence/S-PR-33-modal-375.png) inspecionados. Campos opcionais e vínculos de favoritos das contas de teste foram limpos ao final; contas permanecem com seus nomes de teste, sessões encerradas. Nenhum dado de outros usuários foi removido. Scripts temporários excluídos.
 
 Sem alterações no código do Back, dependências ou schema. Front sem remoto configurado: entrega local, sem publicação ou merge. Evidências históricas da S-US-16/S-PR-17 permanecem preservadas.
+
+Correção posterior do feedback: sucesso passou a ser popup fixo em portal, fora da linha do nome/botão, removido automaticamente após quatro segundos. RED d32ab67 reproduziu o deslocamento. 25 testes de edição, lint/tipos/build aprovados.
