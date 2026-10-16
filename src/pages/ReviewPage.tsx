@@ -11,6 +11,7 @@ import { CommentsSection } from './CommentsSection';
 import { CommentForm } from './CommentForm';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { CatalogNotice } from '../components/CatalogNotice';
+import { ReviewLikeButton } from '../components/ReviewLikeButton';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; review: ReviewDetails | null };
 function ReviewContent({ id }: { id: number }): ReactElement {
@@ -32,9 +33,12 @@ function ReviewContent({ id }: { id: number }): ReactElement {
     <h2>Review de <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link></h2>
     <Link to={`/jogos/${encodeRouteId(review.game.id)}`}>{review.game.title}</Link>
     <p><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></p>
-    <ReviewBody review={review} />
-    <FavoriteButton kind="review" targetId={review.id} />
-    <EditReview review={review} onSaved={(updated) => setState({ status: 'ready', review: updated })} />
+    <ReviewBody review={review} showLike={false} />
+    <div className="review-actions" role="group" aria-label="Ações da review">
+      <ReviewLikeButton reviewId={review.id} likeCount={review.likeCount} author={review.author.displayName} />
+      <FavoriteButton kind="review" targetId={review.id} />
+      <EditReview review={review} onSaved={(updated) => setState({ status: 'ready', review: updated })} />
+    </div>
     <CommentsSection key={`${review.id}-${commentsVersion}`} reviewId={review.id} />
     <CommentForm reviewId={review.id} authorId={review.userId} onSaved={() => setCommentsVersion((value) => value + 1)} />
   </article></QueryRegion>;

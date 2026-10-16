@@ -10,6 +10,11 @@ body { margin: 0; }
 .review-like-action { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; margin: 0.75rem 0; font-size: 0.8rem; }
 .review-like-action button { font-size: 0.8rem; background: #253e35; color: #c2f0da; }
 .review-like-action button[aria-pressed="true"] { background: #67daa3; color: #123427; }
+.review-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin: 1.25rem 0 1.5rem; padding: 1rem 0; border-top: 1px solid #344248; border-bottom: 1px solid #344248; }
+.review-actions .review-like-action, .review-actions .favorite-control { margin: 0; }
+.review-actions button { min-height: 2.5rem; padding: 0.5rem 0.85rem; font-size: 0.8rem; }
+.review-actions > .review-edit-control > button { background: transparent; color: #c2f0da; border-color: #4c7866; }
+.review-actions > .review-edit-control.is-open { flex: 1 0 100%; min-width: 0; }
 .rated-review-form { display: grid; gap: 0.75rem; }
 .rated-review-form .star-options { flex-wrap: wrap; }
 .rated-review-form textarea { width: 100%; min-height: 8rem; }
