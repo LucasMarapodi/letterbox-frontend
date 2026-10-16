@@ -13,7 +13,7 @@ test('cadastro login nota publicação edição favoritos e logout percorrem ser
   await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'demo@example.com');
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Criar conta' }));
-  await interaction.click(await screen.findByRole('link', { name: 'Entrar para continuar' }));
+  await screen.findByRole('form', { name: 'Login' });
   await interaction.type(screen.getByRole('textbox', { name: 'E-mail' }), 'demo@example.com');
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));

@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 469 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 479 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -66,3 +66,7 @@ Logout tem trava síncrona e informa revogação pendente sem bloquear novo logi
 ## Sexta fase — S-PR-04
 
 Catálogo permite 10/20/50 jogos por página, padrão 20; troca volta à primeira página preservando busca/ordenação e exibe contagem realmente retornada. 469 testes, lint, tipos, build e E2E Chromium sintético aprovados. [Descrição, capturas e limites](docs/S-PR-04.md). Execute `npm exec playwright test -- --config playwright.page-size.config.ts`, com portas 5175/5091 livres. Backend e contratos de IDs opacos preservados; migração de IDs inteiros segue pendente.
+
+## Sexta fase — S-PR-14
+
+Cadastro confirmado abre login com replace e mensagem de sucesso, sem autenticar nem transferir credenciais. Falhas mantêm formulário e permitem retry. 479 testes, lint, tipos, build e E2E Chromium sintético aprovados. [Descrição e PRs intermediárias pendentes por backend](docs/S-PR-14.md). Execute `npm exec playwright test -- --config playwright.registration.config.ts`, com portas 5175/5091 livres. IDs inteiros seguem pendentes da migração própria.

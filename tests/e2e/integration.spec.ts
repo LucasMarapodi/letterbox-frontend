@@ -112,6 +112,9 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   }
   await register(a, 'E2E Autora', emailA, password);
   // Cadastro duplicado é resposta real 409, apresentada pela UI.
+  await a.goto('/cadastro');
+  await a.getByLabel('Nome', { exact: true }).fill('E2E Autora');
+  await a.getByLabel('E-mail', { exact: true }).fill(emailA);
   await a.getByLabel('Senha', { exact: true }).fill(password);
   await a.getByRole('button', { name: 'Criar conta', exact: true }).click();
   await expect(a.getByText('Este e-mail já está cadastrado.', { exact: true })).toBeVisible();

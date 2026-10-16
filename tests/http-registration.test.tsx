@@ -29,13 +29,14 @@ test.each([[400,'validation_failed','Os dados do cadastro são inválidos. Confi
   expect(await screen.findByRole('alert')).toHaveTextContent(message);
   expect(screen.queryByText('Conta criada. Entre para continuar.')).not.toBeInTheDocument();
 });
-test('pendência HTTP bloqueia envio duplicado e sucesso aponta login sem sessão', async () => {
+test('pendência HTTP bloqueia envio duplicado e sucesso abre login sem sessão', async () => {
   const pending = deferred<Response>(); const transport = vi.fn<FetchTransport>().mockReturnValue(pending.promise);
   await open(transport);
   await act(async () => { fireEvent.submit(screen.getByRole('form', { name: 'Cadastro' })); fireEvent.submit(screen.getByRole('form', { name: 'Cadastro' })); });
   expect(transport).toHaveBeenCalledTimes(1); expect(screen.getByRole('button', { name: 'Criando conta…' })).toBeDisabled();
   await act(async () => { pending.resolve(Response.json(wireUser, { status: 201 })); await pending.promise; });
-  expect(await screen.findByRole('link', { name: 'Entrar para continuar' })).toHaveAttribute('href','/login');
+  expect(await screen.findByRole('form', { name: 'Login' })).toBeVisible();
+  expect(screen.getByRole('status')).toHaveTextContent('Conta criada. Entre para continuar.');
   expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument();
 });
 test('resposta incompatível e API desligada não criam conta substituta', async () => {

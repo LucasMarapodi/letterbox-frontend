@@ -43,7 +43,8 @@ test('cadastro válido mostra sucesso sem login automático nem exigência de se
   renderRegister(register);
   await fillRegister();
   await interaction.click(screen.getByRole('button', { name: 'Criar conta' }));
-  expect(await screen.findByRole('status')).toHaveTextContent('Conta criada. Entre para continuar.');
+  await screen.findByRole('form', { name: 'Login' });
+  expect(screen.getByRole('status')).toHaveTextContent('Conta criada. Entre para continuar.');
   expect(register).toHaveBeenCalledWith({ name: 'Nova Pessoa', email: 'nova@example.com', password: 'x' });
   expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument();
 });
@@ -64,5 +65,6 @@ test('cadastro pendente não permite duplicar envio', async () => {
   expect(register).toHaveBeenCalledTimes(1);
   expect(screen.getByRole('button', { name: 'Criando conta…' })).toBeDisabled();
   await act(async () => { pending.resolve(user); await pending.promise; });
+  await screen.findByRole('form', { name: 'Login' });
   expect(screen.getByRole('status')).toHaveTextContent('Conta criada. Entre para continuar.');
 });
