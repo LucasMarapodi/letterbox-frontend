@@ -3,8 +3,17 @@ import type { PublicProfile, Connections } from '../communityContracts';
 import type { PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse, LoginResponse, DashboardResponse, GameOpinionsResponse, FavoriteListsResponse, RankedReviewResponse, RankedGameResponse } from './dtos';
 import { HttpFailure } from './client';
 import type { CatalogFilters, CatalogFilterOption } from '../contracts';
+import type { ProfileCompletionResponse } from './dtos';
 import type { SearchResponse, SearchQuery, SearchGroup, SearchError, SearchPerson, SearchGame, SearchMetadata } from '../searchContracts';
 export type Decoder<T> = (value: unknown) => T;
+export function decodeProfileCompletion(value: unknown): ProfileCompletionResponse {
+  const item = publicRecord(value);
+  const country = nullable(item.country, text), state = nullable(item.state, text), bio = text(item.bio), avatarUrl = nullable(item.avatarUrl, text);
+  const favoriteGameIds = decodeList(item.favoriteGameIds, localId);
+  if (new Set(favoriteGameIds).size !== favoriteGameIds.length || item.favoriteGameCount !== favoriteGameIds.length || typeof item.isComplete !== 'boolean' || (country?.length ?? 0) > 100 || (state?.length ?? 0) > 100 || bio.length > 2000) return fail();
+  if (item.isComplete !== Boolean(country?.trim() && state?.trim() && bio.trim() && favoriteGameIds.length >= 3)) return fail();
+  return { country, state, bio, avatarUrl, favoriteGameIds, favoriteGameCount: favoriteGameIds.length, isComplete: item.isComplete };
+}
 export function decodeCatalogFilters(value: unknown): CatalogFilters {
   const item = publicRecord(value);
   function options(value: unknown): CatalogFilterOption[] {
