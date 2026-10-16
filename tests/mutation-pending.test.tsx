@@ -9,6 +9,7 @@ import { ServiceProvider } from '../src/services/ServiceProvider';
 import { SessionProvider } from '../src/session/SessionProvider';
 import { LoginPage } from '../src/pages/LoginPage';
 import { RegisterPage } from '../src/pages/RegisterPage';
+import { FavoritesProvider } from '../src/components/FavoritesProvider';
 import { ProfileEditor } from '../src/pages/ProfileEditor';
 import { PublishReview } from '../src/pages/PublishReview';
 import { EditReview } from '../src/pages/EditReview';
@@ -29,7 +30,7 @@ interface MutationCase {
 const cases: MutationCase[] = [
   { name: 'login', guest: true, endpoint: '/auth/login', method: 'POST', render: () => <LoginPage />, fields: [{ label: 'E-mail', value: 'test@example.test' }, { label: 'Senha', value: 'test-only' }], button: 'Entrar', pending: 'Entrando…', result: { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' } },
   { name: 'cadastro', guest: true, endpoint: '/auth/register', method: 'POST', render: () => <RegisterPage />, fields: [{ label: 'Nome', value: 'Ana' }, { label: 'E-mail', value: 'test@example.test' }, { label: 'Senha', value: 'test-only' }], button: 'Criar conta', pending: 'Criando conta…', result: wireUser },
-  { name: 'perfil', endpoint: '/users/me/profile', method: 'PATCH', render: saved => <ProfileEditor profile={wireUser} onSaved={saved} />, fields: [{ label: 'Biografia', value: 'Rascunho' }], button: 'Salvar perfil', pending: 'Salvando perfil…', result: { ...wireUser, bio: 'Rascunho' } },
+  { name: 'perfil', endpoint: '/users/me/profile', method: 'PATCH', render: saved => <ProfileEditor profile={wireUser} onSaved={saved} />, fields: [{ label: 'Descrição', value: 'Rascunho' }], button: 'Salvar alterações', pending: 'Salvando alterações…', result: { ...wireUser, bio: 'Rascunho', completion: {country:null,state:null,bio:'Rascunho',avatarUrl:null,favoriteGameIds:[],favoriteGameCount:0,isComplete:false} } },
   { name: 'publicar review', endpoint: '/games/1/reviews', method: 'POST', render: saved => <PublishReview gameId={1} onSaved={saved} />, fields: [{ label: 'Descrição (opcional)', value: 'Rascunho' }], button: 'Publicar review', pending: 'Publicando…', result: wireReview },
   { name: 'editar review', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}`, method: 'PATCH', render: saved => <EditReview review={wireReview} onSaved={saved} />, fields: [{ label: 'Descrição (opcional)', value: 'Rascunho' }], button: 'Salvar review', pending: 'Salvando…', result: { ...wireReview, text: 'Rascunho' } },
   { name: 'comentário', endpoint: '/reviews/55/comments', method: 'POST', render: saved => <CommentForm reviewId={55} authorId={2} onSaved={saved} />, fields: [{ label: 'Seu comentário', value: 'Rascunho' }], button: 'Publicar comentário', pending: 'Publicando…', result: wireComment },
@@ -38,6 +39,8 @@ const cases: MutationCase[] = [
 ];
 function readBody(path: string): unknown {
   if (path.endsWith('/auth/login')) return { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' };
+  if (path.endsWith('/profile-completion')) return {country:null,state:null,bio:'',avatarUrl:null,favoriteGameIds:[],favoriteGameCount:0,isComplete:false};
+  if (path.endsWith('/favorites')) return {games:[],reviews:[]};
   if (path.endsWith('/auth/me')) return wireUser;
   if (path.endsWith('/reviews/me')) return { review: null };
   if (path.endsWith('/rating/me')) return { rating: null };
@@ -55,9 +58,10 @@ test.each(cases)('$name: dois submits/cliques enviam uma mutação, erro libera 
   if (!item.guest) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   transport.mockClear();
   const saved = vi.fn();
-  render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}>{item.render(saved)}</SessionProvider></ServiceProvider></MemoryRouter>);
+  render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}><FavoritesProvider>{item.render(saved)}</FavoritesProvider></SessionProvider></ServiceProvider></MemoryRouter>);
   const interaction = userEvent.setup();
   if(item.name==='publicar review'){await interaction.click(await screen.findByRole('button',{name:'Criar review'})); fireEvent.change(screen.getByLabelText('Nota (0 a 5)'),{target:{value:'4.5'}});} if(item.name==='editar review')await interaction.click(screen.getByRole('button',{name:'Editar minha review'}));
+  if(item.name==='perfil') await interaction.click(screen.getByRole('button',{name:'Editar perfil'}));
   for (const field of item.fields) {
     const input = await screen.findByLabelText(field.label);
     await interaction.clear(input); await interaction.type(input, field.value);

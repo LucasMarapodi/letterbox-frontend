@@ -3,10 +3,17 @@ import type { PublicProfile, Connections } from '../communityContracts';
 import type { PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse, LoginResponse, DashboardResponse, GameOpinionsResponse, FavoriteListsResponse, RankedReviewResponse, RankedGameResponse } from './dtos';
 import { HttpFailure } from './client';
 import type { CatalogFilters, CatalogFilterOption } from '../contracts';
-import type { ProfileCompletionResponse } from './dtos';
+import type { ProfileCompletionResponse, ProfileUpdateResponse } from './dtos';
 import type { ReviewLikeStatusResponse } from './dtos';
 import type { SearchResponse, SearchQuery, SearchGroup, SearchError, SearchPerson, SearchGame, SearchMetadata } from '../searchContracts';
 export type Decoder<T> = (value: unknown) => T;
+export function decodeProfileUpdate(value: unknown): ProfileUpdateResponse {
+  const item = publicRecord(value);
+  const user = decodeUser(item);
+  const completion = decodeProfileCompletion(item.completion);
+  if (user.bio !== completion.bio || user.avatarUrl !== completion.avatarUrl) return fail();
+  return { ...user, completion };
+}
 export function decodeReviewLikeStatus(value: unknown): ReviewLikeStatusResponse {
   const item = publicRecord(value);
   if (typeof item.likedByMe !== 'boolean') return fail();

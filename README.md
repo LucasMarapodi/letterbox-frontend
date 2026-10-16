@@ -57,6 +57,8 @@ Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e inva
 
 ## Entrega
 
+S-PR-33: Editar perfil abre um modal único no cabeçalho do dono, com localização dependente, avatar e seleção de favoritos. Salva alterações parciais por um PATCH da API S-PR-32, sem exigir perfil completo. [Contrato, validação e capturas](docs/S-PR-33.md).
+
 S-PR-09: reviews mostram contagem pública e permitem curtir/descurtir com estado isolado por sessão e confirmação pela API, independentemente dos favoritos. Requer API S-PR-08 com `likeCount` nas projeções e endpoints de curtida. [Implementação, testes e acesso local](docs/S-PR-09.md).
 
 [I-PR-07](docs/I-PR-07.md), [TDD](docs/TDD-I-PR-07.md) e [relatório dos endpoints](docs/RELATORIO-ENDPOINTS.md). Os documentos PR-01 a PR-09/TDD-PR-* preservam o histórico da fase anterior; descrições mockadas nesses registros não representam o runtime atual.
