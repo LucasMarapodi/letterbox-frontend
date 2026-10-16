@@ -65,7 +65,7 @@ export function decodeFavorite(value: unknown): FavoriteResponse {
 }
 export function decodeNotification(value: unknown): NotificationResponse {
   const item = publicRecord(value);
-  const base = { id: id(item.id), userId: localId(item.userId), actorId: localId(item.actorId), reviewId: localId(item.reviewId), createdAt: instant(item.createdAt), actor: author(item.actor) };
+  const base = { id: localId(item.id), userId: localId(item.userId), actorId: localId(item.actorId), reviewId: localId(item.reviewId), createdAt: instant(item.createdAt), actor: author(item.actor) };
   if (item.type === 'new-review' && !('commentId' in item)) return { ...base, type: 'new-review' };
   if (item.type === 'review-comment') return { ...base, type: 'review-comment', commentId: localId(item.commentId) };
   return fail();

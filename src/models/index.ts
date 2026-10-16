@@ -8,6 +8,7 @@ export type ReviewId = LocalId;
 export type RatingId = LocalId;
 export type CommentId = LocalId;
 export type FavoriteId = LocalId;
+export type NotificationId = LocalId;
 export function isLocalId(value: unknown): value is LocalId {
   return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 2_147_483_647;
 }
@@ -70,7 +71,7 @@ export interface Favorite {
 }
 
 interface NotificationBase {
-  id: Id;
+  id: NotificationId;
   userId: UserId;
   actorId: UserId;
   reviewId: ReviewId;

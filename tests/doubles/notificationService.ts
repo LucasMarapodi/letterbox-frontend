@@ -6,7 +6,7 @@ export function createMockNotificationService(options: { events?: NotificationEv
   return { async list(user) {
     if (!user) throw new Error('session-required');
     return structuredClone(events.filter((event) => event.userId === user.id)
-      .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id.localeCompare(right.id))
+      .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt) || left.id - right.id)
       .map((event) => {
         const actor = userFixtures.find((item) => item.id === event.actorId);
         return { ...event, actor: { id: event.actorId, displayName: actor?.displayName ?? 'Usuário indisponível', avatarUrl: actor?.avatarUrl ?? null } };

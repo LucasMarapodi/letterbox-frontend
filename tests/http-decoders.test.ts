@@ -1,6 +1,19 @@
 import { expect, test } from 'vitest';
 import { decodeUser, decodeGame, decodeReview, decodeComment, decodeRating, decodeFavorite, decodeNotification, decodeLogin, decodeDashboard, decodeOpinions, decodeFavoriteLists, decodeRankedReview, decodeRankedGame, unwrapRating, unwrapReview, unwrapFavorite, unwrapFollowing, decodeList, composeProfile, composeConnections } from '../src/services/http/decoders';
 import { wireUser, wireGame, wireReview, wireComment, wireRating, wireFavorite, wireNotification } from './http-fixtures';
+
+test('notificações aceitam ID local numérico nos dois tipos de evento', () => {
+  for (const id of [1, 42, 2_147_483_647]) {
+    expect(decodeNotification({ ...wireNotification, id }).id).toBe(id);
+    expect(decodeNotification({ ...wireNotification, id, type: 'review-comment', commentId: 81 })).toMatchObject({ id, commentId: 81 });
+  }
+});
+
+test('notificações rejeitam ID textual ou fora do intervalo inteiro positivo', () => {
+  for (const id of ['42', 'notification-1', '', 0, -1, 1.5, 2_147_483_648, NaN, Infinity, null, undefined, true, {}]) {
+    expect(() => decodeNotification({ ...wireNotification, id })).toThrow();
+  }
+});
 test('objetos do contrato C# preservam IDs, null, decimal e data sem hora', () => {
   expect(decodeUser(wireUser)).toEqual(wireUser); expect(decodeGame(wireGame)).toEqual(wireGame);
   expect(decodeReview(wireReview)).toEqual(wireReview); expect(decodeComment(wireComment)).toEqual(wireComment);
