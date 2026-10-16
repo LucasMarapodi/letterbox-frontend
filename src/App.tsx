@@ -1,6 +1,6 @@
 import { useRef, type ReactElement } from 'react';
 import { HomePage } from './pages/HomePage';
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { ProfilePage } from './pages/ProfilePage';
 import { GameDetailsPage } from './pages/GameDetailsPage';
 import type { AuthService } from './services/authContracts';
@@ -23,6 +23,12 @@ export interface AppRoutesProps { authService?: AuthService; adapters?: Applicat
 
 function ApplicationRoutes(): ReactElement {
   const { user, signOut, notice, version } = useSession();
+  const navigate = useNavigate();
+  function logout(): void {
+    // signOut limpa a sessão antes do primeiro await; a resposta remota não navega.
+    void signOut();
+    navigate('/', { replace: true });
+  }
   const { privateFeatures } = useServices();
   const contentRef = useRef<HTMLDivElement>(null);
   return <>
@@ -37,7 +43,7 @@ function ApplicationRoutes(): ReactElement {
         {user && privateFeatures?.notifications !== false && <NotificationBell key={`${version}-${user.id}`} />}
         {!user && <><Link to="/login">Entrar</Link>{' '}<Link className="signup-link" to="/cadastro">Criar conta</Link></>}
       </nav>
-      {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" onClick={signOut}>Sair <span aria-hidden="true">↗</span></button></div>}
+      {user && <div className="session-menu"><Link aria-label="Meu perfil" to={`/perfil/${encodeRouteId(user.id)}`} className="session-user"><Avatar name={user.displayName} src={user.avatarUrl} /><span aria-label="Usuário conectado">{user.displayName}</span></Link><button className="logout-button" type="button" onClick={logout}>Sair <span aria-hidden="true">↗</span></button></div>}
       </div>
       </div>
     </header>

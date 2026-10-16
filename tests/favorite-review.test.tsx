@@ -42,7 +42,8 @@ test('review alterna favorito pessoal e logout remove ação', async () => {
   expect(await screen.findByRole('button', { name: 'Favoritar review' })).toHaveAttribute('aria-pressed', 'false');
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByRole('button', { name: 'Favoritar review' })).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Entrar para favoritar' })).toBeVisible();
+  await interaction.click(screen.getByRole('link', { name: 'Review de exemplo' }));
+  expect(await screen.findByRole('link', { name: 'Entrar para favoritar' })).toBeVisible();
 });
 test('erro não confirma favorito da review', async () => {
   vi.spyOn(community, 'getFavorite').mockResolvedValue(null);
