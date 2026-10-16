@@ -15,7 +15,8 @@ type State = {
   message?: string;
 };
 
-function PersonalLike({ comment, http }: { comment: PublicComment; http: () => HttpAdapters }) {
+interface Props { comment: PublicComment; onChanged?: () => void; countSuffix?: string; }
+function PersonalLike({ comment, http, onChanged, countSuffix = '' }: Props & { http: () => HttpAdapters }) {
   const reply = comment.parentCommentId !== null;
   const target = `${reply ? 'resposta' : 'comentário'} de ${comment.author.displayName}`;
   const subject = `${reply ? 'da' : 'do'} ${target}`;
@@ -52,7 +53,11 @@ function PersonalLike({ comment, http }: { comment: PublicComment; http: () => H
     busy.current = true;
     setState(previous => ({ ...previous, pending: true, message: undefined }));
     try {
-      if (write) await http().comments.setLiked(comment.id, !state.likedByMe, signal);
+      if (write) {
+        await http().comments.setLiked(comment.id, !state.likedByMe, signal);
+        // O ranking reconsulta a página inteira e substitui este controle pelo resultado confirmado.
+        if (onChanged && !signal.aborted) { onChanged(); return; }
+      }
       const confirmed = await read(true, signal);
       if (!signal.aborted) setState(confirmed);
     } catch (error: unknown) {
@@ -68,7 +73,7 @@ function PersonalLike({ comment, http }: { comment: PublicComment; http: () => H
   }
 
   return <span className="review-like-action comment-like-action">
-    <span aria-live="polite" aria-atomic="true">{state.count} {state.count === 1 ? 'curtida' : 'curtidas'}</span>
+    <span aria-live="polite" aria-atomic="true">{state.count} {state.count === 1 ? 'curtida' : 'curtidas'}{countSuffix}</span>
     {state.status === 'error' ? <>
       <Button disabled={state.pending} aria-busy={state.pending} aria-label={`Consultar novamente curtida ${subject}`} onClick={() => { void run(false); }}>Consultar novamente</Button>
       <span role="status">{state.message}</span>
@@ -82,9 +87,9 @@ function PersonalLike({ comment, http }: { comment: PublicComment; http: () => H
   </span>;
 }
 
-export function CommentLikeButton({ comment }: { comment: PublicComment }) {
+export function CommentLikeButton({ comment, onChanged, countSuffix = '' }: Props) {
   const { user, version } = useSession();
   const { http } = useServices();
-  if (!user || !http) return <span className="review-like-action comment-like-action">{comment.likeCount} {comment.likeCount === 1 ? 'curtida' : 'curtidas'}</span>;
-  return <PersonalLike key={`${version}-${user.id}-${comment.id}`} comment={comment} http={http} />;
+  if (!user || !http) return <span className="review-like-action comment-like-action">{comment.likeCount} {comment.likeCount === 1 ? 'curtida' : 'curtidas'}{countSuffix}</span>;
+  return <PersonalLike key={`${version}-${user.id}-${comment.id}`} comment={comment} http={http} onChanged={onChanged} countSuffix={countSuffix} />;
 }

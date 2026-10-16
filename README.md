@@ -102,3 +102,7 @@ Limpar busca sem termo não consulta nem reinicia a página. Rascunho é apagado
 ## Sexta fase — S-PR-11
 
 Curtidas de comentários/respostas e ajustes visuais solicitados nos cartões e no perfil. 246 testes pertinentes, lint/tipos/build, cinco cenários Chromium sintéticos e integração real aprovados. [Entrega, evidências e dependência da API](docs/S-PR-11.md).
+
+## Sexta fase — S-PR-13
+
+Mais curtidos na Comunidade: comentários/respostas com períodos, paginação, contagens distintas e revalidação após curtida; navegação destaca o comentário na review. 142 testes pertinentes, dois cenários Chromium, lint/tipos/build e API real aprovados. [Entrega e dependências](docs/S-PR-13.md).

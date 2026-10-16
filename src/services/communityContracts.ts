@@ -10,6 +10,14 @@ export interface Connections { followers: User[]; following: User[]; }
 export type RankingPeriod = '24h' | '7d' | '30d';
 export interface RankedReview { review: ReviewDetails; commentCount: number; lastCommentAt: string; }
 export interface RankedGame { game: Game; commentCount: number; lastCommentAt: string; }
+export interface RankedComment {
+  commentId: number; reviewId: ReviewId; gameId: GameId; parentCommentId: number | null;
+  text: string; createdAt: string; author: Pick<User, 'id' | 'displayName' | 'avatarUrl'>;
+  likeCount: number; periodLikeCount: number; lastLikeAt: string;
+}
+export type CommentPageSize = 10 | 20 | 50;
+export interface CommentRankingQuery { period: RankingPeriod; page: number; pageSize: CommentPageSize; }
+export interface RankedCommentPage { items: RankedComment[]; page: number; pageSize: CommentPageSize; hasNextPage: boolean; }
 export function isRankingPeriod(value: unknown): value is RankingPeriod { return value === '24h' || value === '7d' || value === '30d'; }
 
 export class CommunityError extends Error {

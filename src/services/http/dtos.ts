@@ -1,6 +1,8 @@
 import type { User, Game, Rating, Favorite } from '../../models';
 import type { ReviewDetails, PublicComment, FavoriteLists, RankedReview, RankedGame } from '../communityContracts';
 import type { NotificationItem } from '../notificationContracts';
+import type { RankedCommentPage } from '../communityContracts';
+export type RankedCommentPageResponse = RankedCommentPage;
 export type PublicUserResponse = User;
 export type GameResponse = Game;
 export interface GamePageResponse { items: GameResponse[]; page: number; pageSize: number; hasNextPage: boolean; }

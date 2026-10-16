@@ -7,7 +7,25 @@ import type { ProfileCompletionResponse, ProfileUpdateResponse } from './dtos';
 import type { ReviewLikeStatusResponse } from './dtos';
 import type { CommentLikeStatusResponse } from './dtos';
 import type { SearchResponse, SearchQuery, SearchGroup, SearchError, SearchPerson, SearchGame, SearchMetadata } from '../searchContracts';
+import type { CommentRankingQuery, RankedComment, RankedCommentPage } from '../communityContracts';
 export type Decoder<T> = (value: unknown) => T;
+export function decodeRankedCommentPage(value: unknown, query: CommentRankingQuery): RankedCommentPage {
+  const page = publicRecord(value);
+  if (page.page !== query.page || page.pageSize !== query.pageSize || typeof page.hasNextPage !== 'boolean') return fail();
+  const items = decodeList(page.items, (value): RankedComment => {
+    const item = publicRecord(value);
+    if ('likedByMe' in item || 'liked' in item) return fail();
+    const total = likeCount(item.likeCount), period = likeCount(item.periodLikeCount);
+    if (period < 1 || period > total) return fail();
+    return {
+      commentId: localId(item.commentId), reviewId: localId(item.reviewId), gameId: localId(item.gameId),
+      parentCommentId: nullable(item.parentCommentId, localId), text: text(item.text), createdAt: instant(item.createdAt),
+      author: author(item.author), likeCount: total, periodLikeCount: period, lastLikeAt: instant(item.lastLikeAt),
+    };
+  });
+  if (items.length > query.pageSize || new Set(items.map(item => item.commentId)).size !== items.length || (!items.length && page.hasNextPage)) return fail();
+  return { items, page: query.page, pageSize: query.pageSize, hasNextPage: page.hasNextPage };
+}
 export function decodeCommentLikeStatus(value: unknown): CommentLikeStatusResponse {
   const item = publicRecord(value);
   if (typeof item.likedByMe !== 'boolean') return fail();
