@@ -43,13 +43,22 @@ test('perfil com reviews favoritas vazias não monta seção, título ou mensage
   expect(screen.queryByText('Nenhuma review favorita.')).not.toBeInTheDocument();
 });
 
+test('favoritos do perfil não exibem aviso do catálogo mesmo com metadados stale', async () => {
+  await openProfile({favorites: async () => Response.json({games:[wireGame], reviews:[wireReview]}, {
+    headers: {'X-Catalog-Stale':'true', 'X-Catalog-Fetched-At':'2026-10-01T12:00:00Z'},
+  })});
+  await screen.findByRole('region', {name:'Reviews favoritas'});
+  expect(screen.queryByLabelText('Atualização do catálogo')).not.toBeInTheDocument();
+  expect(screen.queryByText(/Dados do catálogo desatualizados/)).not.toBeInTheDocument();
+});
+
 test.each([1, 2])('perfil mostra seção, conteúdo e links com %i reviews favoritas', async count => {
   const reviews = Array.from({ length: count }, (_, index) => ({ ...wireReview, id: index + 1, text: `Texto favorito ${index}` }));
   await openProfile({ reviews });
   const region = await screen.findByRole('region', { name: 'Reviews favoritas' });
   expect(within(region).getByRole('heading', { name: 'Reviews favoritas' })).toBeVisible();
-  expect(within(region).getAllByRole('link')).toHaveLength(count);
-  for (const [index, link] of within(region).getAllByRole('link').entries()) {
+  expect(within(region).getAllByRole('link', {name: /^Review de /})).toHaveLength(count);
+  for (const [index, link] of within(region).getAllByRole('link', {name: /^Review de /}).entries()) {
     expect(link).toHaveAttribute('href', `/reviews/${index + 1}`);
     expect(within(region).getByText(`Texto favorito ${index}`)).toBeVisible();
   }

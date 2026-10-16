@@ -18,6 +18,15 @@ test('somente 404 do usuário significa perfil ausente; lista 404/rede não vira
   expect(await service.getProfile(999)).toBeNull();await expect(service.getProfile(wireUser.id)).rejects.toMatchObject({status:404});await expect(service.getProfile(wireUser.id)).rejects.toMatchObject({kind:'network'});
 });
 function open(transport:FetchTransport):void{render(<MemoryRouter initialEntries={['/perfil/1']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);}
+
+test('perfil não exibe aviso de catálogo mesmo com metadados stale nas reviews', async () => {
+  open(async url => Response.json(url.endsWith('/reviews') ? [wireReview] : url.endsWith('/followers') || url.endsWith('/following') ? [] : wireUser, {
+    headers: {'X-Catalog-Stale':'true', 'X-Catalog-Fetched-At':'2026-10-01T12:00:00Z'},
+  }));
+  await screen.findByRole('link', {name:'Ler review de Jogo HTTP'});
+  expect(screen.queryByLabelText('Atualização do catálogo')).not.toBeInTheDocument();
+  expect(screen.queryByText(/Dados do catálogo desatualizados/)).not.toBeInTheDocument();
+});
 test('visitante vê perfil/reviews/links da API e lista vazia válida',async()=>{
   open(async(url)=>Response.json(url.endsWith('/reviews')?[wireReview]:url.endsWith('/followers')?[{...wireUser,id:2,displayName:'Outro'}]:url.endsWith('/following')?[]:wireUser));
   expect(await screen.findByRole('heading',{name:'Ana',level:2})).toBeVisible();expect(screen.getByRole('link',{name:'Ler review de Jogo HTTP'})).toHaveAttribute('href','/reviews/55');expect(await screen.findByRole('link',{name:'Outro'})).toHaveAttribute('href','/perfil/2');expect(screen.getByText('Nenhuma pessoa seguida.')).toBeVisible();
