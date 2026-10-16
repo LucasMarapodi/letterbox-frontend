@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
-import { decodeReview } from '../src/services/http/decoders';
+import { decodeReview, decodeReviewLikeStatus } from '../src/services/http/decoders';
 import type { FetchTransport } from '../src/services/http/client';
 import { wireUser, wireReview, wireGame } from './http-fixtures';
 import { deferred } from './fixtures';
@@ -142,4 +142,19 @@ test('resposta pessoal antiga após logout não contamina a próxima conta', asy
 });
 test.each([undefined, '2', -1, 1.5, 2147483648])('contador inválido %s não é convertido', likeCount => {
   expect(() => decodeReview({ ...wireReview, likeCount })).toThrow();
+});
+test('contrato privado exige booleano, e contagem pública aceita zero e int32 máximo', () => {
+  for (const likedByMe of [true, false]) expect(decodeReviewLikeStatus({ likedByMe })).toEqual({ likedByMe });
+  for (const likedByMe of [undefined, null, 'true', 'false', 0, 1, {}]) expect(() => decodeReviewLikeStatus({ likedByMe })).toThrow();
+  for (const likeCount of [0, 2147483647]) expect(decodeReview({ ...wireReview, likeCount }).likeCount).toBe(likeCount);
+});
+test('resposta de escrita antiga não altera curtidas da próxima sessão', async () => {
+  const pending = deferred<Response>(); const { interaction, switchAccount } = await open('/comunidade', { write: () => pending.promise });
+  await interaction.click(await screen.findByRole('button', { name: 'Curtir review de Ana' }));
+  await interaction.click(screen.getByRole('button', { name: /Sair/ })); switchAccount();
+  await interaction.click(screen.getByRole('link', { name: 'Entrar' }));
+  await interaction.type(screen.getByLabelText('E-mail'), 'next@example.test'); await interaction.type(screen.getByLabelText('Senha'), 'test-only'); await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  expect(await screen.findByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
+  await act(async () => { pending.resolve(new Response(null, { status: 204 })); });
+  expect(screen.getByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
 });

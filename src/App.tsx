@@ -18,6 +18,7 @@ import type { ApplicationServices } from './services/runtime';
 import { CommunityPage } from './pages/CommunityPage';
 import { DashboardHome } from './pages/DashboardHome';
 import { FavoritesProvider } from './components/FavoritesProvider';
+import { ReviewLikesProvider } from './components/ReviewLikesProvider';
 import { MenuSearch } from './components/MenuSearch';
 import { SearchResultsPage } from './pages/SearchResultsPage';
 import { searchUrl } from './routing/searchUrl';
@@ -55,7 +56,7 @@ function ApplicationRoutes(): ReactElement {
     </header>
     {signingOut && <p className="session-notice" role="status">Encerrando sessão…</p>}
     {notice && <p className="session-notice" role="alert">{notice}</p>}
-    <FavoritesProvider key={`${user ? `${version}-${user.id}` : 'visitor'}-${pathname}`}><div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
+    <FavoritesProvider key={`${user ? `${version}-${user.id}` : 'visitor'}-${pathname}`}><ReviewLikesProvider><div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
       <Route path="/" element={user && privateFeatures?.dashboard === true ? <DashboardHome key={`${version}-${user.id}`} /> : <HomePage authenticated={Boolean(user)} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
       <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/pesquisa" element={<SearchResultsPage />} />
@@ -65,7 +66,7 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<RegisterPage />} />
       <Route path="*" element={<main><h1>Página não encontrada</h1><p>Este endereço não corresponde a uma página.</p></main>} />
-    </Routes></div></FavoritesProvider>
+    </Routes></div></ReviewLikesProvider></FavoritesProvider>
   </>;
 }
 

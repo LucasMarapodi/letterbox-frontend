@@ -13,10 +13,10 @@ import { deferred } from './fixtures';
 const [ana, leo] = userFixtures;
 const bia: User = { id: 3, displayName: 'Bia', username: 'bia', avatarUrl: null, bio: '' };
 const reviews: Review[] = [
-  { id: 1, userId: leo.id, gameId: 1, rating: 4, text: 'Antiga', createdAt: '2026-01-01T12:00:00Z', updatedAt: '2026-10-01T12:00:00Z' },
-  { id: 2, userId: leo.id, gameId: 2, rating: 4, text: 'Recente', createdAt: '2026-02-01T12:00:00Z', updatedAt: null },
-  { id: 3, userId: bia.id, gameId: 1, rating: 4, text: 'Não seguida', createdAt: '2026-03-01T12:00:00Z', updatedAt: null },
-  { id: 4, userId: ana.id, gameId: 1, rating: 4, text: 'Própria', createdAt: '2026-04-01T12:00:00Z', updatedAt: null },
+  { id: 1, userId: leo.id, gameId: 1, likeCount: 0, rating: 4, text: 'Antiga', createdAt: '2026-01-01T12:00:00Z', updatedAt: '2026-10-01T12:00:00Z' },
+  { id: 2, userId: leo.id, gameId: 2, likeCount: 0, rating: 4, text: 'Recente', createdAt: '2026-02-01T12:00:00Z', updatedAt: null },
+  { id: 3, userId: bia.id, gameId: 1, likeCount: 0, rating: 4, text: 'Não seguida', createdAt: '2026-03-01T12:00:00Z', updatedAt: null },
+  { id: 4, userId: ana.id, gameId: 1, likeCount: 0, rating: 4, text: 'Própria', createdAt: '2026-04-01T12:00:00Z', updatedAt: null },
 ];
 afterEach(() => vi.restoreAllMocks());
 test('feed filtra autores e ordena por publicação, remoção e nova publicação refletem próxima consulta', async () => {

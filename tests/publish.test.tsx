@@ -12,7 +12,7 @@ afterEach(() => vi.restoreAllMocks());
 test('publicação aparece nas opiniões e pode ser encontrada pelo par autor/jogo', async () => {
   const service = createMockCommunityService({ reviews: [] });
   const review = await service.publish(1, { rating: 4.5, text: ' Minha opinião ' }, author);
-  expect(review).toMatchObject({ userId: author.id, gameId: 1, rating: 4.5, text: 'Minha opinião' });
+  expect(review).toMatchObject({ userId: author.id, gameId: 1, likeCount: 0, rating: 4.5, text: 'Minha opinião' });
   expect(await service.findOwnReview(1, author)).toEqual(review);
   expect((await service.getOpinions(1)).reviews).toEqual([expect.objectContaining({ id: review.id, author: expect.objectContaining({ displayName: 'Nova' }) })]);
   expect((await service.getOpinions(2)).reviews).toEqual([]);
@@ -55,8 +55,8 @@ test('formulário exige nota e preserva descrição quando envio falha', async (
   expect(screen.getByLabelText('Descrição (opcional)')).toHaveValue('Minha opinião');
 });
 test('publicação válida aparece e encaminha para edição', async () => {
-  vi.spyOn(community, 'findOwnReview').mockResolvedValueOnce(null).mockResolvedValue({ id:99,gameId:1,userId:author.id,rating:4,text:'Opinião nova',createdAt:'2026-01-01',updatedAt:null });
-  vi.spyOn(community, 'publish').mockResolvedValue({ id: 99, gameId: 1, userId: author.id, rating: 4, text: 'Opinião nova', createdAt: '2026-01-01', updatedAt: null });
+  vi.spyOn(community, 'findOwnReview').mockResolvedValueOnce(null).mockResolvedValue({ id:99,gameId:1,userId:author.id,likeCount: 0, rating:4,text:'Opinião nova',createdAt:'2026-01-01',updatedAt:null });
+  vi.spyOn(community, 'publish').mockResolvedValue({ id: 99, gameId: 1, userId: author.id, likeCount: 0, rating: 4, text: 'Opinião nova', createdAt: '2026-01-01', updatedAt: null });
   const interaction = await openGame();
   await interaction.type(screen.getByLabelText('Nota (0 a 5)'),'4'); await interaction.type(await screen.findByLabelText('Descrição (opcional)'), 'Opinião nova');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));

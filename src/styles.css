@@ -7,6 +7,9 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+.review-like-action { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; margin: 0.75rem 0; font-size: 0.8rem; }
+.review-like-action button { font-size: 0.8rem; background: #253e35; color: #c2f0da; }
+.review-like-action button[aria-pressed="true"] { background: #67daa3; color: #123427; }
 .rated-review-form { display: grid; gap: 0.75rem; }
 .rated-review-form .star-options { flex-wrap: wrap; }
 .rated-review-form textarea { width: 100%; min-height: 8rem; }

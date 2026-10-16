@@ -7,7 +7,7 @@ import { community } from '../src/services/community';
 import { createMockCommunityService } from './doubles/communityService';
 import type { Review } from '../src/models';
 afterEach(() => vi.restoreAllMocks());
-const base: Review = { id: 3, userId: 1, gameId: 1, rating: 4, text: 'Antiga com atividade nova', createdAt: '2026-01-01T12:00:00Z', updatedAt: '2026-10-01T12:00:00Z' };
+const base: Review = { id: 3, userId: 1, gameId: 1, likeCount: 0, rating: 4, text: 'Antiga com atividade nova', createdAt: '2026-01-01T12:00:00Z', updatedAt: '2026-10-01T12:00:00Z' };
 test('publicação ordena todos os autores com desempate por ID e ignora edição/comentário', async () => {
   const service = createMockCommunityService({ reviews: [base, { ...base, id: 2, userId: 2, createdAt: '2026-02-01T12:00:00Z' }, { ...base, id: 1, createdAt: '2026-02-01T12:00:00Z' }] });
   const result = await service.getRecentReviews();
