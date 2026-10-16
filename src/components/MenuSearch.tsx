@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useServices } from '../services/ServiceProvider';
 import { validSearchTerm, type SearchGroup, type SearchPerson, type SearchGame, type SearchScope } from '../services/searchContracts';
 import { Avatar } from './Avatar';
@@ -14,6 +14,7 @@ const failure = { status: 'unavailable' as const, items: [], page: null, pageSiz
 export function MenuSearch({ onSearch }: { onSearch?: (term: string) => void }) {
   const { search } = useServices();
   const navigate = useNavigate();
+  const location = useLocation();
   const id = useId();
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +35,7 @@ export function MenuSearch({ onSearch }: { onSearch?: (term: string) => void }) 
     controller.current?.abort();
   }, []);
   const close = useCallback(() => { cancel(); setOpen(false); setSelected(-1); }, [cancel]);
+  useLayoutEffect(close, [location.key, close]);
   const run = useCallback(async (scope: SearchScope) => {
     if (!search || !validSearchTerm(query)) return;
     cancel();
@@ -70,6 +72,7 @@ export function MenuSearch({ onSearch }: { onSearch?: (term: string) => void }) 
       aria-autocomplete="list" aria-expanded={open && valid} aria-controls={open && valid ? `${id}-list` : undefined}
       aria-activedescendant={open && active ? `${id}-${active.key}` : undefined} aria-describedby={open && !valid ? `${id}-hint` : undefined}
       onFocus={() => { if (!open) { setGroups(loading); setOpen(true); } }}
+      onClick={() => { if (!open) { setGroups(loading); setOpen(true); } }}
       onChange={event => {
         const next = event.target.value;
         if (next.trim() !== query) { cancel(); setGroups(loading); setSelected(-1); }

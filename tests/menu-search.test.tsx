@@ -131,3 +131,13 @@ test('menos de três caracteres limpa a lista, aborta e não mantém opção ati
   expect(screen.queryByRole('option')).not.toBeInTheDocument();
   expect(calls()).toHaveLength(1);
 });
+
+test('navegar mantém o campo montado e seu texto, fechando apenas as sugestões', async () => {
+  const { input, interaction } = open();
+  await interaction.type(input, 'mario'); await advance();
+  await interaction.click(screen.getByRole('option', { name: /Mario @mario/ })); await advance(0);
+  expect(screen.getByLabelText('URL atual')).toHaveTextContent('/perfil/7');
+  expect(screen.getByRole('combobox', { name: 'Buscar pessoas e jogos' })).toBe(input);
+  expect(input).toHaveValue('mario');
+  expect(input).toHaveAttribute('aria-expanded', 'false');
+});
