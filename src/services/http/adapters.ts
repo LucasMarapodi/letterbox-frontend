@@ -4,6 +4,8 @@ import { decodeCatalogFilters } from './decoders';
 import { decodeProfileCompletion } from './decoders';
 import type { ProfileCompletionRequest, ProfileCompletionResponse } from './dtos';
 import type { ReviewRequest, ReviewPatchRequest } from './dtos';
+import { decodeReviewLikeStatus } from './decoders';
+import type { ReviewLikeStatusResponse } from './dtos';
 import { validSearchTerm, type SearchService } from '../searchContracts';
 import { decodeSearch } from './decoders';
 import { isLocalId, type User, type UserId, type GameId, type ReviewId } from '../../models';
@@ -40,6 +42,8 @@ export interface HttpAdapters {
     publish(id: GameId, input: ReviewRequest, signal?: AbortSignal): Promise<ReviewResponse>;
   };
   reviews: {
+    likeStatus(id: ReviewId, signal?: AbortSignal): Promise<ReviewLikeStatusResponse>;
+    setLiked(id: ReviewId, selected: boolean, signal?: AbortSignal): Promise<void>;
     get(id: ReviewId, signal?: AbortSignal): Promise<ReviewResponse>;
     edit(id: ReviewId, input: ReviewPatchRequest, signal?: AbortSignal): Promise<ReviewResponse>;
     comments(id: ReviewId, signal?: AbortSignal): Promise<CommentResponse[]>;
@@ -149,6 +153,8 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       publish: (id, input, signal) => call({ method: 'POST', path: ['games', localPathId(id), 'reviews'], body: { rating: input.rating, ...(input.text === undefined ? {} : { text: input.text }) }, signal }, decodeReview, true),
     },
     reviews: {
+      likeStatus: (id, signal) => call({ path: ['reviews', localPathId(id), 'like', 'me'], signal }, decodeReviewLikeStatus, true),
+      setLiked: (id, selected, signal) => call({ method: selected ? 'PUT' : 'DELETE', path: ['reviews', localPathId(id), 'like'], signal }, decodeVoid, true),
       get: (id, signal) => call({ path: ['reviews', localPathId(id)], signal }, decodeReview),
       edit: (id, input, signal) => call({ method: 'PATCH', path: ['reviews', localPathId(id)], body: { ...(input.rating === undefined ? {} : { rating: input.rating }), ...(input.text === undefined ? {} : { text: input.text }) }, signal }, decodeReview, true),
       comments: (id, signal) => call({ path: ['reviews', localPathId(id), 'comments'], signal }, list(decodeComment)),

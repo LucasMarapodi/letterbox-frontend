@@ -57,6 +57,8 @@ Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e inva
 
 ## Entrega
 
+S-PR-09: reviews mostram contagem pública e permitem curtir/descurtir com estado isolado por sessão e confirmação pela API, independentemente dos favoritos. Requer API S-PR-08 com `likeCount` nas projeções e endpoints de curtida. [Implementação, testes e acesso local](docs/S-PR-09.md).
+
 [I-PR-07](docs/I-PR-07.md), [TDD](docs/TDD-I-PR-07.md) e [relatório dos endpoints](docs/RELATORIO-ENDPOINTS.md). Os documentos PR-01 a PR-09/TDD-PR-* preservam o histórico da fase anterior; descrições mockadas nesses registros não representam o runtime atual.
 
 Contratos atuais: identidade, catálogo, opiniões, comentários e favoritos acompanham P-PR-01 a P-PR-05 do Back com PostgreSQL. Usuários/jogos/reviews/notas/comentários/favoritos/notificações e suas referências usam IDs locais numéricos; o identificador externo IGDB é um campo separado. Comentários incluem `parentCommentId` nullable e `likeCount` inteiro não negativo; controles de resposta/curtida dependem de US próprias de interface. As seções de entregas abaixo preservam seus limites históricos; veja as adaptações de [identidade/catálogo](docs/FIX-CONTRATOS-NUMERICOS.md), [opiniões](docs/FIX-P-PR-03.md), [comentários](docs/FIX-P-PR-04.md), [favoritos](docs/FIX-P-PR-05.md) e [notificações](docs/FIX-NOTIFICATION-ID.md). Branches preparadas localmente; Front não possui remoto configurado. Nenhum merge foi feito.

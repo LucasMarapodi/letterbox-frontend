@@ -10,7 +10,7 @@ import type { User } from '../src/models';
 import { encodeRouteId } from '../src/routing/encodeRouteId';
 
 const user: User = { id: 42, displayName: 'Ana', username: 'ana', bio: 'Explorando mundos.', avatarUrl: '/ana.png' };
-const profile: PublicProfile = { user, reviews: [{ id: 55, userId: user.id, gameId: 12, rating: 4, text: 'Review da Ana', createdAt: '2026-01-01T12:00:00Z', updatedAt: null, author: user, game: { id: 12, title: 'Jogo da Ana' } }] };
+const profile: PublicProfile = { user, reviews: [{ id: 55, userId: user.id, gameId: 12, likeCount: 0, rating: 4, text: 'Review da Ana', createdAt: '2026-01-01T12:00:00Z', updatedAt: null, author: user, game: { id: 12, title: 'Jogo da Ana' } }] };
 afterEach(() => vi.restoreAllMocks());
 function open(): void { render(<MemoryRouter initialEntries={[`/perfil/${encodeRouteId(user.id)}`]}><AppRoutes /></MemoryRouter>); }
 test('perfil público completo exibe foto biografia reviews e links numéricos', async () => {

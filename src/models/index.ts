@@ -51,6 +51,7 @@ export interface Review {
   text: string;
   /** Null somente para o histórico sem avaliação; nunca converter para zero. */
   rating: number | null;
+  likeCount: number;
   createdAt: DateTime;
   updatedAt: DateTime | null;
 }
