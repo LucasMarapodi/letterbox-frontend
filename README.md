@@ -49,6 +49,8 @@ O Início combina nome, gênero, plataforma e ordenação com **Aplicar filtros*
 
 Menu público tem busca de pessoas/jogos, debounce de 300 ms, sugestões agrupadas, navegação por teclado e retry de uma categoria. Enter sem seleção abre pesquisa com abas Pessoas/Jogos, 20 itens por página e contexto na URL/histórico. Veja [PR-27](docs/S-PR-27.md) e [PR-28](docs/S-PR-28.md).
 
+A busca fica antes dos links do menu. Itens por página fica à direita na paginação inferior, alinhado ao indicador, preservando as opções 10/20/50. [PR-29 e PR-30](docs/S-PR-29-30.md).
+
 Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e invalida solicitações anteriores imediatamente, tentando revogação real. 401 privado atual limpa sessão; respostas antigas não recuperam identidade ou dados pessoais. Falhas de rede têm erro/retry, sem fixtures.
 
 ## Entrega

@@ -148,14 +148,6 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
       {options.status === 'error' && <><p role="alert">Não foi possível carregar as opções de filtro.</p><Button onClick={() => setOptionsAttempt(previous => previous + 1)}>Tentar novamente opções</Button></>}
     </div>
     </form>
-    <div className="sort-field">
-      <label htmlFor="game-page-size">Itens por página</label>
-      <select id="game-page-size" value={query.pageSize} onChange={(event) => changePageSize(event.target.value)}>
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-      </select>
-    </div>
     </div>
     <p className="applied-filters" aria-label="Filtros aplicados">Nome: {query.term || 'Todos'} · Gênero: {query.genreId ? genre ?? 'Selecionado' : 'Todos'} · Plataforma: {query.platformId ? platform ?? 'Selecionada' : 'Todos'} · Ordem: {sortLabels[query.sort ?? 'release-desc']}</p>
     <section aria-labelledby="catalog-title" aria-busy={state.status === 'loading'}>
@@ -169,12 +161,20 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
         {data.items.length
           ? <div className="game-grid">{data.items.map((game) => <GameCard key={game.id} game={game} showReleaseDate />)}</div>
           : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />}
-        <nav className="catalog-pagination" aria-label="Páginas do catálogo">
-          <Button disabled={state.status !== 'ready' || data.page <= 1} onClick={() => { if (!startLoading()) return; setQuery(current => ({ ...current, page: data.page - 1 })); }}>Anterior</Button>
-          <span aria-live="polite">Página {data.page}</span>
-          <Button disabled={state.status !== 'ready' || !data.hasNextPage} onClick={() => { if (!startLoading()) return; setQuery(current => ({ ...current, page: data.page + 1 })); }}>Próxima</Button>
-        </nav>
       </div>}
+        <nav className="catalog-pagination catalog-pagination-controls" aria-label="Páginas do catálogo">
+          <Button disabled={state.status !== 'ready' || !data || data.page <= 1} onClick={() => { if (!data || !startLoading()) return; setQuery(current => ({ ...current, page: data.page - 1 })); }}>Anterior</Button>
+          <span aria-live="polite">Página {data?.page ?? query.page}</span>
+          <Button disabled={state.status !== 'ready' || !data?.hasNextPage} onClick={() => { if (!data || !startLoading()) return; setQuery(current => ({ ...current, page: data.page + 1 })); }}>Próxima</Button>
+          <div className="sort-field catalog-page-size">
+            <label htmlFor="game-page-size">Itens por página</label>
+            <select id="game-page-size" value={query.pageSize} onChange={(event) => changePageSize(event.target.value)}>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </nav>
     </section>
     {feed}
   </main>;
