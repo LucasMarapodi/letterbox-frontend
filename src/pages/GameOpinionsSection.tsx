@@ -7,6 +7,7 @@ import { useServices } from '../services/ServiceProvider';
 import { Avatar } from '../components/Avatar';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
+import { ReviewFavoriteStar } from '../components/ReviewFavoriteStar';
 
 interface GameOpinionsSectionProps { gameId: GameId; reviewsVersion?: number; }
 type OpinionsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; opinions: GameOpinions };
@@ -60,6 +61,7 @@ export function GameOpinionsSection({ gameId, reviewsVersion = 0 }: GameOpinions
           <Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link>
         </div>
         <p>{review.text}</p>
+        <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
       </article>) : <EmptyState message="Nenhuma review publicada para este jogo." />)}
       </div>
     </>}

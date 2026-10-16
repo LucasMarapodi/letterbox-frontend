@@ -72,7 +72,9 @@ test('perfil de terceiros e visitantes não expõem favoritos', async () => {
   get.mockClear();
   await interaction.click(screen.getByRole('link', { name: 'Outro perfil' }));
   await screen.findByRole('heading', { name: 'Leo' });
-  expect(get).not.toHaveBeenCalled();
+  await screen.findByRole('button', { name: 'Favoritar review de Leo' });
+  expect(get).toHaveBeenCalledTimes(1);
+  expect(get).toHaveBeenCalledWith(expect.objectContaining({ id: ana.id }));
   expect(screen.queryByRole('region', { name: 'Jogos favoritos' })).not.toBeInTheDocument();
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByRole('region', { name: 'Jogos favoritos' })).not.toBeInTheDocument();

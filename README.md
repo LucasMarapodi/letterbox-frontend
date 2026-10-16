@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 612 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 623 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -40,6 +40,8 @@ Visitantes consultam catálogo, detalhes, reviews, comentários, perfis e Comuni
 Nota é recuperada ao reabrir jogo; publicação atualiza reviews; somente o autor edita. Comentários são publicados por outra conta e atualizam a lista pública. Perfis permitem edição do titular; relações e favoritos refletem as respostas da API. Home autenticada usa dashboard agregado, e atualização do feed faz consulta específica. Rankings vêm do servidor e aceitam períodos 24h/7d/30d. Sino consulta notificações ao abrir/reabrir, com foco e Escape.
 
 Início não monta seções de favoritos. Elas permanecem no próprio perfil; Reviews favoritas aparece somente quando há itens. Jogos favoritos usa linhas com capa, nome e resumo. Veja [PR-18](docs/S-PR-18.md), [PR-19](docs/S-PR-19.md) e [PR-20](docs/S-PR-20.md).
+
+Reviews nas listagens de Comunidade, feed, jogo e perfil têm estrela para favoritar/remover, com estado compartilhado por página e sessão. O dashboard reaproveita os favoritos do payload agregado. Veja [PR-23](docs/S-PR-23.md).
 
 Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e invalida solicitações anteriores imediatamente, tentando revogação real. 401 privado atual limpa sessão; respostas antigas não recuperam identidade ou dados pessoais. Falhas de rede têm erro/retry, sem fixtures.
 
