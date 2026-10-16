@@ -21,6 +21,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
     return { ...review, author: { id: review.userId, displayName: author?.displayName ?? 'Usuário indisponível', avatarUrl: author?.avatarUrl ?? null }, game: { id: review.gameId, title: game?.title ?? 'Jogo indisponível' } };
   }
   return {
+    async getGameReviews(id) { return structuredClone(reviews.filter((review) => review.gameId === id).map(reviewDetails)); },
     async getGamesInDiscussion(period) {
       const eligible = commentsInPeriod(comments, period, options.clock ?? (() => new Date()));
       const gameByReview = new Map(reviews.map((review) => [review.id, review.gameId]));

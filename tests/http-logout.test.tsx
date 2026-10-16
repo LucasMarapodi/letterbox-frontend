@@ -6,12 +6,12 @@ import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import { createHttpAdapters, createHttpSessionStore } from '../src/services/http/adapters';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireUser } from './http-fixtures';
+import { wireUser, withCatalog } from './http-fixtures';
 import { deferred } from './fixtures';
 const login = { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' };
 async function open(transport: FetchTransport, session = createHttpSessionStore()): Promise<ReturnType<typeof userEvent.setup>> {
   const interaction = userEvent.setup();
-  render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session })} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withCatalog(transport), session })} /></MemoryRouter>);
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only');
   await interaction.click(screen.getByRole('button',{ name: 'Entrar' })); await screen.findByLabelText('Usuário conectado'); return interaction;
 }

@@ -8,9 +8,10 @@ export interface ReviewTextFormProps {
   submitLabel: string;
   pendingLabel: string;
   failureMessage: string;
+  errorMessage?(error: unknown): string;
   onSubmit(text: string): Promise<void>;
 }
-export function ReviewTextForm({ initialText = '', label = 'Sua review', emptyMessage = 'Escreva sua review.', submitLabel, pendingLabel, failureMessage, onSubmit }: ReviewTextFormProps): ReactElement {
+export function ReviewTextForm({ initialText = '', label = 'Sua review', emptyMessage = 'Escreva sua review.', submitLabel, pendingLabel, failureMessage, errorMessage, onSubmit }: ReviewTextFormProps): ReactElement {
   const id = useId();
   const [text, setText] = useState(initialText);
   const [error, setError] = useState('');
@@ -22,7 +23,7 @@ export function ReviewTextForm({ initialText = '', label = 'Sua review', emptyMe
     if (!text.trim()) { setError(emptyMessage); return; }
     sending.current = true; setPending(true); setError('');
     try { await onSubmit(text); }
-    catch { setError(failureMessage); }
+    catch (error: unknown) { setError(errorMessage ? errorMessage(error) : failureMessage); }
     finally { sending.current = false; setPending(false); }
   }
   return <form onSubmit={submit} aria-label={submitLabel}>

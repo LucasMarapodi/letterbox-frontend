@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { expect, test, vi } from 'vitest';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireUser } from './http-fixtures';
+import { wireUser, withCatalog } from './http-fixtures';
 test('entrada padrão preserva capacidades HTTP ao montar provider sem override', async () => {
   const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'})).mockResolvedValueOnce(Response.json(wireUser));
-  const defaults=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport});
+  const defaults=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport:withCatalog(transport)});
   const original=await vi.importActual<typeof import('../src/services/runtime')>('../src/services/runtime');
   vi.doMock('../src/services/runtime',()=>({...original,defaultApplicationServices:defaults}));
   const {AppRoutes}=await import('../src/App'); const {MemoryRouter}=await import('react-router-dom');

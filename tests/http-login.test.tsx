@@ -6,7 +6,7 @@ import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import { createHttpSessionStore } from '../src/services/http/adapters';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireUser, wireReview } from './http-fixtures';
+import { wireUser, wireReview, withCatalog } from './http-fixtures';
 import { deferred } from './fixtures';
 const credentials = { email: 'test@example.com', password: 'test-only' };
 const login = { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' };
@@ -37,7 +37,7 @@ test.each(['401','invalid','identity'])('confirmação %s rejeita login e elimin
 test('UI aguarda me e não persiste sessão após remontagem', async () => {
   const pending = deferred<Response>();
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockReturnValueOnce(pending.promise);
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withCatalog(transport) });
   const storage = vi.spyOn(Storage.prototype,'setItem');
   const interaction = userEvent.setup();
   const mounted = render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={adapters} /></MemoryRouter>);

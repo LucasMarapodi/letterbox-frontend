@@ -7,7 +7,7 @@ import { createDefaultApplicationServices } from '../src/services/runtime';
 import { SessionProvider, useSession } from '../src/session/SessionProvider';
 import { createHttpSessionStore } from '../src/services/http/adapters';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireUser, wireNotification } from './http-fixtures';
+import { wireUser, wireNotification, wireGame, withCatalog } from './http-fixtures';
 import { deferred } from './fixtures';
 const userA = { ...wireUser, id: 'user-1', displayName: 'Ana API' };
 const userB = { ...wireUser, id: 'user-b', displayName: 'Bia API' };
@@ -15,7 +15,7 @@ const loginA = { user: userA, token: 'test-a', expiresAt: '2080-01-01T00:00:00Z'
 const loginB = { user: userB, token: 'test-b', expiresAt: loginA.expiresAt };
 test('autenticação HTTP não consulta nem exibe dados privados de mocks não migrados', async () => {
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(loginA)).mockResolvedValueOnce(Response.json(userA));
-  const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport});
+  const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport:withCatalog(transport)});
   const favorites = vi.spyOn(adapters.community,'getFavorites'); const feed = vi.spyOn(adapters.community,'getFeed'); const notifications = vi.spyOn(adapters.notifications,'list');
   const interaction = userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={adapters}/></MemoryRouter>);
   await interaction.type(screen.getByLabelText('E-mail'),'a@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
@@ -26,7 +26,7 @@ test('autenticação HTTP não consulta nem exibe dados privados de mocks não m
 });
 test('serviços privados ainda não migrados não aceitam identidade de usuário para gravar em mocks', async () => {
   const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'});
-  for (const operation of [() => adapters.community.rate('game-1',5,userA), () => adapters.community.publish('game-1','Texto',userA), () => adapters.community.comment('review-2','Texto',userA), () => adapters.community.setFavorite('game','game-1',true,userA), () => adapters.community.getRating('game-1',userA), () => adapters.community.findOwnReview('game-1',userA), () => adapters.community.getFavorites(userA), () => adapters.community.getFeed(userA), () => adapters.community.isFollowing('user-2',userA), () => adapters.community.setFollowing('user-2',true,userA), () => adapters.notifications.list(userA)]) {
+  for (const operation of [() => adapters.community.setFavorite('game','game-1',true,userA), () => adapters.community.getFavorites(userA), () => adapters.community.getFeed(userA), () => adapters.community.isFollowing('user-2',userA), () => adapters.community.setFollowing('user-2',true,userA), () => adapters.notifications.list(userA)]) {
     await expect(operation()).rejects.toMatchObject({kind:'configuration'});
   }
 });
@@ -52,6 +52,7 @@ test('versão única e dados tardios de A não entram em B após logout', async 
   expect(Number(screen.getByLabelText('Versão da sessão').textContent)).toBe(session.version());
 });
 test('visitante não dispara consultas HTTP privadas', async()=>{
-  const transport=vi.fn<FetchTransport>(); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
-  await screen.findByRole('link',{name:'Ecos do Horizonte'}); expect(transport).not.toHaveBeenCalled();
+  const transport=vi.fn<FetchTransport>().mockImplementation(async()=>Response.json([wireGame])); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
+  await screen.findByRole('link',{name:wireGame.title}); expect(transport).toHaveBeenCalledTimes(1);
+  expect(transport.mock.calls[0][0]).toContain('/api/v1/games'); expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
 });
