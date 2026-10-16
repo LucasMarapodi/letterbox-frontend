@@ -7,6 +7,7 @@ import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
 import { deferred } from './fixtures';
 import { wireGame, withAuthentication } from './http-fixtures';
+import { decodeCatalogFilters } from '../src/services/http/decoders';
 
 const options = { genres: [{ id: 31, name: 'Aventura da API' }], platforms: [{ id: 42, name: 'Plataforma da API' }] };
 function result(query: URLSearchParams, title = 'Jogo retornado') { return Response.json({ items: [{ ...wireGame, title }], page: Number(query.get('page') ?? 1), pageSize: Number(query.get('pageSize') ?? 20), hasNextPage: true }); }
@@ -102,4 +103,10 @@ test('opções com IDs textuais são rejeitadas em vez de usadas como IDs locais
   await open(false, async url => new URL(url).pathname.endsWith('/filters') ? Response.json({ ...options, genres: [{ id: '31', name: 'Inválido' }] }) : result(new URL(url).searchParams));
   expect(await screen.findByText('Não foi possível carregar as opções de filtro.')).toBeVisible();
   expect(screen.queryByRole('option', { name: 'Inválido' })).not.toBeInTheDocument();
+});
+
+test('decodificador rejeita opções inválidas, nomes ausentes e IDs duplicados', () => {
+  for (const id of ['31', 0, -1, 1.5, 2_147_483_648, null]) expect(() => decodeCatalogFilters({ ...options, genres: [{ id, name: 'Nome' }] })).toThrow();
+  for (const genres of [[{ id: 1, name: ' ' }], [{ id: 1 }], [{ id: 1, name: 'A' }, { id: 1, name: 'B' }]]) expect(() => decodeCatalogFilters({ ...options, genres })).toThrow();
+  expect(decodeCatalogFilters({ genres: [], platforms: [] })).toEqual({ genres: [], platforms: [] });
 });

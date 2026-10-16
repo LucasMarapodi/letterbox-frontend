@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
@@ -10,7 +11,7 @@ import { deferred } from './fixtures';
 
 function open(register: () => Promise<Response>, path = '/cadastro', state: unknown = null) {
   const transport = vi.fn<FetchTransport>().mockImplementation(url => url.endsWith('/auth/register') ? register() : Promise.resolve(Response.json(wirePage())));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   const router = createMemoryRouter([{ path: '*', element: <AppRoutes adapters={adapters} /> }], { initialEntries: [{ pathname: path, state }] });
   render(<RouterProvider router={router} />);
   return { router, adapters, transport, interaction: userEvent.setup() };

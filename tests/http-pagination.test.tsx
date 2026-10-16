@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -10,11 +11,11 @@ import { deferred } from './fixtures';
 
 const page = (number = 1, hasNextPage = false, title = 'Página real') => ({ items: [{ ...wireGame, id: 42, title }], page: number, pageSize: 20, hasNextPage });
 function mount(transport: FetchTransport): void {
-  render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /></MemoryRouter>);
+  render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)})} /></MemoryRouter>);
 }
 test('adaptador decodifica envelope e rejeita array antigo e paginação inválida', async () => {
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(page())).mockResolvedValueOnce(Response.json([wireGame])).mockResolvedValueOnce(Response.json({ ...page(), page: 0 }));
-  const adapters = createHttpAdapters({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createHttpAdapters({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   expect(await adapters.games.list()).toEqual(page());
   await expect(adapters.games.list()).rejects.toMatchObject({ kind: 'contract' });
   await expect(adapters.games.list()).rejects.toMatchObject({ kind: 'contract' });
@@ -43,6 +44,7 @@ test('Home recente, próximo/anterior, filtro e ordenação resetam página; ID 
   await user.click(screen.getByRole('button', { name: 'Próxima' }));
   await screen.findByText('Página 2');
   await user.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
+  await user.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   await screen.findByText('Página 1');
   const urls = transport.mock.calls.map(([url]) => new URL(url));
   expect(urls[0].searchParams.get('sort')).toBe('release-desc');

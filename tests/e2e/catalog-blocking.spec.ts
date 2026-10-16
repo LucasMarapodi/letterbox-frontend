@@ -24,6 +24,9 @@ test.beforeAll(async () => {
   server = createServer((request, response) => {
     response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5175');
     response.setHeader('Content-Type', 'application/json');
+    if (new URL(request.url ?? '/', 'http://127.0.0.1:5091').pathname.endsWith('/filters')) {
+      response.end(JSON.stringify({ genres: [], platforms: [] })); return;
+    }
     const query = new URL(request.url ?? '/', 'http://127.0.0.1:5091').searchParams;
     calls.push(query);
     if (hold) pending.push({ response, query }); else respond(response, query);
@@ -75,7 +78,7 @@ for (const mobile of [false, true]) {
       const before = await position(page);
       hold = true;
       const count = calls.length;
-      await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+      await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
       await expect.poll(() => pending.length).toBe(1);
       await assertBlocked(page, before);
       if (mobile) { await page.touchscreen.tap(80, 100); await assertPosition(page, before); }
@@ -85,7 +88,7 @@ for (const mobile of [false, true]) {
       await expect(page.getByRole('dialog')).toHaveCount(0);
       await expect(page.getByRole('link', { name: 'aventura 1', exact: true })).toBeVisible();
       await assertPosition(page, before);
-      await expect(page.getByRole('button', { name: 'Buscar', exact: true })).toBeFocused();
+      await expect(page.getByRole('button', { name: 'Aplicar filtros', exact: true })).toBeFocused();
       expect(calls).toHaveLength(count + 1);
 
       const size = page.getByLabel('Itens por página');
@@ -118,7 +121,7 @@ for (const mobile of [false, true]) {
 
       const finalCount = calls.length;
       await size.selectOption('50');
-      await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+      await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
       await expect(page.getByRole('dialog')).toHaveCount(0);
       expect(calls).toHaveLength(finalCount);
       await page.screenshot({ path: `docs/evidence/S-PR-25-result-${mobile ? 'mobile' : 'desktop'}.png` });

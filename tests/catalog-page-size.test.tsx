@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -18,7 +19,7 @@ async function open(authenticated = false, respond: (query: URLSearchParams) => 
     const parsed = new URL(url);
     return parsed.pathname === '/api/v1/games' ? respond(parsed.searchParams) : Response.json([]);
   }));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   if (authenticated) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter><AppRoutes adapters={adapters} /></MemoryRouter>);
   const queries = () => transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/games').map(([url]) => Object.fromEntries(new URL(url).searchParams));
@@ -45,6 +46,7 @@ test('trocar quantidade na página 3 volta à primeira e preserva busca aplicada
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'a & b{Enter}');
   await screen.findByText('Página 1');
   await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
+  await interaction.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   await screen.findByText('Página 1');
   for (const page of [2, 3]) {
     await interaction.click(screen.getByRole('button', { name: 'Próxima' }));
@@ -86,9 +88,9 @@ test.each(['', '15', '10abc', 'NaN'])('seleção inválida %s não dispara consu
 test('quantidade mantém loading/erro/retry e descarta resposta regional anterior', async () => {
   const old = deferred<Response>(); const latest = deferred<Response>();
   let retry = false;
-  const { interaction, queries } = await open(false, async query => query.get('pageSize') === '50' ? retry ? Response.json({ ...pageFor(query, 2), hasNextPage: false }) : latest.promise : query.get('sort') === 'name-desc' ? old.promise : Response.json(pageFor(query)));
+  const { interaction, queries } = await open(false, async query => query.get('pageSize') === '50' ? retry ? Response.json({ ...pageFor(query, 2), hasNextPage: false }) : latest.promise : query.get('page') === '2' ? old.promise : Response.json(pageFor(query)));
   await screen.findByText('Página 1');
-  await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
+  await interaction.click(screen.getByRole('button', { name: 'Próxima' }));
   const region = screen.getByRole('region', { name: 'Jogos' });
   expect(region).toHaveAttribute('aria-busy', 'true');
   expect(screen.queryByText(/Exibindo/)).not.toBeInTheDocument();

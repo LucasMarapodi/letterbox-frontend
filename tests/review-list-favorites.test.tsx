@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -43,7 +44,7 @@ async function open(path = '/comunidade', options: { visitor?: boolean; read?: F
     if (endpoint.endsWith('/follow/me')) return Response.json({ following: false });
     throw new Error(`Consulta inesperada: ${endpoint}`);
   });
-  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   if (!options.visitor) await services.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[path]}><AppRoutes adapters={services} /></MemoryRouter>);
   return { transport, interaction: userEvent.setup(), lists, author, switchAccount() { account = { ...wireUser, id: 4, displayName: 'Outra conta' }; selected = new Set(); } };

@@ -1,5 +1,6 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
-import type { GameQuery } from '../contracts';
+import type { GameQuery, CatalogFilters } from '../contracts';
+import { decodeCatalogFilters } from './decoders';
 import { validSearchTerm, type SearchService } from '../searchContracts';
 import { decodeSearch } from './decoders';
 import { isLocalId, type User, type UserId, type GameId, type ReviewId } from '../../models';
@@ -25,6 +26,7 @@ export interface HttpAdapters {
     logout(signal?: AbortSignal): Promise<void>;
   };
   games: {
+    filters(signal?: AbortSignal): Promise<CatalogFilters>;
     list(query?: GameQuery, signal?: AbortSignal): Promise<GamePageResponse>;
     get(id: GameId, signal?: AbortSignal): Promise<GameResponse>;
     opinions(id: GameId, signal?: AbortSignal): Promise<GameOpinionsResponse>;
@@ -128,7 +130,11 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       },
     },
     games: {
-      list: (query, signal) => call({ path: ['games'], query: { term: query?.term, sort: query?.sort, page: query?.page, pageSize: query?.pageSize }, signal }, decodeGamePage),
+      filters: signal => call({ path: ['games', 'filters'], signal }, decodeCatalogFilters),
+      list: (query, signal) => {
+        if ([query?.genreId, query?.platformId].some(value => value !== undefined && !isLocalId(value))) throw new HttpFailure('configuration');
+        return call({ path: ['games'], query: { term: query?.term, sort: query?.sort, genreId: query?.genreId, platformId: query?.platformId, page: query?.page, pageSize: query?.pageSize }, signal }, decodeGamePage);
+      },
       get: (id, signal) => call({ path: ['games', localPathId(id)], signal }, decodeGame),
       opinions: (id, signal) => call({ path: ['games', localPathId(id), 'opinions'], signal }, decodeOpinions),
       reviews: (id, signal) => call({ path: ['games', localPathId(id), 'reviews'], signal }, list(decodeReview)),

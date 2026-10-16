@@ -30,7 +30,7 @@ test('quantidade usa HTTP, volta à primeira página e mostra página parcial em
   await expect(page.getByText('Exibindo 20 jogos · até 20 por página')).toBeVisible();
   expect(calls[0].get('pageSize')).toBe('20');
   await page.getByLabel('Buscar jogos').fill('a & b');
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
   await page.getByLabel('Ordenar por').selectOption('name-desc');
   for (const number of [2, 3]) {
     await page.getByRole('button', { name: 'Próxima', exact: true }).click();

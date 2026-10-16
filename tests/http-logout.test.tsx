@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -36,14 +37,14 @@ test('falha de revogação informa erro sem restaurar usuário', async () => {
 test('401 privado atual limpa usuário/sino/dados e mostra necessidade de login', async () => {
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockResolvedValueOnce(Response.json(wireUser)).mockResolvedValueOnce(Response.json({ code:'unauthorized',message:'Seguro' },{status:401}));
   const session = createHttpSessionStore(); await open(transport, session);
-  const http = createHttpAdapters({apiBaseUrl:'http://localhost:5207'},{transport,session});
+  const http = createHttpAdapters({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session});
   await act(async () => { await expect(http.auth.me()).rejects.toMatchObject({status:401}); });
   expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument(); expect(screen.queryByRole('button',{name:'Notificações'})).not.toBeInTheDocument();
   expect(screen.getByRole('alert')).toHaveTextContent('Sua sessão expirou. Entre novamente.');
 });
 test('logout invalida login que ainda espera confirmação', async () => {
   const pending = deferred<Response>(); const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockReturnValueOnce(pending.promise).mockResolvedValueOnce(new Response(null,{status:204}));
-  const session = createHttpSessionStore(); const auth = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).auth;
+  const session = createHttpSessionStore(); const auth = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session}).auth;
   const entering = auth.login({email:'test@example.com',password:'test-only'}).catch((error:unknown)=>error);
   // O transporte privado me precisa ter iniciado antes da revogação.
   await vi.waitFor(()=>expect(transport).toHaveBeenCalledTimes(2));

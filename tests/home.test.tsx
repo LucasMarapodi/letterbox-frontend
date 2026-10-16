@@ -7,6 +7,7 @@ import type { Services } from '../src/services/contracts';
 vi.mock('../src/services', () => ({
   services: {
     games: {
+      async getFilters() { return { genres: [], platforms: [] }; },
       async list() { return gamePage(); },
       async getById(): Promise<null> { return null; },
       async getOpinions() { return { averageRating: null, reviews: [] }; },

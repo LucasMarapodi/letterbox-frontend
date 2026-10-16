@@ -16,6 +16,7 @@ const endpoints: EndpointCase[] = [
   { name: 'me', method: 'GET', path: '/auth/me', run: (a) => a.auth.me(), response: wireUser, private: true },
   { name: 'logout', method: 'POST', path: '/auth/logout', run: (a) => a.auth.logout(), response: undefined, private: true },
   { name: 'games', method: 'GET', path: '/games?term=a+%26+b&sort=name-desc', run: (a) => a.games.list({ term: 'a & b', sort: 'name-desc' }), response: wirePage([wireGame]) },
+  { name: 'catalog-filters', method: 'GET', path: '/games/filters', run: a => a.games.filters(), response: { genres: [{ id: 31, name: 'Aventura' }], platforms: [{ id: 42, name: 'Console' }] } },
   { name: 'game', method: 'GET', path: '/games/12', run: (a) => a.games.get(wireGame.id), response: wireGame },
   { name: 'opinions', method: 'GET', path: '/games/99/opinions', run: (a) => a.games.opinions(99), response: { averageRating: 0, reviews: [wireReview] } },
   { name: 'rating-read', method: 'GET', path: '/games/99/rating/me', run: (a) => a.games.myRating(99), response: { rating: null }, private: true },

@@ -10,7 +10,7 @@ import type { GameService, Services } from '../src/services/contracts';
 import { deferred, makeGame } from './fixtures';
 
 vi.mock('../src/services', () => ({ services: {
-  games: { list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
+  games: { getFilters: vi.fn<GameService['getFilters']>().mockResolvedValue({ genres: [], platforms: [] }), list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
 } } satisfies { services: Services }));
 
 beforeEach(() => {

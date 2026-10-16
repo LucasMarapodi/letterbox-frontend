@@ -1,5 +1,5 @@
 import { gamePage } from './fixtures';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, expect, test, vi } from 'vitest';
@@ -11,7 +11,7 @@ import type { GameService, Services } from '../src/services/contracts';
 import { deferred, makeGame } from './fixtures';
 
 vi.mock('../src/services', () => ({ services: {
-  games: { list: vi.fn<GameService['list']>().mockResolvedValue(gamePage([])), getById: vi.fn<GameService['getById']>().mockResolvedValue(null), getOpinions: vi.fn<GameService['getOpinions']>().mockResolvedValue({ averageRating: null, reviews: [] }) },
+  games: { getFilters: vi.fn<GameService['getFilters']>().mockResolvedValue({ genres: [], platforms: [] }), list: vi.fn<GameService['list']>().mockResolvedValue(gamePage([])), getById: vi.fn<GameService['getById']>().mockResolvedValue(null), getOpinions: vi.fn<GameService['getOpinions']>().mockResolvedValue({ averageRating: null, reviews: [] }) },
 } } satisfies { services: Services }));
 
 function renderHome(): void { render(<MemoryRouter><HomePage /></MemoryRouter>); }
@@ -34,10 +34,10 @@ test('a listagem pendente anuncia carregamento e exibe os jogos após resolver',
   const pending = deferred<import('../src/services/contracts').GamePage>();
   vi.mocked(services.games.list).mockReturnValueOnce(pending.promise);
   renderHome();
-  expect(screen.getByRole('status')).toHaveTextContent('Carregando jogos…');
+  expect(within(screen.getByRole('region', { name: 'Jogos' })).getByRole('status')).toHaveTextContent('Carregando jogos…');
   await act(async () => { pending.resolve(gamePage([makeGame()])); await pending.promise; });
   expect(screen.getByRole('link', { name: 'Jogo público' })).toBeVisible();
-  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(within(screen.getByRole('region', { name: 'Jogos' })).queryByRole('status')).not.toBeInTheDocument();
 });
 
 test('lista vazia informa ausência de jogos sem apresentar erro', async () => {
@@ -71,7 +71,7 @@ test('busca por Enter envia o termo ao serviço e apresenta seus resultados', as
   await screen.findByRole('link', { name: 'Jogo público' });
   await user.type(screen.getByRole('textbox', { name: 'Buscar jogos' }), 'Ecos{Enter}');
   expect(await screen.findByRole('link', { name: 'Ecos' })).toBeVisible();
-  expect(services.games.list).toHaveBeenLastCalledWith({ term: 'Ecos', sort: 'name-asc', page: 1, pageSize: 20 });
+  expect(services.games.list).toHaveBeenLastCalledWith({ term: 'Ecos', sort: 'release-desc', page: 1, pageSize: 20 });
   expect(screen.queryByRole('link', { name: 'Jogo público' })).not.toBeInTheDocument();
 });
 
@@ -82,7 +82,7 @@ test('busca sem resultados informa ausência e limpar restaura a lista inicial',
   await screen.findByRole('link', { name: 'Jogo público' });
   const input = screen.getByRole('textbox', { name: 'Buscar jogos' });
   await user.type(input, 'inexistente');
-  await user.click(screen.getByRole('button', { name: 'Buscar' }));
+  await user.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   expect(await screen.findByText('Nenhum jogo encontrado para esta busca.')).toBeVisible();
   await user.click(screen.getByRole('button', { name: 'Limpar busca' }));
   expect(await screen.findByRole('link', { name: 'Jogo público' })).toBeVisible();
@@ -112,6 +112,7 @@ test('ordenar mantém a busca submetida e limpar mantém a ordenação escolhida
   await user.type(screen.getByRole('textbox', { name: 'Buscar jogos' }), 'game{Enter}');
   await screen.findByRole('link', { name: alpha.title });
   await user.selectOptions(screen.getByRole('combobox', { name: 'Ordenar por' }), 'name-desc');
+  await user.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   expect(services.games.list).toHaveBeenLastCalledWith({ term: 'game', sort: 'name-desc', page: 1, pageSize: 20 });
   expect(await screen.findAllByRole('article')).toHaveLength(2);
   expect(screen.getAllByRole('article')[0]).toHaveTextContent(zeta.title);

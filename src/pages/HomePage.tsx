@@ -9,27 +9,41 @@ import { TextField } from '../components/TextField';
 import { CatalogNotice } from '../components/CatalogNotice';
 import { CatalogLoadingOverlay } from '../components/CatalogLoadingOverlay';
 import { HttpFailure } from '../services/http/client';
-import type { GamePage, GameQuery, GameSort } from '../services/contracts';
+import type { GamePage, GameQuery, GameSort, CatalogFilters } from '../services/contracts';
 
 type CatalogState = { status: 'loading'; data: GamePage | null; blocking: boolean; focus?: HTMLElement | null }
-  | { status: 'error'; data: GamePage | null; integration: boolean; retryBlocking: boolean }
+  | { status: 'error'; data: GamePage | null; integration: boolean; invalidFilter: boolean; retryBlocking: boolean }
   | { status: 'ready'; data: GamePage };
+type Draft = Pick<GameQuery, 'genreId' | 'platformId'> & { term: string; sort: GameSort };
+const defaults: Draft = { term: '', sort: 'release-desc' };
 
 export function HomePage({ authenticated = false, feed }: { authenticated?: boolean; feed?: ReactNode }): ReactElement {
   const { games } = useServices();
   const [state, setState] = useState<CatalogState>({ status: 'loading', data: null, blocking: false });
   const blocking = useRef(false);
   const [attempt, setAttempt] = useState<number>(0);
-  const [term, setTerm] = useState<string>('');
-  const explicitSort = useRef(false);
+  const [draft, setDraft] = useState<Draft>(defaults);
+  const [options, setOptions] = useState<{ status: 'loading' | 'error' } | { status: 'ready'; data: CatalogFilters }>({ status: 'loading' });
+  const [optionsAttempt, setOptionsAttempt] = useState(0);
   const [query, setQuery] = useState<GameQuery>({ term: '', sort: 'release-desc', page: 1, pageSize: 20 });
+  useEffect(() => {
+    let active = true;
+    setOptions({ status: 'loading' });
+    void (async () => {
+      await Promise.resolve();
+      if (!active) return;
+      try { const data = await games.getFilters(); if (active) setOptions({ status: 'ready', data }); }
+      catch { if (active) setOptions({ status: 'error' }); }
+    })();
+    return () => { active = false; };
+  }, [games, optionsAttempt]);
   useEffect(() => {
     let active: boolean = true;
     games.list(query).then(
       (data) => { if (active) { blocking.current = false; setState({ status: 'ready', data }); } },
       (error: unknown) => { if (active) {
         blocking.current = false;
-        setState(previous => ({ status: 'error', data: previous.data, retryBlocking: previous.status === 'loading' && previous.blocking, integration: error instanceof HttpFailure && [502, 503, 504].includes(error.status ?? 0) }));
+        setState(previous => ({ status: 'error', data: previous.data, retryBlocking: previous.status === 'loading' && previous.blocking, invalidFilter: error instanceof HttpFailure && error.code === 'invalid_filter', integration: error instanceof HttpFailure && [502, 503, 504].includes(error.status ?? 0) }));
       } },
     );
     return () => { active = false; };
@@ -45,29 +59,38 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
 
   function search(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    const nextTerm = term.trim();
-    const sort = explicitSort.current ? query.sort : nextTerm ? 'name-asc' : 'release-desc';
-    if (nextTerm === query.term?.trim() && sort === query.sort && query.page === 1) return;
+    apply({ ...draft, term: draft.term.trim(), page: 1, pageSize: query.pageSize });
+  }
+  function apply(next: GameQuery): void {
+    if (next.term === query.term && next.sort === query.sort && next.genreId === query.genreId && next.platformId === query.platformId && next.page === query.page && next.pageSize === query.pageSize) return;
     if (!startLoading(true)) return;
-    setQuery(previous => ({ ...previous, term: nextTerm, page: 1, sort }));
+    setQuery(next);
   }
 
   function clearSearch(): void {
     if (blocking.current) return;
-    if (!term.trim() && !query.term?.trim()) return;
-    setTerm('');
+    if (!draft.term.trim() && !query.term?.trim()) return;
+    setDraft(previous => ({ ...previous, term: '' }));
     if (!query.term?.trim()) return;
     if (!startLoading(true)) return;
-    setQuery((previous) => ({ ...previous, term: '', sort: explicitSort.current ? previous.sort : 'release-desc', page: 1 }));
+    setQuery(previous => ({ ...previous, term: '', page: 1 }));
+  }
+  function clearFilters(): void {
+    if (blocking.current) return;
+    setDraft(defaults);
+    apply({ ...defaults, page: 1, pageSize: query.pageSize });
   }
 
   function changeSort(value: string): void {
     if (value !== 'release-desc' && value !== 'name-asc' && value !== 'name-desc') return;
     const sort: GameSort = value;
-    if (blocking.current || sort === query.sort) return;
-    explicitSort.current = true;
-    startLoading();
-    setQuery((previous) => ({ ...previous, sort, page: 1 }));
+    if (!blocking.current) setDraft(previous => ({ ...previous, sort }));
+  }
+  function changeDimension(kind: 'genreId' | 'platformId', value: string): void {
+    if (blocking.current || options.status !== 'ready') return;
+    const entries = kind === 'genreId' ? options.data.genres : options.data.platforms;
+    if (value !== '' && !entries.some(option => String(option.id) === value)) return;
+    setDraft(previous => ({ ...previous, [kind]: value === '' ? undefined : Number(value) }));
   }
 
   function retry(): void {
@@ -82,6 +105,9 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
     setQuery((previous) => ({ ...previous, pageSize, page: 1 }));
   }
   const data = state.data;
+  const sortLabels = { 'release-desc': 'Últimos lançados', 'name-asc': 'Nome: A–Z', 'name-desc': 'Nome: Z–A' };
+  const genre = options.status === 'ready' ? options.data.genres.find(option => option.id === query.genreId)?.name : undefined;
+  const platform = options.status === 'ready' ? options.data.platforms.find(option => option.id === query.platformId)?.name : undefined;
   return <main className="dashboard">
     {state.status === 'loading' && state.blocking && <CatalogLoadingOverlay restoreFocus={state.focus ?? null} />}
     {authenticated ? <section className="dashboard-welcome" aria-labelledby="dashboard-title">
@@ -95,19 +121,33 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
       <Link className="primary-link" to="/cadastro">Comece sua jornada <span aria-hidden="true">↗</span></Link>
     </section>}
     <div className="catalog-toolbar">
-    <form className="catalog-search" aria-label="Busca de jogos" onSubmit={search}>
-      <TextField label="Buscar jogos" placeholder="Encontre seu próximo jogo…" value={term} onChange={(event) => setTerm(event.target.value)} />
-      <Button type="submit">Buscar</Button>{' '}
-      <Button onClick={clearSearch}>Limpar busca</Button>
-    </form>
+    <form className="catalog-search catalog-filters" aria-label="Busca de jogos" onSubmit={search}>
+      <TextField label="Buscar jogos" placeholder="Encontre seu próximo jogo…" value={draft.term} onChange={event => setDraft(previous => ({ ...previous, term: event.target.value }))} />
+      <div className="sort-field"><label htmlFor="game-genre">Gênero</label>
+        <select id="game-genre" value={draft.genreId ?? ''} disabled={options.status !== 'ready'} onChange={event => changeDimension('genreId', event.target.value)}>
+          <option value="">Todos</option>{options.status === 'ready' && options.data.genres.map(option => <option key={option.id} value={option.id}>{option.name}</option>)}
+        </select>
+      </div>
+      <div className="sort-field"><label htmlFor="game-platform">Plataforma</label>
+        <select id="game-platform" value={draft.platformId ?? ''} disabled={options.status !== 'ready'} onChange={event => changeDimension('platformId', event.target.value)}>
+          <option value="">Todos</option>{options.status === 'ready' && options.data.platforms.map(option => <option key={option.id} value={option.id}>{option.name}</option>)}
+        </select>
+      </div>
     <div className="sort-field">
       <label htmlFor="game-sort">Ordenar por</label>{' '}
-      <select id="game-sort" value={query.sort} onChange={(event) => changeSort(event.target.value)}>
-        <option value="release-desc">Recentes</option>
+      <select id="game-sort" value={draft.sort} aria-describedby="game-sort-help" onChange={(event) => changeSort(event.target.value)}>
+        <option value="release-desc">Últimos lançados</option>
         <option value="name-asc">Nome: A–Z</option>
         <option value="name-desc">Nome: Z–A</option>
       </select>
+      <small id="game-sort-help">Últimos lançados usa a primeira data de lançamento, da mais recente à mais antiga.</small>
     </div>
+    <div className="catalog-filter-actions"><Button type="submit">Aplicar filtros</Button><Button onClick={clearSearch}>Limpar busca</Button><Button onClick={clearFilters}>Limpar filtros</Button></div>
+    <div className="filter-options-feedback" role="region" aria-label="Opções de filtro" aria-busy={options.status === 'loading'}>
+      {options.status === 'loading' && <LoadingState message="Carregando opções de filtro…" />}
+      {options.status === 'error' && <><p role="alert">Não foi possível carregar as opções de filtro.</p><Button onClick={() => setOptionsAttempt(previous => previous + 1)}>Tentar novamente opções</Button></>}
+    </div>
+    </form>
     <div className="sort-field">
       <label htmlFor="game-page-size">Itens por página</label>
       <select id="game-page-size" value={query.pageSize} onChange={(event) => changePageSize(event.target.value)}>
@@ -117,16 +157,17 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
       </select>
     </div>
     </div>
+    <p className="applied-filters" aria-label="Filtros aplicados">Nome: {query.term || 'Todos'} · Gênero: {query.genreId ? genre ?? 'Selecionado' : 'Todos'} · Plataforma: {query.platformId ? platform ?? 'Selecionada' : 'Todos'} · Ordem: {sortLabels[query.sort ?? 'release-desc']}</p>
     <section aria-labelledby="catalog-title" aria-busy={state.status === 'loading'}>
       <h2 id="catalog-title">Jogos</h2>
       {state.status === 'loading' && !state.blocking && <LoadingState message="Carregando jogos…" />}
-      {state.status === 'error' && <ErrorState message={state.integration ? 'O catálogo está temporariamente indisponível. Tente novamente.' : 'Não foi possível carregar os jogos.'} onRetry={retry} />}
+      {state.status === 'error' && <ErrorState message={state.invalidFilter ? 'Filtro indisponível. Altere a seleção e aplique novamente.' : state.integration ? 'O catálogo está temporariamente indisponível. Tente novamente.' : 'Não foi possível carregar os jogos.'} onRetry={retry} />}
       {state.status === 'ready' && <CatalogNotice paths={[['games']]} onRetry={retry} />}
       {state.status === 'error' && data && <p>Resultados anteriores; a atualização não foi concluída.</p>}
       {data && <div className="catalog-results" aria-hidden={state.status !== 'ready'} inert={state.status !== 'ready'}>
         <p className="catalog-count" style={{ visibility: state.status === 'ready' ? 'visible' : 'hidden' }}>Exibindo {data.items.length} {data.items.length === 1 ? 'jogo' : 'jogos'} · até {data.pageSize} por página</p>
         {data.items.length
-          ? <div className="game-grid">{data.items.map((game) => <GameCard key={game.id} game={game} />)}</div>
+          ? <div className="game-grid">{data.items.map((game) => <GameCard key={game.id} game={game} showReleaseDate />)}</div>
           : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />}
         <nav className="catalog-pagination" aria-label="Páginas do catálogo">
           <Button disabled={state.status !== 'ready' || data.page <= 1} onClick={() => { if (!startLoading()) return; setQuery(current => ({ ...current, page: data.page - 1 })); }}>Anterior</Button>

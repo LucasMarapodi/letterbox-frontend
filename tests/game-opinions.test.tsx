@@ -9,7 +9,7 @@ import type { GameOpinions, GameService, PublicReview, Services } from '../src/s
 import { deferred, makeGame } from './fixtures';
 
 vi.mock('../src/services', () => ({ services: {
-  games: { list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
+  games: { getFilters: vi.fn<GameService['getFilters']>().mockResolvedValue({ genres: [], platforms: [] }), list: vi.fn<GameService['list']>(), getById: vi.fn<GameService['getById']>(), getOpinions: vi.fn<GameService['getOpinions']>() },
 } } satisfies { services: Services }));
 
 const review: PublicReview = { id: 1, gameId: 1, userId: 1, text: 'Uma experiência memorável.', createdAt: '2026-01-01T00:00:00Z', updatedAt: null, author: { id: 1, displayName: 'Ana', avatarUrl: null } };

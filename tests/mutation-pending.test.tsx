@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -52,7 +53,7 @@ function readBody(path: string): unknown {
 test.each(cases)('$name: dois submits/cliques enviam uma mutação, erro libera retry e preserva dados', async item => {
   let response = deferred<Response>();
   const transport = vi.fn<FetchTransport>().mockImplementation((url, init) => new URL(url).pathname === `/api/v1${item.endpoint}` && init.method === item.method ? response.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   if (!item.guest) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   transport.mockClear();
   const saved = vi.fn();
@@ -96,7 +97,7 @@ test.each(['comentário', 'editar review'])('%s: nova tentativa pendente/fracass
   const item = cases.find(item => item.name === name)!;
   let response = deferred<Response>();
   const transport: FetchTransport = (url, init) => init.method !== 'GET' && !url.endsWith('/auth/login') ? response.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname)));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}>{item.render(vi.fn())}</SessionProvider></ServiceProvider></MemoryRouter>);
   const interaction = userEvent.setup();
@@ -119,7 +120,7 @@ test.each(['comentário', 'editar review'])('%s: nova tentativa pendente/fracass
 test('logout informa revogação pendente sem bloquear novo login; resposta antiga não afeta nova sessão', async () => {
   const pending = deferred<Response>();
   const transport = vi.fn<FetchTransport>().mockImplementation((url) => url.endsWith('/auth/logout') ? pending.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   const logoutCall = vi.spyOn(adapters.auth, 'logout');
   render(<MemoryRouter><AppRoutes adapters={adapters} /></MemoryRouter>);
@@ -143,7 +144,7 @@ test('logout informa revogação pendente sem bloquear novo login; resposta anti
 test('ações em alvos independentes continuam disponíveis durante envio e erro do primeiro', async () => {
   const first = deferred<Response>(); const second = deferred<Response>();
   const transport = vi.fn<FetchTransport>().mockImplementation((url, init) => init.method === 'PUT' ? url.endsWith('/1') ? first.promise : second.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}><FavoriteButton kind="game" targetId={1} /><FavoriteButton kind="review" targetId={56} /></SessionProvider></ServiceProvider></MemoryRouter>);
   const firstButton = await screen.findByRole('button', { name: 'Favoritar jogo' });
@@ -163,7 +164,7 @@ test('ações em alvos independentes continuam disponíveis durante envio e erro
 test.each([204, 500])('logout %s finaliza andamento e uma sessão posterior pode sair novamente', async status => {
   let pending = deferred<Response>();
   const transport = vi.fn<FetchTransport>().mockImplementation(url => url.endsWith('/auth/logout') ? pending.promise : Promise.resolve(Response.json(readBody(new URL(url).pathname))));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter><AppRoutes adapters={adapters} /></MemoryRouter>);
   const interaction = userEvent.setup();

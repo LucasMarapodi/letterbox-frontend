@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,7 +24,7 @@ async function open(status?:number,other=false){
     if(url.endsWith('/reviews')||url.endsWith('/followers')||url.endsWith('/following'))return Response.json([]);
     return Response.json(other?{...profile,id: 2}:profile);
   }));
-  const interaction=userEvent.setup();render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport})}/></MemoryRouter>);
+  const interaction=userEvent.setup();render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await interaction.click(await screen.findByRole('link',{name:other?'Perfil de exemplo':'Meu perfil'}));await screen.findByRole('heading',{name:'Ana',level:2});return {interaction,transport};
 }
 test('formulário PATCH atualiza perfil/navbar e limpar avatar envia null',async()=>{
@@ -38,5 +39,5 @@ test('outro usuário não vê edição',async()=>{await open(undefined,true);exp
 test('401 remove editor/sessão e não declara sucesso',async()=>{const {interaction}=await open(401);await interaction.type(await screen.findByLabelText('Biografia'),'rascunho');await interaction.click(screen.getByRole('button',{name:'Salvar perfil'}));expect(await screen.findByText('Sua sessão expirou. Entre novamente.')).toBeVisible();expect(screen.queryByRole('button',{name:'Salvar perfil'})).not.toBeInTheDocument();expect(screen.queryByText('Perfil atualizado.')).not.toBeInTheDocument();});
 test('PATCH tardio após logout não restaura perfil nem sessão',async()=>{
   const pending=deferred<Response>();const transport=withAuthentication(async(url,init)=>init.method==='PATCH'?pending.promise:url.endsWith('/auth/logout')?new Response(null,{status:204}):Response.json([]));
-  const {auth}=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport});await auth.login({email:'test@example.com',password:'test-only'});const edit=auth.editProfile;if(!edit)throw new Error('Edição de perfil HTTP ausente.');const result=edit({bio:'rascunho'}).catch((error:unknown)=>error);await auth.logout?.();pending.resolve(Response.json({...wireUser,bio:'rascunho'}));expect(await result).toMatchObject({kind:'cancelled'});expect(auth.sessionUser?.()).toBeNull();
+  const {auth}=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport)});await auth.login({email:'test@example.com',password:'test-only'});const edit=auth.editProfile;if(!edit)throw new Error('Edição de perfil HTTP ausente.');const result=edit({bio:'rascunho'}).catch((error:unknown)=>error);await auth.logout?.();pending.resolve(Response.json({...wireUser,bio:'rascunho'}));expect(await result).toMatchObject({kind:'cancelled'});expect(auth.sessionUser?.()).toBeNull();
 });

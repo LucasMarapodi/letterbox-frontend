@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { wirePage } from './http-fixtures';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,14 +12,14 @@ import { wireUser, wireReview, wireComment, withAuthentication } from './http-fi
 test('comentários públicos e POST com apenas text/Bearer usam DTO validado',async()=>{
   const session=createHttpSessionStore(); session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
   const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json([wireComment])).mockResolvedValueOnce(Response.json(wireComment,{status:201}));
-  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
+  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session}).community;
   expect(await service.getComments(wireReview.id)).toEqual([wireComment]); expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
   expect(await service.comment(wireReview.id,wireComment.text,{...wireUser,id: 999})).toEqual(wireComment);
   expect(transport.mock.calls[1][0].endsWith('/reviews/55/comments')).toBe(true); expect(transport.mock.calls[1][1]).toMatchObject({method:'POST',body:'{"text":"Comentário"}',headers:{Authorization:'Bearer test-only'}});
 });
 test('visitante/logout não autorizam User forjado; 401 limpa sessão e impede nova escrita',async()=>{
   const session=createHttpSessionStore(); const transport=vi.fn<FetchTransport>().mockResolvedValue(Response.json({code:'unauthorized',message:'Seguro'},{status:401}));
-  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
+  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session}).community;
   await expect(service.comment(55,'texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(transport).not.toHaveBeenCalled();
   session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
   await expect(service.comment(55,'texto',wireUser)).rejects.toMatchObject({code:'session-required'}); expect(session.current()).toBeNull();
@@ -44,7 +45,7 @@ async function open(status?:number,visitor=false):Promise<{interaction:ReturnTyp
     }
     return Response.json({...wireReview,userId: 2,author:{...wireReview.author,id: 2,displayName:'Outro'}});
   }));
-  const interaction=userEvent.setup();render(<MemoryRouter initialEntries={[visitor?'/reviews/55':'/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
+  const interaction=userEvent.setup();render(<MemoryRouter initialEntries={[visitor?'/reviews/55':'/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);
   if(!visitor){await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await interaction.click(await screen.findByRole('link',{name:'Review de exemplo'}));}
   await screen.findByRole('heading',{name:'Review de Outro'});return {interaction,transport};
 }
@@ -58,4 +59,4 @@ test.each([[400,'Seu comentário não foi aceito. Verifique o texto.'],[404,'Est
   const {interaction}=await open(status);await interaction.type(await screen.findByLabelText('Seu comentário'),'rascunho');await interaction.click(screen.getByRole('button',{name:'Publicar comentário'}));
   expect(await screen.findByText(message)).toBeVisible();expect(screen.getByLabelText('Seu comentário')).toHaveValue('rascunho');expect(screen.queryByText('Comentário publicado.')).not.toBeInTheDocument();expect(screen.queryByRole('list',{name:'Comentários da review'})).not.toBeInTheDocument();
 });
-test('visitante consulta comentários HTTP sem formulário',async()=>{const {transport}=await open(undefined,true);expect(await screen.findByText('Nenhum comentário nesta review.')).toBeVisible();expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();expect(transport.mock.calls.filter(([url,init])=>url.endsWith('/comments')&&init.method==='GET')).toHaveLength(1);});
+test('visitante consulta comentários HTTP sem formulário',async()=>{const { transport}=await open(undefined,true);expect(await screen.findByText('Nenhum comentário nesta review.')).toBeVisible();expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();expect(transport.mock.calls.filter(([url,init])=>url.endsWith('/comments')&&init.method==='GET')).toHaveLength(1);});

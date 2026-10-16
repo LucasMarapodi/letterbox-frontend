@@ -12,7 +12,7 @@ npm run dev
 npm run check
 ```
 
-check executa 658 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
+check executa 667 testes de regressão/contratos, lint, tipos e build. Configuração inválida ou API indisponível produz erro; não existe seletor de modo mock ou fallback para catálogo local.
 
 ## E2E com API real
 
@@ -44,6 +44,8 @@ Início não monta seções de favoritos. Elas permanecem no próprio perfil; Re
 Reviews nas listagens de Comunidade, feed, jogo e perfil têm estrela para favoritar/remover, com estado compartilhado por página e sessão. O dashboard reaproveita os favoritos do payload agregado. Veja [PR-23](docs/S-PR-23.md).
 
 Busca, limpeza efetiva da busca e troca de tamanho preservam o catálogo montado e a rolagem com overlay bloqueante durante a consulta. Erro libera a tela e oferece retry; operações sem alteração não consultam novamente. Veja [PR-25](docs/S-PR-25.md).
+
+O Início combina nome, gênero, plataforma e ordenação com **Aplicar filtros**. Opções vêm da API, com loading/retry separados; editar o formulário não consulta. Limpar filtros restaura Todos e Últimos lançados, preservando o tamanho. Últimos lançados usa a primeira data de lançamento, exibida nos cartões quando disponível. Veja [PR-06](docs/S-PR-06.md).
 
 Menu público tem busca de pessoas/jogos, debounce de 300 ms, sugestões agrupadas, navegação por teclado e retry de uma categoria. Enter sem seleção abre pesquisa com abas Pessoas/Jogos, 20 itens por página e contexto na URL/histórico. Veja [PR-27](docs/S-PR-27.md) e [PR-28](docs/S-PR-28.md).
 

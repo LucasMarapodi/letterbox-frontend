@@ -46,7 +46,7 @@ test('contrato simulado: paginação, CORS dos headers, stale, retry e erro sem 
   await expect(page.getByRole('link', { name: 'Jogo de teste 2', exact: true })).toBeVisible();
   await expect(page.getByText(/Dados do catálogo desatualizados/)).toHaveCount(0);
   unavailable = true;
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
   await expect(page.getByText('O catálogo está temporariamente indisponível. Tente novamente.', { exact: true })).toBeVisible();
   await expect(page.locator('.game-grid')).toHaveCount(0);
   unavailable = false;

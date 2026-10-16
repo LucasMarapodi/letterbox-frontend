@@ -10,6 +10,7 @@ test('centraliza o mock padrão sem exigir que a tela importe fixtures', async (
 
 test('permite substituir a implementação mantendo o contrato público', async () => {
   const games: GameService = {
+    async getFilters() { return { genres: [], platforms: [] }; },
     async list() { return gamePage(); },
     async getById() { return null; },
     async getOpinions() { return { averageRating: null, reviews: [] }; },

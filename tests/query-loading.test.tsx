@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -51,7 +52,7 @@ const cases: QueryCase[] = [
 test.each(cases)('região $region anuncia pendência e não fica busy após resposta', async ({ route, endpoint, region, authenticated, action }) => {
   const pending = deferred<Response>();
   const transport = vi.fn<FetchTransport>().mockImplementation(async (url) => new URL(url).pathname === `/api/v1${endpoint}` ? (await pending.promise).clone() : Response.json(body(new URL(url).pathname)));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   if (authenticated) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[route]}><AppRoutes adapters={adapters} /></MemoryRouter>);
   if (action) await userEvent.setup().click(await screen.findByRole('button', { name: action }));
@@ -102,7 +103,7 @@ test('falha ao consultar review própria oferece retry sem liberar publicação 
     if (url.endsWith('/reviews/me') && failure) throw new TypeError('offline');
     return Response.json(body(new URL(url).pathname));
   };
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[gameRoute]}><AppRoutes adapters={adapters} /></MemoryRouter>);
   await screen.findByText('Não foi possível verificar sua review.');

@@ -44,7 +44,7 @@ test('limpeza vazia e de rascunho preserva página 3; busca aplicada gera uma ú
   await page.screenshot({ path: 'docs/evidence/S-PR-15-clear-search-page3.png' });
 
   await page.getByLabel('Buscar jogos').fill('RPG');
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
   await expect(page.getByText('Página 1', { exact: true })).toBeVisible();
   expect(queries.at(-1)?.term).toBe('RPG');
   await page.getByLabel('Buscar jogos').fill('');

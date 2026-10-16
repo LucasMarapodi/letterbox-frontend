@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -13,7 +14,7 @@ function response(query: URLSearchParams, title = 'Jogo atual'): Response {
 }
 async function open(respond: (query: URLSearchParams) => Promise<Response> = async query => response(query), authenticated = false) {
   const transport = vi.fn<FetchTransport>().mockImplementation(withAuthentication(async url => respond(new URL(url).searchParams)));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   if (authenticated) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter><AppRoutes adapters={adapters} /></MemoryRouter>);
   return { interaction: userEvent.setup(), queries: () => transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/games').map(([url]) => Object.fromEntries(new URL(url).searchParams)) };
@@ -25,6 +26,7 @@ test.each([false, true])('sem busca: cliques repetidos preservam página 3, orde
   await interaction.selectOptions(screen.getByLabelText('Itens por página'), '50');
   await screen.findByText('Página 1');
   await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
+  await interaction.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   await screen.findByText('Página 1');
   for (const page of [2, 3]) {
     await interaction.click(screen.getByRole('button', { name: 'Próxima' })); await screen.findByText(`Página ${page}`);
@@ -87,7 +89,8 @@ test('busca aplicada com campo já apagado gera uma consulta sem termo, reseta p
   const { interaction, queries } = await open(async query => hold ? pending.promise.then(value => value.clone()) : response(query));
   await screen.findByText('Página 1');
   await interaction.selectOptions(screen.getByLabelText('Itens por página'), '50'); await screen.findByText('Página 1');
-  await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc'); await screen.findByText('Página 1');
+  await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
+  await interaction.click(screen.getByRole('button', { name: 'Aplicar filtros' })); await screen.findByText('Página 1');
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'aplicada{Enter}'); await screen.findByText('Página 1');
   await interaction.click(screen.getByRole('button', { name: 'Próxima' })); await screen.findByText('Página 2');
   await interaction.clear(screen.getByLabelText('Buscar jogos'));
@@ -107,7 +110,7 @@ test('busca pendente bloqueia limpeza; após terminar, limpar restaura ordenaç�
   const { interaction, queries } = await open(async query => query.get('term') ? pending.promise : response(query));
   await screen.findByText('Página 1');
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'aplicada{Enter}');
-  expect(queries().at(-1)).toMatchObject({ term: 'aplicada', sort: 'name-asc' });
+  expect(queries().at(-1)).toMatchObject({ term: 'aplicada', sort: 'release-desc' });
   await interaction.click(screen.getByRole('button', { name: 'Limpar busca' }));
   expect(queries()).toHaveLength(2);
   expect(screen.getByRole('dialog', { name: 'Carregando jogos' })).toBeInTheDocument();

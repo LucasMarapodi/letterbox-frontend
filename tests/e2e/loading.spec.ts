@@ -51,7 +51,7 @@ test('catálogo comunica pendência, vazio, erro e retry sem manter vazio antigo
   await expect(catalog.getByText(/Nenhum jogo/)).toBeVisible();
 
   completed = null;
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
   await expect(catalog).toHaveAttribute('aria-busy', 'true');
   await expect(catalog.getByText(/Nenhum jogo/)).toHaveCount(0);
   await expect.poll(() => pending.size).toBeGreaterThan(0);

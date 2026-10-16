@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -32,7 +33,7 @@ async function open(options: { dashboard: boolean; login?: boolean; empty?: bool
     if (path === '/api/v1/users/1') return Response.json(wireUser);
     throw new Error(`Consulta inesperada: ${path}`);
   }, { isolateDashboard: false }));
-  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   // undefined reproduz a composição sem dashboard agregado, que antes montava favoritos.
   services.privateFeatures = { ...services.privateFeatures, dashboard: options.dashboard ? true : undefined };
   if (!options.login) await services.auth.login({ email: 'test@example.test', password: 'test-only' });
@@ -87,9 +88,10 @@ test.each([true, false])('busca, ordenação, paginação e atualização do fee
   const { interaction, transport } = await open({ dashboard });
   await screen.findByRole('button', { name: 'Atualizar feed' });
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'aventura');
-  await interaction.click(screen.getByRole('button', { name: 'Buscar' }));
+  await interaction.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   await within(screen.getByRole('region', { name: 'Jogos' })).findByRole('link', { name: wireGame.title });
   await interaction.selectOptions(screen.getByLabelText('Ordenar por'), 'name-desc');
+  await interaction.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   await within(screen.getByRole('region', { name: 'Jogos' })).findByRole('link', { name: wireGame.title });
   await interaction.click(screen.getByRole('button', { name: 'Próxima' }));
   expect(await screen.findByText('Página 2')).toBeVisible();

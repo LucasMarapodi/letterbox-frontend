@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { wirePage } from './http-fixtures';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -31,7 +32,7 @@ async function open(failure=false){let game=false;let review=false;const transpo
  if(path.includes('/users/'))return Response.json(wireUser);
  if(path.includes('/reviews/'))return Response.json(wireReview);
  return Response.json(wireGame);
-}));const interaction=userEvent.setup();render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport})}/></MemoryRouter>);await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await screen.findByRole('link',{name:wireGame.title});return {interaction,transport};}
+}));const interaction=userEvent.setup();render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await screen.findByRole('link',{name:wireGame.title});return {interaction,transport};}
 test('Home não duplica GET favorites; ações dos dois tipos aparecem no próprio perfil e remoção refresca lista',async()=>{
  const {interaction,transport}=await open();expect(transport.mock.calls.filter(([url])=>new URL(url).pathname==='/api/v1/favorites')).toHaveLength(0);
  await interaction.click(screen.getByRole('link',{name:wireGame.title}));await interaction.click(await screen.findByRole('button',{name:'Favoritar jogo'}));await screen.findByRole('button',{name:'Remover jogo dos favoritos'});
