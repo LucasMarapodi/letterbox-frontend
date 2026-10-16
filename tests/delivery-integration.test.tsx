@@ -33,8 +33,7 @@ test('cadastro login nota publicação edição favoritos e logout percorrem ser
   const games = await screen.findByRole('region', { name: 'Jogos favoritos' });
   expect(within(games).getByRole('link', { name: 'Ecos do Horizonte' })).toBeVisible();
   expect(within(screen.getByRole('region', { name: 'Reviews favoritas' })).getByText('Review revisada da demonstração')).toBeVisible();
-  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
-  await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
+  await interaction.click(screen.getByRole('link', { name: 'Início' }));
   await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
   await interaction.click(await screen.findByRole('button',{name:'Editar minha review'})); expect(await screen.findByRole('radio', { name: '5 estrelas' })).toBeChecked();
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));

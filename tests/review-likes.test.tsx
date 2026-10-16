@@ -136,6 +136,8 @@ test('resposta pessoal antiga após logout não contamina a próxima conta', asy
   await screen.findByText('2 curtidas'); await interaction.click(screen.getByRole('button', { name: /Sair/ }));
   switchAccount(); await interaction.click(screen.getByRole('link', { name: 'Entrar' }));
   await interaction.type(screen.getByLabelText('E-mail'), 'next@example.test'); await interaction.type(screen.getByLabelText('Senha'), 'test-only'); await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
+  await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
   expect(await screen.findByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
   await act(async () => { old.resolve(Response.json({ likedByMe: true })); });
   expect(screen.getByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
@@ -155,6 +157,8 @@ test('resposta de escrita antiga não altera curtidas da próxima sessão', asyn
   await interaction.click(screen.getByRole('button', { name: /Sair/ })); switchAccount();
   await interaction.click(screen.getByRole('link', { name: 'Entrar' }));
   await interaction.type(screen.getByLabelText('E-mail'), 'next@example.test'); await interaction.type(screen.getByLabelText('Senha'), 'test-only'); await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
+  await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
   expect(await screen.findByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');
   await act(async () => { pending.resolve(new Response(null, { status: 204 })); });
   expect(screen.getByRole('button', { name: 'Curtir review de Ana' })).toHaveAttribute('aria-pressed', 'false');

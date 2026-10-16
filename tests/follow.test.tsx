@@ -74,6 +74,7 @@ test('envio pendente não duplica e resposta após logout não restaura ação',
   await act(async () => { fireEvent.click(button); fireEvent.click(button); });
   expect(set).toHaveBeenCalledTimes(1);
   expect(screen.getByRole('button', { name: 'Seguir' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Seguir' })).toHaveAttribute('aria-busy', 'true');
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   await act(async () => { pending.resolve(); await pending.promise; });
   expect(screen.queryByRole('button', { name: 'Deixar de seguir' })).not.toBeInTheDocument();

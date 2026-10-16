@@ -12,22 +12,22 @@ import { Button } from './Button';
 import { ReviewFavoriteStar } from './ReviewFavoriteStar';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; reviews: ReviewDetails[] };
-export function FeedSection({ initialReviews }: { initialReviews?: ReviewDetails[] } = {}): ReactElement | null {
+export function FeedSection(): ReactElement | null {
   const { community } = useServices();
   const { user } = useSession();
-  const [state, setState] = useState<State>(() => initialReviews ? { status: 'ready', reviews: initialReviews } : { status: 'loading' });
+  const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
-    if (user && (initialReviews === undefined || attempt > 0)) {
+    if (user) {
       setState({ status: 'loading' });
       void community.getFeed(user).then((reviews) => { if (active) setState({ status: 'ready', reviews }); }, () => { if (active) setState({ status: 'error' }); });
     }
     return () => { active = false; };
-  }, [user, attempt, initialReviews]);
+  }, [user, attempt]);
   if (!user) return null;
   return <section className="feed-section" aria-label="Feed de reviews" aria-busy={state.status === 'loading'}><h2>Feed de reviews</h2><p className="feed-description">As últimas reviews de quem você segue.</p>
-    {state.status === 'ready' && (initialReviews === undefined || attempt > 0) && <CatalogNotice paths={[[ 'feed', 'following' ]]} />}
+    {state.status === 'ready' && <CatalogNotice paths={[[ 'feed', 'following' ]]} />}
     <Button disabled={state.status === 'loading'} onClick={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }}>Atualizar feed</Button>
     {state.status === 'loading' && <LoadingState message="Carregando feed…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar o feed." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}

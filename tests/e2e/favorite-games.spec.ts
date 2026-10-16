@@ -48,7 +48,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 320, height: 800 
     await page.getByLabel('E-mail', { exact: true }).fill('test@example.test');
     await page.getByLabel('Senha', { exact: true }).fill('test-only');
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-    await expect(page.getByRole('region', { name: 'Feed de reviews', exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Feed de reviews', exact: true })).toHaveCount(0);
     await expect(page.getByRole('region', { name: 'Jogos favoritos', exact: true })).toHaveCount(0);
     await page.getByRole('link', { name: 'Meu perfil', exact: true }).click();
     const section = page.getByRole('region', { name: 'Jogos favoritos', exact: true });

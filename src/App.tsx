@@ -12,11 +12,9 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { Avatar } from './components/Avatar';
 import { encodeRouteId } from './routing/encodeRouteId';
-import { FeedSection } from './components/FeedSection';
 import { NotificationBell } from './components/NotificationBell';
 import type { ApplicationServices } from './services/runtime';
 import { CommunityPage } from './pages/CommunityPage';
-import { DashboardHome } from './pages/DashboardHome';
 import { FavoritesProvider } from './components/FavoritesProvider';
 import { ReviewLikesProvider } from './components/ReviewLikesProvider';
 import { MenuSearch } from './components/MenuSearch';
@@ -57,7 +55,7 @@ function ApplicationRoutes(): ReactElement {
     {signingOut && <p className="session-notice" role="status">Encerrando sessão…</p>}
     {notice && <p className="session-notice" role="alert">{notice}</p>}
     <FavoritesProvider key={`${user ? `${version}-${user.id}` : 'visitor'}-${pathname}`}><ReviewLikesProvider><div ref={contentRef} id="conteudo-principal" role="region" aria-label="Conteúdo principal" tabIndex={-1}><Routes>
-      <Route path="/" element={user && privateFeatures?.dashboard === true ? <DashboardHome key={`${version}-${user.id}`} /> : <HomePage authenticated={Boolean(user)} feed={user && privateFeatures?.feed !== false ? <FeedSection key={`feed-${version}-${user.id}`} /> : null} />} />
+      <Route path="/" element={<HomePage authenticated={Boolean(user)} />} />
       <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/pesquisa" element={<SearchResultsPage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />

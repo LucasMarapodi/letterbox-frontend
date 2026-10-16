@@ -42,7 +42,7 @@ function ProfileContent({ id }: { id: number }): ReactElement {
       {refreshing ? <LoadingState message="Carregando perfil…" /> : <>
       <Avatar name={profile.user.displayName} src={profile.user.avatarUrl} />
       <div className="profile-overview-copy"><div className="profile-name-row"><h2>{profile.user.displayName}</h2><ProfileEditor profile={profile.user} onSaved={updated => setState({ status: 'ready', profile: { ...profile, user: updated } })} /></div><p className="profile-username">@{profile.user.username}</p><p>{profile.user.bio.trim() || 'Biografia não informada.'}</p></div>
-      <FollowButton targetId={id} name={profile.user.displayName} onChanged={() => setConnectionsVersion((value) => value + 1)} />
+      <FollowButton targetId={id} onChanged={() => setConnectionsVersion((value) => value + 1)} />
       </>}
     </section>
     <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
