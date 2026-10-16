@@ -30,8 +30,8 @@ export function FavoritesSections({ initialLists }: { initialLists?: FavoriteLis
     <section aria-label="Jogos favoritos"><h2>Jogos favoritos</h2>
       {state.lists.games.length ? <div className="game-grid">{state.lists.games.map((game) => <GameCard key={game.id} game={game} />)}</div> : <EmptyState message="Nenhum jogo favorito." />}
     </section>
-    <section aria-label="Reviews favoritas"><h2>Reviews favoritas</h2>
-      {state.lists.reviews.length ? state.lists.reviews.map((review) => <article className="review-card" key={review.id}><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}: {review.game.title}</Link><p className="review-text">{review.text}</p></article>) : <EmptyState message="Nenhuma review favorita." />}
-    </section>
+    {state.lists.reviews.length > 0 && <section aria-label="Reviews favoritas"><h2>Reviews favoritas</h2>
+      {state.lists.reviews.map((review) => <article className="review-card" key={review.id}><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}: {review.game.title}</Link><p className="review-text">{review.text}</p></article>)}
+    </section>}
   </div>;
 }
