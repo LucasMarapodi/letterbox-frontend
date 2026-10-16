@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { Review } from '../models';
 import { useServices } from '../services/ServiceProvider';
 import { CommunityError, type ReviewInput } from '../services/communityContracts';
@@ -53,7 +53,7 @@ function PublishControl({ gameId, onSaved }: { gameId: number; onSaved(): void }
 export function PublishReview(props: { gameId: number; onSaved(): void }): ReactElement | null {
   const { user, version } = useSession();
   const { privateFeatures } = useServices();
-  const [invitation, setInvitation] = useState(false);
+  const navigate = useNavigate();
   if ((privateFeatures?.publishReview ?? privateFeatures?.opinions) === false) return null;
-  return user ? <PublishControl key={`${version}-${user.id}-${props.gameId}`} {...props} /> : <section aria-label="Sua review"><Button onClick={() => setInvitation(true)}>Criar review</Button>{invitation && <p><Link to="/login">Entrar para criar review</Link></p>}</section>;
+  return user ? <PublishControl key={`${version}-${user.id}-${props.gameId}`} {...props} /> : <section aria-label="Sua review"><Button onClick={() => navigate('/login')}>Criar review</Button></section>;
 }

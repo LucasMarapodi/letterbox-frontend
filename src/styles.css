@@ -319,3 +319,6 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .profile-game-selection .active-suggestion { outline: 2px solid #67daa3; }
 .profile-suggestion-cover { width: 2.5rem; height: 3.3rem; flex: 0 0 2.5rem; object-fit: cover; font-size: 0.6rem; border-radius: 0.3rem; }
 @media (max-width: 480px) { .profile-edit-modal { padding: 1rem; max-height: 94dvh; } .profile-name-row { gap: 0.6rem; } }
+.profile-pagination { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin-top: 1rem; }
+.profile-pagination button { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+.profile-pagination span { text-align: center; font-size: 0.8rem; }

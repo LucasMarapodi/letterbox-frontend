@@ -1,3 +1,5 @@
+import { ServiceProvider } from '../src/services/ServiceProvider';
+import { ConnectionsSections } from '../src/components/ConnectionsSections';
 import {render,screen,within,waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {MemoryRouter} from 'react-router-dom';
@@ -12,7 +14,7 @@ async function open(counts=[7,5,5,13,13],guest=false){
  const games=Array.from({length:counts[0]},(_,i)=>({...wireGame,id:100+i,title:`Jogo ${i}`}));
  const reviews=Array.from({length:counts[1]},(_,i)=>({...wireReview,id:300+i,text:`Publicada ${i}`,game:{...wireReview.game,title:`Publicado ${i}`}}));
  const people=(n:number)=>Array.from({length:n},(_,i)=>({...wireUser,id:500+i,username:`pessoa${i}`,displayName:`Pessoa ${i}`}));
- const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
+ const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url)=>{
   const path=new URL(url).pathname;
   if(path.endsWith('/favorites'))return Response.json({games,reviews:favorites});
   if(path.includes('/favorites/review/')){favorites=favorites.filter(item=>!path.endsWith(`/${item.id}`));return new Response(null,{status:204});}
@@ -59,6 +61,19 @@ test('modal usa coleção completa mesmo com somente três favoritos visíveis',
  const {interaction}=await open();await interaction.click(next('Jogos favoritos'));await interaction.click(screen.getByRole('button',{name:'Editar perfil'}));const dialog=await screen.findByRole('dialog',{name:'Editar perfil'});expect(await within(dialog).findAllByRole('button',{name:/^Remover Jogo/})).toHaveLength(7);
 });
 test('sair e reabrir perfil reinicia páginas e não mostra favoritos privados',async()=>{
- const {interaction}=await open();await interaction.click(next('Seguidores'));await interaction.click(screen.getByRole('button',{name:'Sair'}));await interaction.click(screen.getByRole('link',{name:'Entrar'}));await interaction.type(screen.getByLabelText('E-mail'),'test@example.test');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await interaction.click(await screen.findByRole('link',{name:'Meu perfil'}));expect(await region('Seguidores').findByText('Página 1 de 3')).toBeVisible();
+ const {interaction}=await open();await interaction.click(next('Seguidores'));await interaction.click(screen.getByRole('button',{name:'Sair'}));await interaction.click(screen.getByRole('link',{name:'Entrar'}));await interaction.type(screen.getByLabelText('E-mail'),'test@example.test');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await interaction.click(await screen.findByRole('link',{name:'Meu perfil'}));expect(await within(await screen.findByRole('region',{name:'Seguidores'})).findByText('Página 1 de 3')).toBeVisible();
 });
 test('visitantes não veem convites textuais para favoritar',async()=>{await open([0,3,0,7,7],true);expect(screen.queryByText(/Entrar para favoritar/)).not.toBeInTheDocument();expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument();});
+test('revalidar conexões ajusta seguidores sem reiniciar seguindo',async()=>{
+ let count=7;
+ const transport:FetchTransport=async(url)=>Response.json(Array.from({length:url.endsWith('/followers')?count:13},(_,i)=>({...wireUser,id:50+i,username:`pessoa${i}`,displayName:`Pessoa ${i}`})));
+ const services=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport});
+ const view=render(<MemoryRouter><ServiceProvider value={services}><ConnectionsSections profileId={1}/></ServiceProvider></MemoryRouter>);
+ await screen.findByRole('region',{name:'Seguidores'});await userEvent.click(next('Seguidores'));await userEvent.click(next('Seguindo'));count=6;
+ view.rerender(<MemoryRouter><ServiceProvider value={services}><ConnectionsSections profileId={1} revision={1}/></ServiceProvider></MemoryRouter>);
+ await screen.findByRole('region',{name:'Seguidores'});expect(items('Seguidores')).toHaveLength(6);expect(region('Seguidores').queryByRole('navigation')).not.toBeInTheDocument();expect(region('Seguindo').getByText('Página 2 de 3')).toBeVisible();
+});
+test('navegar para outro perfil reinicia as páginas públicas',async()=>{
+ const {interaction}=await open();await interaction.click(next('Seguidores'));await interaction.click(next('Reviews do usuário'));await interaction.click(region('Seguidores').getByRole('link',{name:'Pessoa 6'}));
+ const followers=await screen.findByRole('region',{name:'Seguidores'});expect(within(followers).getByText('Página 1 de 3')).toBeVisible();expect(region('Reviews do usuário').getByText('Página 1 de 3')).toBeVisible();expect(screen.queryByRole('region',{name:'Favoritos'})).not.toBeInTheDocument();
+});

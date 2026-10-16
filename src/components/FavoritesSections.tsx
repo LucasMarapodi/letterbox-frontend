@@ -1,3 +1,4 @@
+import { ProfilePagination, useProfilePage } from './ProfilePagination';
 import { ReviewBody } from './ReviewBody';
 import { CatalogNotice } from './CatalogNotice';
 import { useEffect, type ReactElement } from 'react';
@@ -12,6 +13,8 @@ import { ReviewFavoriteStar } from './ReviewFavoriteStar';
 export function FavoritesSections(): ReactElement | null {
   const { user } = useSession();
   const favorites = useFavorites();
+  const games = useProfilePage(favorites?.state.lists?.games ?? [], 3);
+  const reviews = useProfilePage(favorites?.state.lists?.reviews ?? [], 2);
   const load = favorites?.load;
   useEffect(() => { if (load) void load(); }, [load]);
   if (!user || !favorites) return null;
@@ -21,13 +24,15 @@ export function FavoritesSections(): ReactElement | null {
   return <div className="favorites-sections" role="region" aria-label="Favoritos" aria-busy={false}>
     <CatalogNotice paths={[[ 'favorites' ]]} onRetry={() => { void favorites.load(true); }} />
     <section className="favorite-games-section" aria-label="Jogos favoritos"><h2>Jogos favoritos</h2>
-      {state.lists.games.length ? <ul className="favorite-games-list" aria-label="Jogos favoritos">{state.lists.games.map((game) => <li className="favorite-game" key={game.id}>
+      {state.lists.games.length ? <ul className="favorite-games-list" aria-label="Jogos favoritos">{games.items.map((game) => <li className="favorite-game" key={game.id}>
         <GameCover title={game.title} src={game.coverUrl} />
         <div className="favorite-game-copy"><h3><Link to={`/jogos/${encodeRouteId(game.id)}`}>{game.title}</Link></h3><p>{game.summary.trim() || 'Resumo não informado.'}</p></div>
       </li>)}</ul> : <EmptyState message="Nenhum jogo favorito." />}
+      <ProfilePagination label="jogos favoritos" {...games} />
     </section>
     {state.lists.reviews.length > 0 && <section aria-label="Reviews favoritas"><h2>Reviews favoritas</h2>
-      {state.lists.reviews.map((review) => <article className="review-card" key={review.id}><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}: {review.game.title}</Link><ReviewBody review={review} /><ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} /></article>)}
+      {reviews.items.map((review) => <article className="review-card" key={review.id}><Link to={`/reviews/${encodeRouteId(review.id)}`}>Review de {review.author.displayName}: {review.game.title}</Link><ReviewBody review={review} /><ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} /></article>)}
+      <ProfilePagination label="reviews favoritas" {...reviews} />
     </section>}
   </div>;
 }
