@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -39,7 +40,7 @@ test('login numérico confirma me, abre dashboard e mantém perfil próprio/edi�
     if (path === '/api/v1/users/42/reviews') return Response.json([numericReview]);
     return Response.json([]);
   });
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={adapters} /></MemoryRouter>);
   const interaction = userEvent.setup();
   await interaction.type(screen.getByLabelText('E-mail'), 'test@example.test');
@@ -60,7 +61,7 @@ test('login numérico confirma me, abre dashboard e mantém perfil próprio/edi�
 
 test.each(['login', 'register'] as const)('storage_unavailable em %s é reconhecido sem criar sessão e permite retry', async operation => {
   const transport = vi.fn<FetchTransport>().mockImplementation(async () => Response.json({ code: 'storage_unavailable', message: 'Armazenamento indisponível.' }, { status: 503 }));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   const input = { name: 'Teste', email: 'test@example.test', password: 'test-only' };
   await expect(adapters.auth[operation](input)).rejects.toMatchObject({ code: 'storage-unavailable' });
   expect(adapters.auth.sessionUser?.()).toBeNull();

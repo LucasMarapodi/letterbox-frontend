@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { wirePage } from './http-fixtures';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -26,7 +27,7 @@ async function open(failure=false){let following=false;const transport=vi.fn<Fet
   if(url.endsWith('/followers'))return Response.json(following?[wireUser]:[]);
   if(url.endsWith('/following')||url.endsWith('/reviews'))return Response.json([]);
   return Response.json({...wireUser,id:2,displayName:'Outro'});
-}));const interaction=userEvent.setup();const adapters=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport});await adapters.auth.login({email:'test@example.com',password:'test-only'});render(<MemoryRouter initialEntries={['/perfil/2']}><AppRoutes adapters={adapters}/></MemoryRouter>);
+}));const interaction=userEvent.setup();const adapters=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport)});await adapters.auth.login({email:'test@example.com',password:'test-only'});render(<MemoryRouter initialEntries={['/perfil/2']}><AppRoutes adapters={adapters}/></MemoryRouter>);
 return {interaction,transport};}
 test('seguir/deixar segue resposta da API e refresca conexões',async()=>{
   const {interaction,transport}=await open();await interaction.click(await screen.findByRole('button',{name:'Seguir Outro'}));expect(await screen.findByRole('button',{name:'Deixar de seguir Outro'})).toHaveAttribute('aria-pressed','true');expect(await within(screen.getByRole('region',{name:'Seguidores'})).findByRole('link',{name:'Ana'})).toBeVisible();

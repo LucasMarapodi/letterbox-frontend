@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -13,7 +14,7 @@ const login = { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00
 test('login envia credenciais e confirma me com Bearer antes de retornar User', async () => {
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockResolvedValueOnce(Response.json({ ...wireUser, displayName: 'Nome confirmado' }));
   const session = createHttpSessionStore();
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withFilterOptions(transport), session });
   expect(await adapters.auth.login(credentials)).toEqual({ ...wireUser, displayName: 'Nome confirmado' });
   expect(transport.mock.calls.map(([url]) => url)).toEqual(['http://localhost:5207/api/v1/auth/login','http://localhost:5207/api/v1/auth/me']);
   expect(transport.mock.calls[0][1].body).toBe(JSON.stringify(credentials));
@@ -23,14 +24,14 @@ test('login envia credenciais e confirma me com Bearer antes de retornar User', 
 });
 test.each([401,400])('login HTTP %s mapeia erro sem guardar sessão', async (status) => {
   const transport = vi.fn<FetchTransport>().mockResolvedValue(Response.json({ code: status === 401 ? 'unauthorized' : 'validation_failed', message: 'Seguro' }, { status }));
-  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session });
+  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withFilterOptions(transport), session });
   await expect(adapters.auth.login(credentials)).rejects.toMatchObject({ code: status === 401 ? 'invalid-credentials' : 'invalid-fields' });
   expect(session.current()).toBeNull(); expect(transport).toHaveBeenCalledTimes(1);
 });
 test.each(['401','invalid','identity'])('confirmação %s rejeita login e elimina token pendente', async (scenario) => {
   const second = scenario === '401' ? Response.json({ code: 'unauthorized', message: 'Seguro' }, { status: 401 }) : Response.json(scenario === 'identity' ? { ...wireUser, id: 'different-user' } : { invalid: true });
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(login)).mockResolvedValueOnce(second);
-  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session });
+  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withFilterOptions(transport), session });
   await expect(adapters.auth.login(credentials)).rejects.toBeInstanceOf(Error);
   expect(transport).toHaveBeenCalledTimes(2); expect(session.current()).toBeNull();
 });
@@ -47,13 +48,13 @@ test('UI aguarda me e não persiste sessão após remontagem', async () => {
   await act(async () => { pending.resolve(Response.json(wireUser)); await pending.promise; });
   expect(await screen.findByLabelText('Usuário conectado')).toHaveTextContent('Ana'); expect(storage).not.toHaveBeenCalled(); storage.mockRestore();
   mounted.unmount();
-  render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport })} /></MemoryRouter>);
+  render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withFilterOptions(transport)})} /></MemoryRouter>);
   expect(screen.queryByLabelText('Usuário conectado')).not.toBeInTheDocument();
 });
 test('login concorrente tardio não substitui conta nova', async () => {
   const pending = deferred<Response>(); const newer = { ...wireUser, id: 2, displayName: 'Bia' };
   const transport = vi.fn<FetchTransport>().mockReturnValueOnce(pending.promise).mockResolvedValueOnce(Response.json({ ...login, user: newer, token: 'new-test-only' })).mockResolvedValueOnce(Response.json(newer));
-  const session = createHttpSessionStore(); const auth = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport, session }).auth;
+  const session = createHttpSessionStore(); const auth = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withFilterOptions(transport), session }).auth;
   const old = auth.login(credentials).catch((error: unknown) => error);
   expect(await auth.login({ ...credentials, email: 'b@example.com' })).toEqual(newer);
   pending.resolve(Response.json({ ...login, expiresAt: wireReview.createdAt }));

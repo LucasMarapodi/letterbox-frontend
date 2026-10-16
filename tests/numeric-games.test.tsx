@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test, vi } from 'vitest';
@@ -20,7 +21,7 @@ test.each([undefined, 0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, '345447'])('igdbI
 });
 test.each(['userId', 'gameId'] as const)('URLs %s inválidas não fazem consultas HTTP', parameter => {
   const transport = vi.fn().mockRejectedValue(new Error('Não deveria consultar'));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   render(<MemoryRouter initialEntries={[parameter === 'userId' ? '/perfil/01' : '/jogos/igdb-12']}><AppRoutes adapters={adapters} /></MemoryRouter>);
   expect(screen.getByText(parameter === 'userId' ? 'Perfil não encontrado.' : 'Jogo não encontrado.')).toBeVisible();
   expect(transport).not.toHaveBeenCalled();

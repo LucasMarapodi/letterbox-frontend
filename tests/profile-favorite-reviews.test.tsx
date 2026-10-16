@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter } from 'react-router-dom';
@@ -24,7 +25,7 @@ async function openProfile(options: { reviews?: ReviewResponse[]; favorites?: Fe
     if (path.endsWith('/reviews') || path.endsWith('/followers') || path.endsWith('/following') || path.endsWith('/comments')) return Response.json([]);
     return Response.json({ ...wireUser, id: options.profileId ?? wireUser.id });
   }));
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   if (!options.visitor) await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[`/perfil/${options.profileId ?? wireUser.id}`]}>
     <AppRoutes adapters={adapters} /><Link to="/reviews/55">Abrir review de teste</Link>
@@ -91,7 +92,7 @@ test('adicionar primeira e remover última review atualiza visibilidade ao retor
 });
 
 test.each([{ visitor: true }, { profileId: 2 }])('favoritos permanecem privados: %j', async options => {
-  const { transport } = await openProfile({ ...options, reviews: [wireReview] });
+  const { transport} = await openProfile({ ...options, reviews: [wireReview] });
   expect(screen.queryByRole('region', { name: 'Favoritos' })).not.toBeInTheDocument();
   expect(transport.mock.calls.some(([url]) => new URL(url).pathname === '/api/v1/favorites')).toBe(false);
 });

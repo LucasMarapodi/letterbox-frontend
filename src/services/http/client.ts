@@ -27,7 +27,7 @@ export function validateApiBaseUrl(baseUrl: string): string {
 }
 function isApiError(value: unknown): value is { code: string; message: string } {
   return typeof value === 'object' && value !== null && 'code' in value && typeof value.code === 'string' &&
-    ['validation_failed','unauthorized','forbidden','not_found','conflict','internal_error','http_error','integration_unavailable','integration_invalid_response','integration_timeout','storage_unavailable'].includes(value.code) && 'message' in value && typeof value.message === 'string';
+    ['validation_failed','invalid_filter','unauthorized','forbidden','not_found','conflict','internal_error','http_error','integration_unavailable','integration_invalid_response','integration_timeout','storage_unavailable'].includes(value.code) && 'message' in value && typeof value.message === 'string';
 }
 export function createHttpClient(baseUrl: string, transport: FetchTransport = (url, init) => fetch(url, init)): HttpClient {
   const base = validateApiBaseUrl(baseUrl);

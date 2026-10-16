@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, configure, fireEvent, getConfig, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
@@ -30,7 +31,7 @@ function open(respond: FetchTransport = async url => Response.json(result(new UR
     if (path.endsWith('/opinions')) return Response.json({ averageRating: null, reviews: [] });
     return Response.json([]);
   });
-  const view = render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /><Location /></MemoryRouter>);
+  const view = render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)})} /><Location /></MemoryRouter>);
   return { ...view, input: screen.getByRole('combobox', { name: 'Buscar pessoas e jogos' }), interaction: userEvent.setup({ advanceTimers: vi.advanceTimersByTime }), calls: () => transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/search') };
 }
 

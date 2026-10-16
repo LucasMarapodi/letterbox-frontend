@@ -2,8 +2,18 @@ import { isLocalId, type LocalId } from '../../models';
 import type { PublicProfile, Connections } from '../communityContracts';
 import type { PublicUserResponse, GameResponse, GamePageResponse, ReviewResponse, CommentResponse, RatingResponse, FavoriteResponse, NotificationResponse, LoginResponse, DashboardResponse, GameOpinionsResponse, FavoriteListsResponse, RankedReviewResponse, RankedGameResponse } from './dtos';
 import { HttpFailure } from './client';
+import type { CatalogFilters, CatalogFilterOption } from '../contracts';
 import type { SearchResponse, SearchQuery, SearchGroup, SearchError, SearchPerson, SearchGame, SearchMetadata } from '../searchContracts';
 export type Decoder<T> = (value: unknown) => T;
+export function decodeCatalogFilters(value: unknown): CatalogFilters {
+  const item = publicRecord(value);
+  function options(value: unknown): CatalogFilterOption[] {
+    const result = decodeList(value, entry => { const option = publicRecord(entry); const name = text(option.name); if (!name.trim()) return fail(); return { id: localId(option.id), name }; });
+    if (new Set(result.map(option => option.id)).size !== result.length) return fail();
+    return result;
+  }
+  return { genres: options(item.genres), platforms: options(item.platforms) };
+}
 export function decodeGamePage(value: unknown): GamePageResponse {
   const item = record(value);
   const { page, pageSize, hasNextPage } = item;

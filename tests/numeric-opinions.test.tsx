@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -32,7 +33,7 @@ test('favorito preserva ID próprio e alvo numéricos da review', () => {
 
 test.each(['0', '-1', '1.5', '01', '1e2', '2147483648', 'review-55', 'game%2F42'])('rota de review inválida %s não consulta a API', id => {
   const transport = vi.fn<FetchTransport>().mockRejectedValue(new Error('Não deveria consultar'));
-  render(<MemoryRouter initialEntries={[`/reviews/${encodeURIComponent(id)}`]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[`/reviews/${encodeURIComponent(id)}`]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)})} /></MemoryRouter>);
   expect(screen.getByText('Review não encontrada.')).toBeVisible();
   expect(transport).not.toHaveBeenCalled();
 });
@@ -56,7 +57,7 @@ test('respostas numéricas de nota, publicação e edição são aceitas; favori
     if (path.endsWith('/comments')) return Response.json([]);
     throw new Error(`Consulta inesperada: ${path}`);
   }));
-  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await services.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={['/jogos/12']}><AppRoutes adapters={services} /></MemoryRouter>);
   const interaction = userEvent.setup();

@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -22,7 +23,7 @@ async function open(games: Game[]) {
     if (path.endsWith('/reviews') || path.endsWith('/followers') || path.endsWith('/following')) return Response.json([]);
     throw new Error(`Consulta inesperada: ${path}`);
   }));
-  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await services.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={['/perfil/1']}><AppRoutes adapters={services} /></MemoryRouter>);
   const region = await screen.findByRole('region', { name: 'Jogos favoritos' });

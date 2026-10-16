@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { wirePage } from './http-fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -37,7 +38,7 @@ function Probe(): React.ReactElement {
 test('versão única e dados tardios de A não entram em B após logout', async () => {
   const pending = deferred<Response>();
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(loginA)).mockResolvedValueOnce(Response.json(userA)).mockReturnValueOnce(pending.promise).mockResolvedValueOnce(new Response(null,{status:204})).mockResolvedValueOnce(Response.json(loginB)).mockResolvedValueOnce(Response.json(userB)).mockResolvedValueOnce(Response.json([]));
-  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session});
+  const session = createHttpSessionStore(); const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session});
   const interaction=userEvent.setup(); render(<SessionProvider service={adapters.auth}><Probe/></SessionProvider>);
   await interaction.click(screen.getByRole('button',{name:'Conta A'})); await screen.findByText('Ana API');
   expect(Number(screen.getByLabelText('Versão da sessão').textContent)).toBe(session.version());
@@ -52,7 +53,7 @@ test('versão única e dados tardios de A não entram em B após logout', async 
   expect(Number(screen.getByLabelText('Versão da sessão').textContent)).toBe(session.version());
 });
 test('visitante não dispara consultas HTTP privadas', async()=>{
-  const transport=vi.fn<FetchTransport>().mockImplementation(async()=>Response.json(wirePage([wireGame]))); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
+  const transport=vi.fn<FetchTransport>().mockImplementation(async()=>Response.json(wirePage([wireGame]))); render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);
   await screen.findByRole('link',{name:wireGame.title}); expect(transport).toHaveBeenCalledTimes(1);
   expect(transport.mock.calls[0][0]).toContain('/api/v1/games'); expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
 });

@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
@@ -27,7 +28,7 @@ function open(route = '/pesquisa?q=mario&aba=pessoas&page=1', respond: (query: U
     if (parsed.pathname.endsWith('/opinions')) return Response.json({ averageRating: null, reviews: [] });
     return Response.json([]);
   });
-  const app = <MemoryRouter initialEntries={[route]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /><Location /></MemoryRouter>;
+  const app = <MemoryRouter initialEntries={[route]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)})} /><Location /></MemoryRouter>;
   const view = render(strict ? <StrictMode>{app}</StrictMode> : app);
   return { ...view, interaction: userEvent.setup(), queries: () => transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/search').map(([url]) => Object.fromEntries(new URL(url).searchParams)) };
 }

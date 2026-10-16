@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,7 +12,7 @@ import { wireUser, wireGame, wireReview, withAuthentication } from './http-fixtu
 test('publicação envia só text, usa token e distingue wrapper null de recurso 404',async()=>{
   const session=createHttpSessionStore(); session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
   const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json({review:null})).mockResolvedValueOnce(Response.json(wireReview,{status:201})).mockResolvedValueOnce(Response.json([wireReview])).mockResolvedValueOnce(Response.json({code:'not_found',message:'Seguro'},{status:404}));
-  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
+  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session}).community;
   expect(await service.findOwnReview(wireGame.id,wireUser)).toBeNull();
   expect(await service.publish(wireGame.id,'Review',{...wireUser,id: 999})).toEqual(wireReview);
   expect(transport.mock.calls[1][1].body).toBe('{"text":"Review"}'); expect(transport.mock.calls[1][1].headers).toHaveProperty('Authorization','Bearer test-only');
@@ -19,7 +20,7 @@ test('publicação envia só text, usa token e distingue wrapper null de recurso
   await expect(service.findOwnReview(99,wireUser)).rejects.toMatchObject({code:'not-found'});
 });
 async function open(transport:FetchTransport):Promise<ReturnType<typeof userEvent.setup>>{
-  const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
+  const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'})); await interaction.click(await screen.findByRole('link',{name:wireGame.title})); return interaction;
 }
 function backend(options:{conflict?:boolean;failure?:boolean;own?:boolean}={}):ReturnType<typeof vi.fn<FetchTransport>>{

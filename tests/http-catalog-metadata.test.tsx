@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -9,7 +10,7 @@ import { wireGame, wirePage, wireReview, withAuthentication } from './http-fixtu
 import { deferred } from './fixtures';
 const headers = { 'X-Catalog-Stale': 'true', 'X-Catalog-Fetched-At': '2026-10-14T10:00:00Z' };
 function mount(transport: FetchTransport, path = '/'): void {
-  render(<MemoryRouter initialEntries={[path]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[path]}><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)})} /></MemoryRouter>);
 }
 test('stale confirmado mostra data e retry usa mesma consulta sem request adicional', async () => {
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(wirePage([wireGame]), { headers })).mockResolvedValueOnce(Response.json(wirePage([wireGame]), { headers: { ...headers, 'X-Catalog-Stale': 'false' } }));

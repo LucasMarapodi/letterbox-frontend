@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { wirePage } from './http-fixtures';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,7 +12,7 @@ import { wireUser, wireGame, wireRating, withAuthentication } from './http-fixtu
 test.each([null,0,4.5])('nota HTTP %s mantém null zero e decimal sem campos de autoria',async(value)=>{
   const session=createHttpSessionStore(); session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
   const transport=vi.fn<FetchTransport>().mockImplementation(async(_url,init)=>Response.json(init.method==='PUT'?{...wireRating,value:4.5}:{rating:value===null?null:{...wireRating,value}}));
-  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
+  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session}).community;
   expect(await service.getRating(wireGame.id,wireUser)).toEqual(value===null?null:{...wireRating,value});
   expect(await service.rate(wireGame.id,4.5,{...wireUser,id: 999})).toMatchObject({userId:wireUser.id,value:4.5});
   expect(transport.mock.calls[1][1].body).toBe('{"value":4.5}'); expect(transport.mock.calls[1][1].headers).toHaveProperty('Authorization','Bearer test-only');
@@ -19,11 +20,11 @@ test.each([null,0,4.5])('nota HTTP %s mantém null zero e decimal sem campos de 
 test.each([[400,'validation_failed','invalid-rating'],[401,'unauthorized','session-required'],[404,'not_found','not-found']] as const)('erro de nota HTTP %s não vira sucesso',async(status,code,expected)=>{
   const session=createHttpSessionStore(); session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});
   const transport=vi.fn<FetchTransport>().mockResolvedValue(Response.json({code,message:'Seguro'},{status}));
-  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport,session}).community;
+  const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport),session}).community;
   await expect(service.rate(99,5,wireUser)).rejects.toMatchObject({code:expected}); if(status===401) expect(session.current()).toBeNull();
 });
 test('visitante não usa identidade arbitrária como autorização',async()=>{
-  const transport=vi.fn<FetchTransport>(); const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport}).community;
+  const transport=vi.fn<FetchTransport>(); const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport)}).community;
   await expect(service.rate(99,5,wireUser)).rejects.toMatchObject({code:'session-required'}); expect(transport).not.toHaveBeenCalled();
 });
 test('estrelas recuperam decimal e gravação refresca jogo e média HTTP',async()=>{
@@ -34,7 +35,7 @@ test('estrelas recuperam decimal e gravação refresca jogo e média HTTP',async
     if(url.endsWith('/opinions')) return Response.json({averageRating:saved?5:0,reviews:[]});
     return Response.json({...wireGame,averageRating:saved?5:0});
   }));
-  const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport})}/></MemoryRouter>);
+  const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   await interaction.click(await screen.findByRole('link',{name:wireGame.title}));
   expect(await screen.findByText('4.5 de 5 estrelas')).toBeVisible();

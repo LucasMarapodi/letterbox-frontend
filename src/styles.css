@@ -7,6 +7,17 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+.catalog-toolbar .catalog-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; flex: 1; min-width: 0; }
+.catalog-filters .text-field, .catalog-filters .sort-field { margin: 0; min-width: 0; }
+.catalog-filters .sort-field { display: grid; gap: 0.4rem; }
+.catalog-filters select { width: 100%; min-width: 0; }
+.catalog-filters small { display: block; color: #9badb5; font-size: 0.75rem; }
+.catalog-filter-actions, .filter-options-feedback { grid-column: 1 / -1; }
+.catalog-filter-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.filter-options-feedback:empty { display: none; }
+.applied-filters { font-size: 0.85rem; overflow-wrap: anywhere; margin: 1rem 0; }
+.game-card .game-release-date { margin: 0; padding: 0 1.15rem 1rem; font-size: 0.8rem; color: #9badb5; }
+@media (max-width: 560px) { .catalog-toolbar .catalog-filters { grid-template-columns: minmax(0, 1fr); width: 100%; } }
 .search-tabs { display: flex; gap: 0.75rem; margin: 1.5rem 0; }
 .search-tabs [aria-selected="false"] { background: #1c272c; color: #c6ddd4; }
 .search-result-list { list-style: none; margin: 1rem 0; padding: 0; }

@@ -18,6 +18,7 @@ export function createMockGameService(options: MockGameOptions = {}): GameServic
   const reviews: Review[] = structuredClone(options.reviews ?? reviewFixtures);
   const users: User[] = structuredClone(options.users ?? userFixtures);
   return {
+    async getFilters() { return { genres: [], platforms: [] }; },
     async list(query: GameQuery = {}): Promise<GamePage> {
       if (error) throw error;
       const term: string = (query.term ?? '').trim().toLocaleLowerCase('pt-BR');

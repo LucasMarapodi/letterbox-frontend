@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -17,7 +18,7 @@ async function open(respond: (query: URLSearchParams) => Promise<Response>, init
     if (first) { first = false; return initial; }
     return respond(parsed.searchParams);
   });
-  const view = render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /></MemoryRouter>);
+  const view = render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)})} /></MemoryRouter>);
   await screen.findByRole('link', { name: 'Jogo anterior' });
   return { ...view, interaction: userEvent.setup(), queries: () => transport.mock.calls.filter(([url]) => new URL(url).pathname === '/api/v1/games') };
 }
@@ -26,7 +27,7 @@ test.each(['busca', 'tamanho'])('%s mantém o catálogo montado, isola a página
   const pending = deferred<Response>();
   const { interaction, container, queries } = await open(() => pending.promise);
   const previous = screen.getByRole('link', { name: 'Jogo anterior' });
-  const control = action === 'busca' ? screen.getByRole('button', { name: 'Buscar' }) : screen.getByLabelText('Itens por página');
+  const control = action === 'busca' ? screen.getByRole('button', { name: 'Aplicar filtros' }) : screen.getByLabelText('Itens por página');
   if (action === 'busca') {
     await interaction.type(screen.getByLabelText('Buscar jogos'), 'aventura');
     await interaction.click(control);
@@ -77,12 +78,12 @@ test('limpeza vazia/rascunho, mesmo tamanho e busca idêntica não consultam nem
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'rascunho');
   await interaction.click(screen.getByRole('button', { name: 'Limpar busca' }));
   fireEvent.change(screen.getByLabelText('Itens por página'), { target: { value: '20' } });
-  await interaction.click(screen.getByRole('button', { name: 'Buscar' }));
+  await interaction.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   expect(queries()).toHaveLength(1);
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 
-test('limpar busca aplicada bloqueia; ordenação e paginação mantêm loading regional', async () => {
+test('limpar busca aplicada bloqueia; ordenação fica em rascunho e paginação mantém loading regional', async () => {
   const pending = deferred<Response>(); let hold = false;
   const { interaction } = await open(async () => hold ? pending.promise : result());
   await interaction.type(screen.getByLabelText('Buscar jogos'), 'aventura{Enter}');
@@ -103,7 +104,7 @@ test('limpar busca aplicada bloqueia; ordenação e paginação mantêm loading 
 test('resposta inicial obsoleta não remove overlay nem substitui a busca atual', async () => {
   const old = deferred<Response>(); const latest = deferred<Response>(); let count = 0;
   const transport: FetchTransport = async () => ++count === 1 ? old.promise : latest.promise;
-  render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport })} /></MemoryRouter>);
+  render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)})} /></MemoryRouter>);
   await userEvent.setup().type(screen.getByLabelText('Buscar jogos'), 'nova{Enter}');
   expect(screen.getByRole('dialog', { name: 'Carregando jogos' })).toBeInTheDocument();
   await act(async () => { old.resolve(result('Obsoleto')); await old.promise; });

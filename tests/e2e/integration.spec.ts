@@ -226,7 +226,7 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   // Stop only the host owned by this suite; the developer's :5080 API is untouched.
   await stop();
   await home(b);
-  await b.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await b.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
   await expect(b.getByText('Não foi possível carregar os jogos.', { exact: true })).toBeVisible();
   await expect(b.locator('.game-grid')).toHaveCount(0);
   await start(request);

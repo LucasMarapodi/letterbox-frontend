@@ -1,3 +1,4 @@
+import { withFilterOptions } from './http-fixtures';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider, useLocation } from 'react-router-dom';
@@ -27,7 +28,7 @@ async function open(path: string, options: { logout?: Promise<Response>; favorit
     if (route.includes('/reviews/')) return Response.json({ code: 'not_found', message: 'Ausente' }, { status: 404 });
     throw new Error('Chamada não prevista no cenário.');
   });
-  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
+  const adapters = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport)});
   await adapters.auth.login({ email: 'test@example.test', password: 'test-only' });
   const router = createMemoryRouter([{ path: '*', element: <><AppRoutes adapters={adapters} /><Location /></> }], { initialEntries: ['/comunidade', path], initialIndex: 1 });
   render(<RouterProvider router={router} />);
