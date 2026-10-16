@@ -53,6 +53,13 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
     setState({ status: 'loading' });
     setAttempt((previous) => previous + 1);
   }
+  function changePageSize(value: string): void {
+    if (value !== '10' && value !== '20' && value !== '50') return;
+    const pageSize = Number(value);
+    if (pageSize === query.pageSize) return;
+    setState({ status: 'loading' });
+    setQuery((previous) => ({ ...previous, pageSize, page: 1 }));
+  }
   return <main className="dashboard">
     {authenticated ? <section className="dashboard-welcome" aria-labelledby="dashboard-title">
       <span className="eyebrow">SEU PRÓXIMO JOGO COMEÇA AQUI</span>
@@ -78,12 +85,21 @@ export function HomePage({ authenticated = false, favorites, feed }: { authentic
         <option value="name-desc">Nome: Z–A</option>
       </select>
     </div>
+    <div className="sort-field">
+      <label htmlFor="game-page-size">Itens por página</label>
+      <select id="game-page-size" value={query.pageSize} onChange={(event) => changePageSize(event.target.value)}>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
+    </div>
     </div>
     <section aria-labelledby="catalog-title" aria-busy={state.status === 'loading'}>
       <h2 id="catalog-title">Jogos</h2>
       {state.status === 'loading' && <LoadingState message="Carregando jogos…" />}
       {state.status === 'error' && <ErrorState message={state.integration ? 'O catálogo está temporariamente indisponível. Tente novamente.' : 'Não foi possível carregar os jogos.'} onRetry={retry} />}
       {state.status === 'ready' && <CatalogNotice paths={[['games']]} onRetry={retry} />}
+      {state.status === 'ready' && <p className="catalog-count">Exibindo {state.data.items.length} {state.data.items.length === 1 ? 'jogo' : 'jogos'} · até {state.data.pageSize} por página</p>}
       {state.status === 'ready' && (state.data.items.length
         ? <div className="game-grid">{state.data.items.map((game) => <GameCard key={game.id} game={game} />)}</div>
         : <EmptyState message={query.term?.trim() ? 'Nenhum jogo encontrado para esta busca.' : 'Nenhum jogo disponível.'} />)}
