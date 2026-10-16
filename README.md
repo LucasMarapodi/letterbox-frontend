@@ -1,6 +1,6 @@
 # Game Reviews — Frontend Web
 
-React + TypeScript + Vite. Fundação e catálogo público das US-01 a US-11, sem backend ou acesso direto à IGDB.
+React + TypeScript + Vite. Fundação, catálogo público e autenticação mockada das US-01 a US-14, sem backend ou acesso direto à IGDB.
 
 ## Executar
 
@@ -34,8 +34,8 @@ Não publicar contratos provisórios como decisões da API real. Não implementa
 
 ## Rotas provisórias
 
-`/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login`, `/cadastro` e `/notificacoes`.
-Home e detalhes do jogo oferecem catálogo público mockado. As páginas de review, perfil, login, cadastro e notificações mostram título, ID quando aplicável e aviso de implementação futura. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
+`/`, `/jogos/:gameId`, `/reviews/:reviewId`, `/perfil/:userId`, `/login` e `/cadastro`.
+Home e detalhes do jogo oferecem catálogo público mockado. Login e cadastro possuem formulários funcionais. Review e perfil permanecem provisórios. Notificações será acessado pelo sino e modal na US-28, sem página dedicada. Os links de exemplo na Home permanecem como atalhos temporários de navegação.
 URLs desconhecidas apresentam mensagem e a navegação permite retornar ao início.
 Em hospedagem futura com `BrowserRouter`, configurar fallback dos caminhos para `index.html`.
 
@@ -54,3 +54,10 @@ Visitantes podem listar jogos, buscar pelo nome por Enter ou botão, limpar a bu
 Fixtures fictícias ilustram jogo completo, lançamento/capa ausentes, média zero e ausência de notas. Capas SVG locais em `public/covers` não usam serviços externos. Os componentes não filtram, ordenam ou calculam média: consomem os resultados da camada de serviços.
 
 Evidências de TDD: `docs/TDD-PR-02.md`. Descrição local da PR: `docs/PR-02.md`. A branch `feat/pr-02-catalogo-publico` deriva da branch da fundação, sem merge. A PR ainda não foi publicada por ausência de remoto.
+
+## Autenticação mockada — PR-03
+
+Login, cadastro sem login automático, sessão em memória e logout. `RequireSession` oferece proteção reutilizável para ações das próximas US. Conteúdo público continua acessível a visitantes.
+
+Credenciais fictícias: `ana@example.com` / `teste123`. Decisões e limitações em `docs/AUTH.md`; evidências em `docs/TDD-PR-03.md`; descrição para revisão em `docs/PR-03.md`.
+

@@ -48,11 +48,17 @@ export function HomePage(): ReactElement {
     setState({ status: 'loading' });
     setAttempt((previous) => previous + 1);
   }
-  return <main>
-    <h1>Game Reviews</h1>
-    <p>Explore jogos e descubra novas experiências.</p>
-    <form aria-label="Busca de jogos" onSubmit={search}>
-      <TextField label="Buscar jogos" value={term} onChange={(event) => setTerm(event.target.value)} />
+  return <main className="dashboard">
+    <section className="dashboard-hero" aria-labelledby="dashboard-title">
+      <span className="eyebrow">DESCUBRA. JOGUE. COMPARTILHE.</span>
+      <h1 id="dashboard-title">Game Reviews</h1>
+      <p className="hero-headline">Cada jogo, uma nova história.</p>
+      <p className="hero-description">Explore jogos e descubra novas experiências.</p>
+      <Link className="primary-link" to="/cadastro">Comece sua jornada <span aria-hidden="true">↗</span></Link>
+    </section>
+    <div className="catalog-toolbar">
+    <form className="catalog-search" aria-label="Busca de jogos" onSubmit={search}>
+      <TextField label="Buscar jogos" placeholder="Encontre seu próximo jogo…" value={term} onChange={(event) => setTerm(event.target.value)} />
       <Button type="submit">Buscar</Button>{' '}
       <Button onClick={clearSearch}>Limpar busca</Button>
     </form>
@@ -63,7 +69,8 @@ export function HomePage(): ReactElement {
         <option value="name-desc">Nome: Z–A</option>
       </select>
     </div>
-    <nav aria-label="Rotas de exemplo">
+    </div>
+    <nav className="example-links" aria-label="Rotas de exemplo">
       <Link to="/jogos/game-1">Jogo de exemplo</Link>{' '}
       <Link to="/reviews/review-1">Review de exemplo</Link>{' '}
       <Link to="/perfil/user-1">Perfil de exemplo</Link>
