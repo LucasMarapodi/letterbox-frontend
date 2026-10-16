@@ -13,7 +13,7 @@ const userA = { ...wireUser, id: 'user-1', displayName: 'Ana API' };
 const userB = { ...wireUser, id: 'user-b', displayName: 'Bia API' };
 const loginA = { user: userA, token: 'test-a', expiresAt: '2080-01-01T00:00:00Z' };
 const loginB = { user: userB, token: 'test-b', expiresAt: loginA.expiresAt };
-test('autenticação HTTP não consulta nem exibe dados privados de mocks não migrados', async () => {
+test('autenticação usa dashboard e não consulta favoritos/feed/notificações separadamente', async () => {
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(loginA)).mockResolvedValueOnce(Response.json(userA));
   const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport:withCatalog(transport)});
   const favorites = vi.spyOn(adapters.community,'getFavorites'); const feed = vi.spyOn(adapters.community,'getFeed'); const notifications = vi.spyOn(adapters.notifications,'list');
@@ -21,14 +21,13 @@ test('autenticação HTTP não consulta nem exibe dados privados de mocks não m
   await interaction.type(screen.getByLabelText('E-mail'),'a@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   expect(await screen.findByLabelText('Usuário conectado')).toHaveTextContent('Ana API');
   expect(favorites).not.toHaveBeenCalled(); expect(feed).not.toHaveBeenCalled(); expect(notifications).not.toHaveBeenCalled();
-  expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument(); expect(screen.queryByRole('button',{name:'Notificações'})).not.toBeInTheDocument();
+  expect(await screen.findByRole('region',{name:'Jogos favoritos'})).toBeVisible(); expect(screen.getByRole('button',{name:'Notificações'})).toBeVisible();
   expect(adapters.privateFeatures?.opinions).toBe(false);
 });
-test('serviços privados ainda não migrados não aceitam identidade de usuário para gravar em mocks', async () => {
+test('serviços privados não aceitam identidade de usuário sem sessão HTTP', async () => {
   const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'});
-  for (const operation of [() => adapters.community.getFeed(userA), () => adapters.notifications.list(userA)]) {
-    await expect(operation()).rejects.toMatchObject({kind:'configuration'});
-  }
+  await expect(adapters.community.getFeed(userA)).rejects.toMatchObject({code:'session-required'});
+  await expect(adapters.notifications.list(userA)).rejects.toMatchObject({kind:'http',status:401});
 });
 function Probe(): React.ReactElement {
   const {user,signIn,signOut,version}=useSession();

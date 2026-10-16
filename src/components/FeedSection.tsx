@@ -6,20 +6,22 @@ import { useSession } from '../session/SessionProvider';
 import { encodeRouteId } from '../routing/encodeRouteId';
 import { Avatar } from './Avatar';
 import { EmptyState, ErrorState, LoadingState } from './Feedback';
+import { Button } from './Button';
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; reviews: ReviewDetails[] };
-export function FeedSection(): ReactElement | null {
+export function FeedSection({ initialReviews }: { initialReviews?: ReviewDetails[] } = {}): ReactElement | null {
   const { community } = useServices();
   const { user } = useSession();
-  const [state, setState] = useState<State>({ status: 'loading' });
+  const [state, setState] = useState<State>(() => initialReviews ? { status: 'ready', reviews: initialReviews } : { status: 'loading' });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
-    if (user) void community.getFeed(user).then((reviews) => { if (active) setState({ status: 'ready', reviews }); }, () => { if (active) setState({ status: 'error' }); });
+    if (user && (initialReviews === undefined || attempt > 0)) void community.getFeed(user).then((reviews) => { if (active) setState({ status: 'ready', reviews }); }, () => { if (active) setState({ status: 'error' }); });
     return () => { active = false; };
-  }, [user, attempt]);
+  }, [user, attempt, initialReviews]);
   if (!user) return null;
   return <section className="feed-section" aria-label="Feed de reviews"><h2>Feed de reviews</h2><p className="feed-description">As últimas reviews de quem você segue.</p>
+    <Button disabled={state.status === 'loading'} onClick={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }}>Atualizar feed</Button>
     {state.status === 'loading' && <LoadingState message="Carregando feed…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar o feed." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'ready' && (state.reviews.length ? state.reviews.map((review) => <article className="review-card" key={review.id}>

@@ -16,6 +16,6 @@ export function CommunityRankedReviews({ period }: { period: RankingPeriod }): R
   return <section aria-label="Reviews mais comentadas"><h2>Reviews mais comentadas</h2>
     {state.status === 'loading' && <LoadingState message="Carregando reviews mais comentadas…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar as reviews mais comentadas." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
-    {state.status === 'ready' && (state.items.length ? state.items.map((item) => <CommunityReviewCard key={item.review.id} review={item.review} commentCount={item.commentCount} />) : <EmptyState message="Nenhuma review com comentários neste período." />)}
+    {state.status === 'ready' && (state.items.length ? state.items.map((item) => <CommunityReviewCard key={item.review.id} review={item.review} commentCount={item.commentCount} lastCommentAt={item.lastCommentAt} />) : <EmptyState message="Nenhuma review com comentários neste período." />)}
   </section>;
 }

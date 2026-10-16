@@ -16,6 +16,6 @@ export function CommunityRankedGames({ period }: { period: RankingPeriod }): Rea
   return <section aria-label="Jogos em discussão"><h2>Jogos em discussão</h2>
     {state.status === 'loading' && <LoadingState message="Carregando jogos em discussão…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar os jogos em discussão." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
-    {state.status === 'ready' && (state.items.length ? <div className="game-grid">{state.items.map((item) => <GameCard key={item.game.id} game={item.game} commentCount={item.commentCount} />)}</div> : <EmptyState message="Nenhum jogo com comentários neste período." />)}
+    {state.status === 'ready' && (state.items.length ? <div className="game-grid">{state.items.map((item) => <GameCard key={item.game.id} game={item.game} commentCount={item.commentCount} lastCommentAt={item.lastCommentAt} />)}</div> : <EmptyState message="Nenhum jogo com comentários neste período." />)}
   </section>;
 }

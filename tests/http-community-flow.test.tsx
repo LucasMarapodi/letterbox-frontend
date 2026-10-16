@@ -1,0 +1,26 @@
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { expect, test, vi } from 'vitest';
+import { AppRoutes } from '../src/App';
+import { createDefaultApplicationServices } from '../src/services/runtime';
+import { createHttpSessionStore } from '../src/services/http/adapters';
+import type { FetchTransport } from '../src/services/http/client';
+import { wireUser, wireReview, wireGame } from './http-fixtures';
+import { deferred } from './fixtures';
+const oldReview={...wireReview,createdAt:'2000-01-01T00:00:00Z'};
+const recentTime='2026-10-14T00:00:00Z';
+test('operações públicas usam DTOs de ranking e period sem Bearer mesmo com sessão',async()=>{
+ const session=createHttpSessionStore();session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json([oldReview])).mockResolvedValueOnce(Response.json([{review:oldReview,commentCount:23,lastCommentAt:recentTime}])).mockResolvedValueOnce(Response.json([{game:wireGame,commentCount:23,lastCommentAt:recentTime}]));const service=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport,session}).community;
+ expect(await service.getRecentReviews()).toEqual([oldReview]);expect(await service.getMostCommented('24h')).toEqual([{review:oldReview,commentCount:23,lastCommentAt:recentTime}]);expect(await service.getGamesInDiscussion('30d')).toEqual([{game:wireGame,commentCount:23,lastCommentAt:recentTime}]);expect(transport.mock.calls.map(([url])=>new URL(url).pathname+new URL(url).search)).toEqual(['/api/v1/community/reviews/recent','/api/v1/community/reviews/most-commented?period=24h','/api/v1/community/games/in-discussion?period=30d']);for(const [,init]of transport.mock.calls)expect(init.headers).not.toHaveProperty('Authorization');
+});
+function open(transport:FetchTransport){render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport})}/></MemoryRouter>);return userEvent.setup();}
+test('três abas mantêm período e exibem review antiga com comentários recentes da API',async()=>{
+ const transport=vi.fn<FetchTransport>().mockImplementation(async(url)=>Response.json(url.includes('most-commented')?[{review:oldReview,commentCount:23,lastCommentAt:recentTime}]:url.includes('in-discussion')?[{game:wireGame,commentCount:23,lastCommentAt:recentTime}]:[oldReview]));const interaction=open(transport);
+ expect(await screen.findByText('Review')).toBeVisible();await interaction.click(screen.getByRole('button',{name:'Mais comentadas'}));expect(await screen.findByText('23 comentários no período')).toBeVisible();expect(screen.getByLabelText('Último comentário')).toHaveAttribute('dateTime',recentTime);expect(screen.getByLabelText('Período dos rankings')).toHaveValue('7d');
+ await interaction.selectOptions(screen.getByLabelText('Período dos rankings'),'24h');await screen.findByText('23 comentários no período');await interaction.click(screen.getByRole('button',{name:'Jogos em discussão'}));expect(await screen.findByRole('link',{name:wireGame.title})).toHaveAttribute('href','/jogos/game%252F42');expect(screen.getByLabelText('Período dos rankings')).toHaveValue('24h');await interaction.selectOptions(screen.getByLabelText('Período dos rankings'),'30d');await screen.findByText('23 comentários no período');expect(transport.mock.calls.some(([url])=>url.endsWith('in-discussion?period=30d'))).toBe(true);
+});
+test('período/aba anteriores não sobrescrevem seleção atual',async()=>{
+ const old=deferred<Response>();const transport=vi.fn<FetchTransport>().mockImplementation(async(url)=>url.includes('most-commented?period=7d')?old.promise:Response.json(url.includes('most-commented')?[{review:{...oldReview,text:'Resultado atual'},commentCount:1,lastCommentAt:recentTime}]:[]));const interaction=open(transport);await screen.findByText('Nenhuma review publicada.');await interaction.click(screen.getByRole('button',{name:'Mais comentadas'}));await interaction.selectOptions(screen.getByLabelText('Período dos rankings'),'24h');await screen.findByText('Resultado atual');await interaction.click(screen.getByRole('button',{name:'Jogos em discussão'}));await screen.findByText('Nenhum jogo com comentários neste período.');await act(async()=>{old.resolve(Response.json([{review:{...oldReview,text:'Resultado antigo'},commentCount:999,lastCommentAt:recentTime}]));await old.promise;});expect(screen.queryByText('Resultado antigo')).not.toBeInTheDocument();expect(screen.queryByText('Resultado atual')).not.toBeInTheDocument();
+});
+test('rede recente mostra erro e retry vazio, sem fixture',async()=>{const transport=vi.fn<FetchTransport>().mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(Response.json([]));const interaction=open(transport);expect(await screen.findByText('Não foi possível carregar as reviews recentes.')).toBeVisible();await interaction.click(screen.getByRole('button',{name:'Tentar novamente'}));expect(await screen.findByText('Nenhuma review publicada.')).toBeVisible();expect(screen.queryByText('Ecos do Horizonte')).not.toBeInTheDocument();});
