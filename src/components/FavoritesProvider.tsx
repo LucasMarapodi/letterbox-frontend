@@ -45,7 +45,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const load = useCallback((force = false): Promise<void> => {
     if (!user || !enabled || !alive.current || (!force && data.current)) return Promise.resolve();
-    if (request.current?.revision === revision.current) return request.current.promise;
+    if (!force && request.current?.revision === revision.current) return request.current.promise;
     const current = ++revision.current;
     if (!data.current) setState({ status: 'loading', lists: null });
     const promise = Promise.resolve().then(() => { if (!alive.current) throw new Error('Consulta invalidada.'); return community.getFavorites(user); }).then(lists => {

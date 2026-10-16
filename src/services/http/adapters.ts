@@ -1,6 +1,8 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import type { GameQuery, CatalogFilters } from '../contracts';
 import { decodeCatalogFilters } from './decoders';
+import { decodeProfileCompletion } from './decoders';
+import type { ProfileCompletionRequest, ProfileCompletionResponse } from './dtos';
 import { validSearchTerm, type SearchService } from '../searchContracts';
 import { decodeSearch } from './decoders';
 import { isLocalId, type User, type UserId, type GameId, type ReviewId } from '../../models';
@@ -43,6 +45,8 @@ export interface HttpAdapters {
     comment(id: ReviewId, input: TextRequest, signal?: AbortSignal): Promise<CommentResponse>;
   };
   profiles: {
+    completion(signal?: AbortSignal): Promise<ProfileCompletionResponse>;
+    complete(input: ProfileCompletionRequest, signal?: AbortSignal): Promise<ProfileCompletionResponse>;
     get(id: UserId, signal?: AbortSignal): Promise<PublicUserResponse>;
     reviews(id: UserId, signal?: AbortSignal): Promise<ReviewResponse[]>;
     profile(id: UserId, signal?: AbortSignal): Promise<PublicProfile>;
@@ -150,6 +154,8 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       comment: (id, input, signal) => call({ method: 'POST', path: ['reviews', localPathId(id), 'comments'], body: { text: input.text }, signal }, decodeComment, true),
     },
     profiles: {
+      completion: signal => call({ path: ['users', 'me', 'profile-completion'], signal }, decodeProfileCompletion, true),
+      complete: (input, signal) => call({ method: 'PUT', path: ['users', 'me', 'profile-completion'], signal, body: { country: input.country, state: input.state, bio: input.bio, favoriteGameIds: input.favoriteGameIds, ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }) } }, decodeProfileCompletion, true),
       get: getUser, reviews: userReviews, followers, following,
       async profile(id, signal) { const [user, reviews] = await Promise.all([getUser(id, signal), userReviews(id, signal)]); return { user, reviews }; },
       async connections(id, signal) { const [followerUsers, followingUsers] = await Promise.all([followers(id, signal), following(id, signal)]); return { followers: followerUsers, following: followingUsers }; },

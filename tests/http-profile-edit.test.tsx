@@ -16,6 +16,7 @@ async function open(status?:number,other=false){
   const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url,init)=>{
     if(new URL(url).pathname==='/api/v1/games')return Response.json(wirePage([]));
     if(new URL(url).pathname==='/api/v1/favorites')return Response.json({games:[],reviews:[]});
+    if(url.endsWith('/profile-completion'))return Response.json({country:null,state:null,bio:profile.bio,avatarUrl:profile.avatarUrl,favoriteGameIds:[],favoriteGameCount:0,isComplete:false});
     if(url.endsWith('/follow/me'))return Response.json({following:false});
     if(url.endsWith('/profile')&&init.method==='PATCH'){
       if(status===0)throw new Error('offline');if(status)return Response.json({code:status===401?'unauthorized':'validation_failed',message:'Seguro'},{status});

@@ -11,6 +11,7 @@ import { FavoritesSections } from '../components/FavoritesSections';
 import { FollowButton } from '../components/FollowButton';
 import { ConnectionsSections } from '../components/ConnectionsSections';
 import { ProfileEditor } from './ProfileEditor';
+import { ProfileCompletion } from './ProfileCompletion';
 import { CatalogNotice } from '../components/CatalogNotice';
 import { ReviewFavoriteStar } from '../components/ReviewFavoriteStar';
 
@@ -22,6 +23,8 @@ function ProfileContent({ id }: { id: number }): ReactElement {
   const [attempt, setAttempt] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [connectionsVersion, setConnectionsVersion] = useState(0);
+  const [completionRevision, setCompletionRevision] = useState(0);
+  const [editorRevision, setEditorRevision] = useState(0);
   useEffect(() => {
     let active = true;
     setRefreshing(true);
@@ -41,7 +44,8 @@ function ProfileContent({ id }: { id: number }): ReactElement {
       <FollowButton targetId={id} name={profile.user.displayName} onChanged={() => setConnectionsVersion((value) => value + 1)} />
       </>}
     </section>
-    <ProfileEditor profile={profile.user} onSaved={(updated) => setState({ status: 'ready', profile: { ...profile, user: updated } })} />
+    <ProfileCompletion profile={profile.user} revision={completionRevision} onSaved={data => { setState({ status: 'ready', profile: { ...profile, user: { ...profile.user, bio: data.bio, avatarUrl: data.avatarUrl } } }); setEditorRevision(value => value + 1); }} />
+    <ProfileEditor key={editorRevision} profile={profile.user} onSaved={(updated) => { setState({ status: 'ready', profile: { ...profile, user: updated } }); setCompletionRevision(value => value + 1); }} />
     <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
       {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? profile.reviews.map((review) => <article className="review-card" key={review.id}>
         <h3><Link to={`/jogos/${encodeRouteId(review.gameId)}`}>{review.game.title}</Link></h3>
