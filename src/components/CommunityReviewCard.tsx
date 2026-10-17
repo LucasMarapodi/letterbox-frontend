@@ -8,6 +8,7 @@ import { encodeRouteId } from '../routing/encodeRouteId';
 import { Avatar } from './Avatar';
 import { LastCommentTime } from './LastCommentTime';
 import { ReviewFavoriteStar } from './ReviewFavoriteStar';
+import { CommunityCommentPreview } from './CommunityCommentPreview';
 export function CommunityReviewCard({ review, commentCount, lastCommentAt }: { review: ReviewDetails; commentCount?: number; lastCommentAt?: string }): ReactElement {
   return <article className="review-card review-preview community-review">
     <div className="feed-author"><Avatar name={review.author.displayName} src={review.author.avatarUrl} /><Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></div>
@@ -15,6 +16,7 @@ export function CommunityReviewCard({ review, commentCount, lastCommentAt }: { r
     <ReviewBody review={review} />
     {commentCount !== undefined && <p>{commentCount} {commentCount === 1 ? 'comentário' : 'comentários'} no período</p>}
     {lastCommentAt && <LastCommentTime value={lastCommentAt} />}
+    {commentCount !== undefined && commentCount > 0 && <CommunityCommentPreview key={review.id} reviewId={review.id} />}
     <ReviewCardLink id={review.id} label="Ler review" />
     <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
   </article>;

@@ -371,6 +371,14 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .rated-review-form .completion-actions > button { min-height: 2.75rem; }
 
 .profile-reviews { margin-top: 3rem; }
+.community-comment-preview { position: relative; z-index: 2; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #405259; }
+.community-comment-preview h4 { margin: 0 0 .75rem; font-size: .85rem; color: #adcbc0; }
+.comment-preview-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .75rem; }
+.comment-preview-list > li { padding: .85rem; background: #142026; border-radius: .75rem; min-width: 0; }
+.comment-preview-author { display: flex; align-items: center; gap: .6rem; font-size: .8rem; font-weight: 600; }
+.comment-preview-author .avatar { width: 1.75rem; height: 1.75rem; font-size: .65rem; }
+.comment-preview-text { margin: .5rem 0 0; font-size: .85rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.comment-preview-more { display: inline-block; margin-top: .75rem; color: #79dcae; font-size: .85rem; }
 .profile-section-heading { display: flex; align-items: baseline; gap: .85rem; padding-bottom: .8rem; margin-bottom: 1.5rem; border-bottom: 1px solid #405259; }
 .profile-section-heading h2 { margin: 0; font-size: 1.5rem; }
 .profile-section-heading > span { color: #91aaa3; font-size: .85rem; }
