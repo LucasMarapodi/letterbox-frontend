@@ -369,3 +369,19 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .game-favorite-error { grid-column: 1 / -1; color: #ffbcbc; font-size: .8rem; overflow-wrap: anywhere; }
 .rated-review-form .completion-actions { justify-content: flex-end; flex-wrap: nowrap; }
 .rated-review-form .completion-actions > button { min-height: 2.75rem; }
+
+.profile-reviews { margin-top: 3rem; }
+.profile-section-heading { display: flex; align-items: baseline; gap: .85rem; padding-bottom: .8rem; margin-bottom: 1.5rem; border-bottom: 1px solid #405259; }
+.profile-section-heading h2 { margin: 0; font-size: 1.5rem; }
+.profile-section-heading > span { color: #91aaa3; font-size: .85rem; }
+.profile-reviews .review-card, .favorites-sections .review-card { background: #1c292e; border-color: #35494d; }
+.favorite-games-section .favorite-games-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.favorite-games-section .favorite-game { display: flex; flex-direction: column; gap: .75rem; padding: .85rem; }
+.favorite-games-section .favorite-game .game-cover { width: 5rem; height: 7rem; object-fit: cover; }
+.favorite-games-section .favorite-game-copy { width: 100%; }
+.favorite-games-section .favorite-game-copy p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: .8rem; }
+@media (max-width: 700px) {
+  .favorite-games-section .favorite-games-list { grid-template-columns: minmax(0, 1fr); }
+  .favorite-games-section .favorite-game { display: grid; grid-template-columns: 4rem minmax(0, 1fr); }
+  .favorite-games-section .favorite-game .game-cover { width: 4rem; height: auto; }
+}
