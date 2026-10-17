@@ -52,7 +52,7 @@ for(const [name,width]of [['desktop',1280],['mobile',390]]as const){
     const recent=page.getByRole('region',{name:'Reviews recentes',exact:true});await expect(recent.locator('.review-card-link').first()).toHaveAttribute('href','/reviews/56');
     await recent.getByRole('link',{name:'Ler review',exact:true}).nth(1).click({position:{x:8,y:8}});await expect(page).toHaveURL(/\/reviews\/55$/);
     await page.getByRole('button',{name:'Editar minha review',exact:true}).click();const form=page.getByRole('form',{name:'Salvar review',exact:true});
-    await expect(form.getByLabel('Título',{exact:true})).toHaveValue('');await expect(form.getByLabel('Nota (0 a 5)',{exact:true})).toHaveValue('0');
+    await expect(form.getByLabel('Título',{exact:true})).toHaveValue('');await expect(form.getByRole('radio',{name:'0 estrelas',exact:true})).toBeChecked();
     await form.getByLabel('Descrição (opcional)',{exact:true}).fill('Uma experiência que merece ser compartilhada.');await form.getByRole('button',{name:'Salvar review',exact:true}).click();
     await expect(form.getByText('Informe um título quando houver descrição.',{exact:true})).toBeVisible();expect(commands).toHaveLength(1);
     await form.getByLabel('Título',{exact:true}).fill('x'.repeat(151));await form.getByRole('button',{name:'Salvar review',exact:true}).click();await expect(form.getByText('Título deve ter até 150 caracteres.',{exact:true})).toBeVisible();expect(commands).toHaveLength(1);

@@ -60,7 +60,7 @@ test.each(cases)('$name: dois submits/cliques enviam uma mutação, erro libera 
   const saved = vi.fn();
   render(<MemoryRouter><ServiceProvider value={adapters}><SessionProvider service={adapters.auth}><FavoritesProvider>{item.render(saved)}</FavoritesProvider></SessionProvider></ServiceProvider></MemoryRouter>);
   const interaction = userEvent.setup();
-  if(item.name==='publicar review'){await interaction.click(await screen.findByRole('button',{name:'Criar review'})); fireEvent.change(screen.getByLabelText('Nota (0 a 5)'),{target:{value:'4.5'}});} if(item.name==='editar review')await interaction.click(screen.getByRole('button',{name:'Editar minha review'}));
+  if(item.name==='publicar review'){await interaction.click(await screen.findByRole('button',{name:'Criar review'})); fireEvent.click(screen.getByRole('radio',{name:'4 estrelas'}));} if(item.name==='editar review')await interaction.click(screen.getByRole('button',{name:'Editar minha review'}));
   if(item.name==='perfil') await interaction.click(screen.getByRole('button',{name:'Editar perfil'}));
   for (const field of item.fields) {
     const input = await screen.findByLabelText(field.label);

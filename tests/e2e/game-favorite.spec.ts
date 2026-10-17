@@ -42,16 +42,16 @@ for (const [name, width] of [['desktop', 1280], ['mobile', 390]] as const) {
       const star = page.getByRole('button', { name: `Remover jogo ${game.title} dos favoritos`, exact: true });
       await expect(star).toHaveAttribute('aria-pressed', 'true');
       const geometry = await star.evaluate(button => {
-        const row = button.parentElement!, heading = row.querySelector('h2,h3')!;
+        const row = button.closest('.game-detail-header') ?? button.parentElement!, heading = row.querySelector('h2,h3')!;
         const text = heading.querySelector('a')?.firstChild ?? heading.firstChild!;
         const range = document.createRange(); range.setStart(text, 0); range.setEnd(text, 1);
-        const first = range.getBoundingClientRect(), action = button.getBoundingClientRect(), container = row.getBoundingClientRect();
+        const first = range.getBoundingClientRect(), action = button.getBoundingClientRect(), container = row.getBoundingClientRect(), group = button.closest('.game-header-actions')?.getBoundingClientRect();
         const style = getComputedStyle(row);
-        return { rightGap: container.right - parseFloat(style.paddingRight) - action.right, firstCenter: first.top + first.height / 2, starCenter: action.top + action.height / 2, headingRight: heading.getBoundingClientRect().right, starLeft: action.left, width: action.width, height: action.height, position: getComputedStyle(button).position, overflow: document.documentElement.scrollWidth > window.innerWidth };
+        return { rightGap: container.right - parseFloat(style.paddingRight) - (group?.right ?? action.right), firstCenter: first.top + first.height / 2, starCenter: action.top + action.height / 2, headingRight: heading.getBoundingClientRect().right, headingBottom: heading.getBoundingClientRect().bottom, starTop: action.top, starLeft: action.left, width: action.width, height: action.height, position: getComputedStyle(button).position, overflow: document.documentElement.scrollWidth > window.innerWidth };
       });
       expect(Math.abs(geometry.rightGap)).toBeLessThan(2);
-      expect(Math.abs(geometry.firstCenter - geometry.starCenter)).toBeLessThan(12);
-      expect(geometry.headingRight).toBeLessThan(geometry.starLeft);
+      if (context === 'detalhe' && width <= 560) expect(geometry.headingBottom).toBeLessThanOrEqual(geometry.starTop);
+      else { expect(Math.abs(geometry.firstCenter - geometry.starCenter)).toBeLessThan(12); expect(geometry.headingRight).toBeLessThan(geometry.starLeft); }
       expect(geometry.width).toBeGreaterThanOrEqual(44); expect(geometry.height).toBeGreaterThanOrEqual(44);
       expect(['fixed', 'absolute']).not.toContain(geometry.position); expect(geometry.overflow).toBe(false);
       await mkdir('docs/evidence', { recursive: true });

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { User } from '../models';
 import { profileLocations } from '../models/profileLocations';
@@ -9,6 +9,7 @@ import { HttpFailure } from '../services/http/client';
 import { useServices } from '../services/ServiceProvider';
 import { useSession } from '../session/SessionProvider';
 import { useFavorites } from '../components/FavoritesProvider';
+import { Modal } from '../components/Modal';
 import { Avatar } from '../components/Avatar';
 import { GameCover } from '../components/GameCover';
 import { TextField } from '../components/TextField';
@@ -112,38 +113,16 @@ function ProfileModal({ profile, onClose, onSaved, trigger }: { profile: User; o
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const sending = useRef(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const title = useId();
   useEffect(() => {
     const controller = new AbortController(); setError(false); setData(null);
     void http?.().profiles.completion(controller.signal).then(value => { if (!controller.signal.aborted) setData(value); }, () => { if (!controller.signal.aborted) setError(true); });
     if (loadFavorites) void loadFavorites();
     return () => controller.abort();
   }, [http, attempt, loadFavorites]);
-  useLayoutEffect(() => {
-    const backdrop = ref.current;
-    const siblings = Array.from(document.body.children).filter(element => element !== backdrop);
-    const inert = siblings.map(element => element.hasAttribute('inert'));
-    siblings.forEach(element => element.setAttribute('inert', ''));
-    const overflow = document.documentElement.style.overflow; document.documentElement.style.overflow = 'hidden';
-    backdrop?.querySelector<HTMLButtonElement>('button')?.focus();
-    function keys(event: KeyboardEvent) {
-      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); if (!sending.current) onClose(); }
-      if (event.key !== 'Tab') return;
-      const controls = Array.from(backdrop?.querySelectorAll<HTMLElement>('button, input, select, textarea, a[href]') ?? []).filter(element => !element.matches(':disabled'));
-      const first = controls[0], last = controls[controls.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-    }
-    function contain(event: FocusEvent) { if (event.target instanceof Node && !backdrop?.contains(event.target)) backdrop?.querySelector<HTMLButtonElement>('button')?.focus(); }
-    document.addEventListener('keydown', keys); document.addEventListener('focusin', contain);
-    return () => { document.removeEventListener('keydown', keys); document.removeEventListener('focusin', contain); siblings.forEach((element, index) => { if (!inert[index]) element.removeAttribute('inert'); }); document.documentElement.style.overflow = overflow; if (trigger?.isConnected) trigger.focus(); };
-  }, [onClose, trigger]);
   const failed = error || favorites?.state.status === 'error';
-  return createPortal(<div className="modal-backdrop" ref={ref}><section className="profile-edit-modal" role="dialog" aria-modal="true" aria-labelledby={title}>
-    <div className="modal-heading"><h2 id={title}>Editar perfil</h2><Button aria-label="Fechar edição do perfil" onClick={() => { if (!sending.current) onClose(); }}>×</Button></div>
+  return <Modal title="Editar perfil" closeLabel="Fechar edição do perfil" trigger={trigger} sending={sending} onClose={onClose}>
     {failed ? <ErrorState message="Não foi possível carregar os dados do perfil." onRetry={() => { setAttempt(value => value + 1); void loadFavorites?.(true); }} /> : data && favorites?.state.lists ? <ProfileForm profile={profile} initial={data} sending={sending} onCancel={onClose} onSaved={onSaved} /> : <LoadingState message="Carregando dados do perfil…" />}
-  </section></div>, document.body);
+  </Modal>;
 }
 export function ProfileEditor({ profile, onSaved }: { profile: User; onSaved(user: User): void }) {
   const { user } = useSession(); const { http } = useServices(); const favorites = useFavorites();

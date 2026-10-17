@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Review } from '../models';
 import { useServices } from '../services/ServiceProvider';
 import { CommunityError, type ReviewInput } from '../services/communityContracts';
 import { useSession } from '../session/SessionProvider';
-import { RatedReviewForm } from '../components/RatedReviewForm';
+import { ReviewModal } from '../components/ReviewModal';
 import { Button } from '../components/Button';
 import { ErrorState, LoadingState, QueryRegion } from '../components/Feedback';
 
@@ -18,6 +18,8 @@ function PublishControl({ gameId, onSaved }: { gameId: number; onSaved(): void }
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const trigger = useRef<HTMLButtonElement>(null);
+  const close = useCallback(() => setOpen(false), []);
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   useEffect(() => {
@@ -42,12 +44,13 @@ function PublishControl({ gameId, onSaved }: { gameId: number; onSaved(): void }
       } else throw failure;
     }
   }
-  if (loading) return <LoadingState region="Consulta da sua review" message="Verificando sua review…" />;
+  if (loading && !review) return <LoadingState region="Consulta da sua review" message="Verificando sua review…" />;
   if (loadError) return <ErrorState region="Consulta da sua review" message="Não foi possível verificar sua review." onRetry={() => { setLoading(true); setAttempt(value => value + 1); }} />;
-  return <QueryRegion label="Consulta da sua review" busy={false}><section className="review-card" aria-label="Sua review">
+  return <QueryRegion label="Consulta da sua review" busy={loading}><section className="game-review-control" aria-label="Sua review">
     {success && <p role="status">{success}</p>}
     {error && <p role="alert">{error}</p>}
-    {open ? <RatedReviewForm initialTitle={review?.title} initialText={review?.text} initialRating={review?.rating} submitLabel={review ? 'Salvar review' : 'Publicar review'} pendingLabel={review ? 'Salvando…' : 'Publicando…'} failureMessage={review ? 'Não foi possível salvar a review. Tente novamente.' : 'Não foi possível publicar a review. Tente novamente.'} onSubmit={submit} onCancel={() => setOpen(false)} /> : <Button onClick={() => { setSuccess(''); setError(''); setOpen(true); }}>{review ? 'Editar minha review' : 'Criar review'}</Button>}
+    <button type="button" ref={trigger} aria-haspopup="dialog" onClick={() => { setSuccess(''); setError(''); setOpen(true); }}>{review ? 'Editar minha review' : 'Criar review'}</button>
+    {open && <ReviewModal trigger={trigger.current} title={review ? 'Editar minha review' : 'Criar review'} initialTitle={review?.title} initialText={review?.text} initialRating={review?.rating} submitLabel={review ? 'Salvar review' : 'Publicar review'} pendingLabel={review ? 'Salvando…' : 'Publicando…'} failureMessage={review ? 'Não foi possível salvar a review. Tente novamente.' : 'Não foi possível publicar a review. Tente novamente.'} onSubmit={submit} onCancel={close} />}
   </section></QueryRegion>;
 }
 export function PublishReview(props: { gameId: number; onSaved(): void }): ReactElement | null {

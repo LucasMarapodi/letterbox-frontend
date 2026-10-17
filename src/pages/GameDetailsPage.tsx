@@ -7,7 +7,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
 import { GameCover } from '../components/GameCover';
 import { PublishReview } from './PublishReview';
-import { GameTitle } from '../components/GameTitle';
+import { GameFavoriteStar } from '../components/GameFavoriteStar';
 import { CatalogNotice } from '../components/CatalogNotice';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
@@ -50,12 +50,17 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     <CatalogNotice paths={[[ 'games', String(id) ], ['games', String(id), 'opinions'], ['games', String(id), 'reviews']]} onRetry={retry} />
     <section className="game-information" aria-labelledby="game-title">
     <div className="game-facts" role="region" aria-label="Informações do jogo" aria-busy={refreshing}>
-    {refreshing ? <LoadingState message="Carregando informações do jogo…" /> : <>
     <aside className="game-poster" aria-label="Capa do jogo">
       <GameCover title={game.title} src={game.coverUrl} className="details-cover" />
     </aside>
     <div className="game-overview">
-    <GameTitle game={game} detail />
+    <header className="game-detail-header">
+      <h2 id="game-title">{game.title}</h2>
+      <div className="game-header-actions">
+        <GameFavoriteStar game={game} />
+        <PublishReview gameId={id} onSaved={() => { setAttempt(value => value + 1); setOpinionsVersion(value => value + 1); }} />
+      </div>
+    </header>
     <p>{game.summary.trim() || 'Descrição indisponível.'}</p>
     <dl>
       <dt>Gêneros</dt><dd>{game.genres.length ? game.genres.join(', ') : 'Gêneros não informados.'}</dd>
@@ -63,11 +68,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
       <dt>Lançamento</dt><dd>{releaseLabel(game.releaseDate)}</dd>
     </dl>
     </div>
-    </>}
     </div>
-    <aside className="game-actions" aria-label="Avaliar e publicar">
-    <PublishReview gameId={id} onSaved={() => { setAttempt(value => value + 1); setOpinionsVersion(value => value + 1); }} />
-    </aside>
     <div className="game-discussion">
     <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
     </div>
