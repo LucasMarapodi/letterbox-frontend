@@ -324,6 +324,9 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .profile-pagination span { text-align: center; font-size: 0.8rem; }
 .comments-list .comment-reply { margin-left: 1rem; border-left: 3px solid #4c7866; }
 .comment-parent { font-size: 0.75rem; color: #9fb8b0; }
+.comments-list .review-card:target, .comments-list .highlighted-comment { outline: 2px solid #67daa3; outline-offset: 3px; scroll-margin-top: 6rem; }
+.comment-context, .ranked-comment-date { color: #a9bcb7; font-size: .8rem; }
+.comment-rank-count { font-weight: 700; color: #8ce6b8; margin-bottom: .25rem; }
 
 .review-card { position: relative; }
 .review-preview { isolation: isolate; }
