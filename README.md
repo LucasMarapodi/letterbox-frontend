@@ -110,3 +110,7 @@ Mais curtidos na Comunidade: comentários/respostas com períodos, paginação, 
 ## Sexta fase — S-PR-37
 
 Título no formulário e nas reviews, validação condicional/limite, contratos nullable e ordem da API preservada. 156 testes pertinentes, dois Chromium com HTTP sintético, lint/tipos/build aprovados. Integração com PostgreSQL local aguarda migration da S-PR-36. [Entrega e limites](docs/S-PR-37.md).
+
+## Sexta fase — S-PR-24
+
+Estrela à direita da primeira linha do nome no catálogo, detalhe, perfil e Jogos em discussão. Estado compartilhado, sem GET por alvo, com retry, isolamento de sessão e navegação independente. Dois Chromium desktop/mobile, testes pertinentes, lint/tipos/build aprovados. [Entrega e capturas](docs/S-PR-24.md).

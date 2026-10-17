@@ -58,7 +58,7 @@ test('PUT/DELETE confirmados não navegam, não avaliam e não publicam',async()
  const {interaction,calls,transport}=await open();await interaction.click(await screen.findByRole('button',{name:selectedLabel}));await screen.findByRole('button',{name:unselectedLabel});
  await interaction.click(screen.getByRole('button',{name:unselectedLabel}));expect(await screen.findByRole('button',{name:selectedLabel})).toHaveAttribute('aria-pressed','true');
  expect(calls('/favorites/game/12','DELETE')).toHaveLength(1);expect(calls('/favorites/game/12','PUT')).toHaveLength(1);for(const [,init]of [...calls('/favorites/game/12','PUT'),...calls('/favorites/game/12','DELETE')]){expect(init.body).toBeUndefined();expect(init.headers).toHaveProperty('Authorization','Bearer test-1');}
- expect(screen.getByRole('heading',{name:'Seus próximos jogos.'})).toBeVisible();expect(transport.mock.calls.some(([url])=>/\/games\/12$|\/rating|\/games\/12\/reviews$/.test(url))).toBe(false);
+ expect(screen.getByRole('heading',{name:'Game Reviews'})).toBeVisible();expect(transport.mock.calls.some(([url])=>/\/games\/12$|\/rating|\/games\/12\/reviews$/.test(url))).toBe(false);
 });
 test('instâncias sincronizadas, clique duplo e IDs de jogo/review independentes',async()=>{
  const pending=deferred<Response>();const {calls,interaction}=await open('/',{duplicate:true,write:async kind=>kind==='game'?pending.promise:new Response(null,{status:204})});

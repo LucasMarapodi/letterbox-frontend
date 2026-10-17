@@ -81,7 +81,7 @@ test('perfil de terceiros e visitantes não expõem favoritos', async () => {
   expect(screen.queryByRole('region', { name: 'Reviews favoritas' })).not.toBeInTheDocument();
 });
 test('falha na consulta permite tentar novamente sem mostrar lista incorreta', async () => {
-  vi.spyOn(community, 'getFavorites').mockRejectedValueOnce(new Error('Falha')).mockResolvedValue({ games: [], reviews: [] });
+  vi.spyOn(community, 'getFavorites').mockResolvedValueOnce({ games: [], reviews: [] }).mockRejectedValueOnce(new Error('Falha')).mockResolvedValue({ games: [], reviews: [] });
   const interaction = await login();
   expect(await screen.findByText('Não foi possível carregar os favoritos.')).toBeVisible();
   await interaction.click(screen.getByRole('button', { name: 'Tentar novamente' }));

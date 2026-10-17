@@ -36,27 +36,27 @@ async function open(): Promise<ReturnType<typeof userEvent.setup>> {
 }
 test('jogo alterna estado após sucesso e recupera estado do serviço', async () => {
   const service = createMockCommunityService();
-  vi.spyOn(community, 'getFavorite').mockImplementation(service.getFavorite);
+  vi.spyOn(community, 'getFavorites').mockImplementation(service.getFavorites);
   vi.spyOn(community, 'setFavorite').mockImplementation(service.setFavorite);
   const interaction = await open();
-  await interaction.click(await screen.findByRole('button', { name: 'Favoritar jogo' }));
-  expect(await screen.findByRole('button', { name: 'Remover jogo dos favoritos' })).toHaveAttribute('aria-pressed', 'true');
+  await interaction.click(await screen.findByRole('button', { name: 'Favoritar jogo Ecos do Horizonte' }));
+  expect(await screen.findByRole('button', { name: 'Remover jogo Ecos do Horizonte dos favoritos' })).toHaveAttribute('aria-pressed', 'true');
   await interaction.click(screen.getByRole('link', { name: 'Início' }));
   await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
-  await interaction.click(await screen.findByRole('button', { name: 'Remover jogo dos favoritos' }));
-  expect(await screen.findByRole('button', { name: 'Favoritar jogo' })).toHaveAttribute('aria-pressed', 'false');
+  await interaction.click(await screen.findByRole('button', { name: 'Remover jogo Ecos do Horizonte dos favoritos' }));
+  expect(await screen.findByRole('button', { name: 'Favoritar jogo Ecos do Horizonte' })).toHaveAttribute('aria-pressed', 'false');
 });
 test('falha não confirma favorito nem altera estado do botão', async () => {
-  vi.spyOn(community, 'getFavorite').mockResolvedValue(null);
+  vi.spyOn(community, 'getFavorites').mockResolvedValue({ games: [], reviews: [] });
   vi.spyOn(community, 'setFavorite').mockRejectedValue(new Error('Falha'));
   const interaction = await open();
-  await interaction.click(await screen.findByRole('button', { name: 'Favoritar jogo' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Favoritar jogo Ecos do Horizonte' }));
   expect(await screen.findByText('Não foi possível atualizar o favorito. Tente novamente.')).toBeVisible();
-  expect(screen.getByRole('button', { name: 'Favoritar jogo' })).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByRole('button', { name: 'Favoritar jogo Ecos do Horizonte' })).toHaveAttribute('aria-pressed', 'false');
 });
 test('visitante recebe caminho de login para favoritar jogo', async () => {
   render(<MemoryRouter initialEntries={['/jogos/1']}><AppRoutes /></MemoryRouter>);
   await screen.findByRole('heading', { name: 'Ecos do Horizonte' });
-  expect(screen.queryByRole('button', { name: 'Favoritar jogo' })).not.toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Favoritar jogo Ecos do Horizonte' })).not.toHaveAttribute('aria-pressed');
   expect(screen.queryByText('Entrar para favoritar')).not.toBeInTheDocument();
 });

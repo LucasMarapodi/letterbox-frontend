@@ -35,9 +35,9 @@ for (const [name, width] of [['desktop', 1280], ['mobile', 390]] as const) {
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
     await expect(page.getByLabel('Usuário conectado')).toHaveText('Ana');
     for (const context of ['catalogo', 'detalhe', 'perfil', 'discussao'] as const) {
-      if (context === 'detalhe') await page.getByRole('link', { name: game.title, exact: true }).click();
-      if (context === 'perfil') await page.getByRole('link', { name: 'Meu perfil', exact: true }).click();
-      if (context === 'discussao') await page.getByRole('link', { name: 'Comunidade', exact: true }).click();
+      if (context === 'detalhe') { await page.getByRole('link', { name: game.title, exact: true }).click(); await expect(page.getByRole('heading', { name: 'Detalhes do jogo', exact: true })).toBeVisible(); }
+      if (context === 'perfil') { await page.getByRole('link', { name: 'Meu perfil', exact: true }).click(); await expect(page.getByRole('heading', { name: 'Perfil público', exact: true })).toBeVisible(); }
+      if (context === 'discussao') { await page.getByRole('link', { name: 'Comunidade', exact: true }).click(); await expect(page.getByRole('heading', { name: 'Comunidade', exact: true })).toBeVisible(); }
       if (context === 'discussao') await page.getByRole('button', { name: 'Jogos em discussão', exact: true }).click();
       const star = page.getByRole('button', { name: `Remover jogo ${game.title} dos favoritos`, exact: true });
       await expect(star).toHaveAttribute('aria-pressed', 'true');
