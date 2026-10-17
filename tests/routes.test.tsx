@@ -34,12 +34,18 @@ test('URL antiga de notificações é tratada como inexistente', () => {
 });
 const parameterCases: ParameterCase[] = [
   { path: '/jogos/42', value: 'ID do jogo: 42' },
-  { path: '/reviews/42', value: 'ID da review: 42' },
 ];
 
 test.each(parameterCases)('disponibiliza o parâmetro de $path', ({ path, value }) => {
   render(<MemoryRouter initialEntries={[path]}><AppRoutes /></MemoryRouter>);
   expect(screen.getByText(value)).toBeVisible();
+});
+
+test('rota de review consulta o ID sem exibir identificador técnico', async () => {
+  const services = createTestApplicationServices(); const getReview = vi.spyOn(services.community, 'getReview');
+  render(<MemoryRouter initialEntries={['/reviews/42']}><AppRoutes adapters={services} /></MemoryRouter>);
+  expect(await screen.findByText('Review não encontrada.')).toBeVisible();
+  expect(getReview).toHaveBeenCalledWith(42); expect(screen.queryByText(/ID da review/)).not.toBeInTheDocument();
 });
 
 test('rota de perfil consulta o ID numérico sem exibi-lo no cabeçalho', async () => {

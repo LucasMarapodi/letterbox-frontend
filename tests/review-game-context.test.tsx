@@ -6,14 +6,14 @@ import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
 import type { FetchTransport } from '../src/services/http/client';
-import { wireComment, wireGame, wireReview, wireUser, withAuthentication } from './http-fixtures';
+import { wireComment, wireGame, wireReview, withAuthentication } from './http-fixtures';
 import { deferred } from './fixtures';
 
 async function open(options: { path?: string; guest?: boolean; rating?: number | null; cover?: string | null; stale?: boolean; game?: (id: number) => Promise<Response>; invalid?: boolean; strict?: boolean } = {}) {
   const review = { ...wireReview, userId: 2, author: { ...wireReview.author, id: 2, displayName: 'Leo' }, title: 'Minha aventura', text: 'Minha experiência', rating: options.rating === undefined ? 4.25 : options.rating, game: { ...wireReview.game, coverUrl: options.cover === undefined ? '/cover.jpg' : options.cover } };
   const transport = vi.fn<FetchTransport>().mockImplementation(withAuthentication(async url => {
     const path = new URL(url).pathname;
-    const headers = options.stale ? { 'X-Catalog-Stale': 'true', 'X-Catalog-Fetched-At': wireReview.createdAt } : {};
+    const headers: Record<string, string> = options.stale ? { 'X-Catalog-Stale': 'true', 'X-Catalog-Fetched-At': wireReview.createdAt } : {};
     if (path === '/api/v1/reviews/55') return options.invalid ? Response.json({ code: 'not_found', message: 'Não encontrada' }, { status: 404 }) : Response.json(review, { headers });
     if (path === '/api/v1/reviews/56') return Response.json({ ...review, id: 56, gameId: 13, game: { ...review.game, id: 13, title: 'Outro jogo' } });
     const game = path.match(/^\/api\/v1\/games\/(\d+)$/);

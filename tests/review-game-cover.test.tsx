@@ -22,7 +22,7 @@ async function open(path: string, coverUrl: string | null = '/covers/game.jpg') 
   return transport;
 }
 
-test.each(['/perfil/1','/comunidade','/reviews/55'])('capa do jogo aparece em %s sem buscar detalhes adicionais', async path => {
+test.each(['/perfil/1','/comunidade','/reviews/55'])('capa do jogo aparece em %s com enriquecimento somente no detalhe da review', async path => {
   const transport = await open(path);
   await waitFor(() => expect(screen.getAllByRole('img',{name:'Capa de Jogo HTTP'})).toHaveLength(path.startsWith('/perfil') ? 2 : 1));
   const covers = screen.getAllByRole('img',{name:'Capa de Jogo HTTP'});
@@ -30,7 +30,7 @@ test.each(['/perfil/1','/comunidade','/reviews/55'])('capa do jogo aparece em %s
     expect(cover).toHaveAttribute('src','/covers/game.jpg');
     expect(cover.closest('a')).toHaveAttribute('href','/jogos/12');
   }
-  expect(transport.mock.calls.some(([url])=>url.endsWith('/games/12'))).toBe(false);
+  expect(transport.mock.calls.filter(([url])=>url.endsWith('/games/12'))).toHaveLength(path.startsWith('/reviews/') ? 1 : 0);
 });
 
 test.each([null, '/covers/broken.jpg'])('capa ausente ou quebrada usa alternativa: %s', async src => {

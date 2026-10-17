@@ -1,5 +1,5 @@
 import { ReviewBody } from '../components/ReviewBody';
-import { ReviewGame } from '../components/ReviewGame';
+import { ReviewGameContext } from '../components/ReviewGameContext';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useLocalRouteId } from '../routing/useLocalRouteId';
@@ -31,11 +31,11 @@ function ReviewContent({ id }: { id: number }): ReactElement {
   const review = state.review;
   if (!review) return <EmptyState region="Conteúdo da review" message="Review não encontrada." />;
   return <QueryRegion label="Conteúdo da review" busy={false}><article className="review-card review-details">
-    <CatalogNotice paths={[[ 'reviews', String(id) ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
+    <ReviewGameContext review={review} />
     <h2 className="review-author-heading" aria-label={`Review de ${review.author.displayName}`}><Avatar name={review.author.displayName} src={review.author.avatarUrl} /><Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link></h2>
-    <ReviewGame game={review.game} />
     <p><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></p>
-    <ReviewBody review={review} showLike={false} />
+    <ReviewBody review={review} showLike={false} showRating={false} />
+    <CatalogNotice paths={[[ 'reviews', String(id) ], ['games', String(review.gameId) ]]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />
     <div className="review-actions" role="group" aria-label="Ações da review">
       <ReviewLikeButton reviewId={review.id} likeCount={review.likeCount} author={review.author.displayName} />
       <FavoriteButton kind="review" targetId={review.id} />
@@ -47,5 +47,5 @@ function ReviewContent({ id }: { id: number }): ReactElement {
 }
 export function ReviewPage(): ReactElement {
   const id = useLocalRouteId('reviewId');
-  return <main><h1>Review</h1><p>ID da review: {id}</p>{id ? <ReviewContent key={id} id={id} /> : <EmptyState region="Conteúdo da review" message="Review não encontrada." />}</main>;
+  return <main><h1>Review</h1>{id ? <ReviewContent key={id} id={id} /> : <EmptyState region="Conteúdo da review" message="Review não encontrada." />}</main>;
 }
