@@ -98,3 +98,7 @@ Cadastro confirmado abre login com replace e mensagem de sucesso, sem autenticar
 ## Sexta fase — S-PR-15
 
 Limpar busca sem termo não consulta nem reinicia a página. Rascunho é apagado localmente; busca aplicada é removida uma única vez, preservando tamanho/ordenação. Duas guardas locais, sem alterar contratos ou Back. 488 testes, lint, tipos, build e E2E Chromium sintético aprovados. [Descrição e evidência](docs/S-PR-15.md). Execute `npm exec playwright test -- --config playwright.clear-search.config.ts`, com portas 5175/5091 livres.
+
+## Sexta fase — S-PR-11
+
+Curtidas de comentários/respostas e ajustes visuais solicitados nos cartões e no perfil. 246 testes pertinentes, lint/tipos/build, cinco cenários Chromium sintéticos e integração real aprovados. [Entrega, evidências e dependência da API](docs/S-PR-11.md).

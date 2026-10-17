@@ -1,4 +1,6 @@
 import { ReviewBody } from './ReviewBody';
+import { ReviewCardLink } from './ReviewCardLink';
+import { ReviewGame } from './ReviewGame';
 import { CatalogNotice } from './CatalogNotice';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
@@ -31,10 +33,10 @@ export function FeedSection(): ReactElement | null {
     <Button disabled={state.status === 'loading'} onClick={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }}>Atualizar feed</Button>
     {state.status === 'loading' && <LoadingState message="Carregando feed…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar o feed." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
-    {state.status === 'ready' && (state.reviews.length ? state.reviews.map((review) => <article className="review-card" key={review.id}>
+    {state.status === 'ready' && (state.reviews.length ? state.reviews.map((review) => <article className="review-card review-preview" key={review.id}>
       <div className="feed-author"><Avatar name={review.author.displayName} src={review.author.avatarUrl} /><Link to={`/perfil/${encodeRouteId(review.author.id)}`}>{review.author.displayName}</Link><time dateTime={review.createdAt}>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(review.createdAt))}</time></div>
-      <h3><Link to={`/jogos/${encodeRouteId(review.game.id)}`}>{review.game.title}</Link></h3>
-      <ReviewBody review={review} /><Link to={`/reviews/${encodeRouteId(review.id)}`}>Ler review</Link>
+      <h3><ReviewGame game={review.game} /></h3>
+      <ReviewBody review={review} /><ReviewCardLink id={review.id} label="Ler review" />
       <ReviewFavoriteStar reviewId={review.id} author={review.author.displayName} />
     </article>) : <EmptyState message="Nenhuma review de pessoas seguidas." />)}
   </section>;

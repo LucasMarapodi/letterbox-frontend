@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test, vi } from 'vitest';
@@ -16,7 +16,7 @@ function open(): void { render(<MemoryRouter initialEntries={[`/perfil/${encodeR
 test('perfil público completo exibe foto biografia reviews e links numéricos', async () => {
   const get = vi.spyOn(community, 'getProfile').mockResolvedValue(profile); open();
   expect(await screen.findByText('Explorando mundos.')).toBeVisible();
-  expect(screen.getByRole('img', { name: 'Ana' })).toHaveAttribute('src', '/ana.png');
+  expect(within(screen.getByRole('region', {name: /Informa/})).getByRole('img', { name: 'Ana' })).toHaveAttribute('src', '/ana.png');
   expect(screen.getByText('Review da Ana')).toBeVisible();
   expect(screen.getByRole('link', { name: 'Ler review de Jogo da Ana' })).toHaveAttribute('href', `/reviews/${encodeRouteId(profile.reviews[0].id)}`);
   expect(screen.getByRole('link', { name: 'Jogo da Ana' })).toHaveAttribute('href', `/jogos/${encodeRouteId(12)}`);
@@ -25,7 +25,7 @@ test('perfil público completo exibe foto biografia reviews e links numéricos',
 test('perfil parcial e sem reviews apresenta alternativas', async () => {
   vi.spyOn(community, 'getProfile').mockResolvedValue({ user: { ...user, bio: '', avatarUrl: null }, reviews: [] }); open();
   expect(await screen.findByText('Biografia não informada.')).toBeVisible();
-  expect(screen.getByRole('img', { name: 'Ana' })).toHaveTextContent('A');
+  expect(within(screen.getByRole('region', {name: /Informa/})).getByRole('img', { name: 'Ana' })).toHaveTextContent('A');
   expect(screen.getByText('Nenhuma review publicada por este usuário.')).toBeVisible();
 });
 test('perfil inexistente mostra ausência', async () => {

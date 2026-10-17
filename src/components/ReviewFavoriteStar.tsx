@@ -10,7 +10,7 @@ export function ReviewFavoriteStar({ reviewId, author }: { reviewId: number; aut
   if (!favorites || !favorites.enabled) return null;
   if (!favorites.authenticated) return null;
   if (favorites.state.status === 'error') return <span className="review-favorite-action"><Button className="review-favorite-star" aria-label={`Tentar novamente favoritos da review de ${author}`} onClick={() => { void favorites.load(true); }}>↻</Button><span role="alert">Favoritos indisponíveis.</span></span>;
-  if (favorites.state.status === 'loading') return <Button className="review-favorite-star" disabled aria-busy="true" aria-label={`Carregando favorito da review de ${author}`}>…</Button>;
+  if (favorites.state.status === 'loading') return <span className="review-favorite-action"><Button className="review-favorite-star" disabled aria-busy="true" aria-label={`Carregando favorito da review de ${author}`}>…</Button></span>;
   const selected = favorites.selected.has(reviewId);
   return <span className="review-favorite-action">
     <Button className="review-favorite-star" aria-pressed={selected} aria-label={selected ? `Remover review de ${author} dos favoritos` : `Favoritar review de ${author}`} disabled={favorites.pending.has(reviewId)} onClick={() => { void favorites.toggleReview(reviewId); }}><span aria-hidden="true">{selected ? '★' : '☆'}</span></Button>

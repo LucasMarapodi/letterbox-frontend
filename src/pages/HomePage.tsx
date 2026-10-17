@@ -105,9 +105,6 @@ export function HomePage({ authenticated = false }: { authenticated?: boolean })
     setQuery((previous) => ({ ...previous, pageSize, page: 1 }));
   }
   const data = state.data;
-  const sortLabels = { 'release-desc': 'Últimos lançados', 'name-asc': 'Nome: A–Z', 'name-desc': 'Nome: Z–A' };
-  const genre = options.status === 'ready' ? options.data.genres.find(option => option.id === query.genreId)?.name : undefined;
-  const platform = options.status === 'ready' ? options.data.platforms.find(option => option.id === query.platformId)?.name : undefined;
   return <main className="dashboard">
     {state.status === 'loading' && state.blocking && <CatalogLoadingOverlay restoreFocus={state.focus ?? null} />}
     {authenticated ? <section className="dashboard-welcome" aria-labelledby="dashboard-title">
@@ -149,7 +146,6 @@ export function HomePage({ authenticated = false }: { authenticated?: boolean })
     </div>
     </form>
     </div>
-    <p className="applied-filters" aria-label="Filtros aplicados">Nome: {query.term || 'Todos'} · Gênero: {query.genreId ? genre ?? 'Selecionado' : 'Todos'} · Plataforma: {query.platformId ? platform ?? 'Selecionada' : 'Todos'} · Ordem: {sortLabels[query.sort ?? 'release-desc']}</p>
     <section aria-labelledby="catalog-title" aria-busy={state.status === 'loading'}>
       <h2 id="catalog-title">Jogos</h2>
       {state.status === 'loading' && !state.blocking && <LoadingState message="Carregando jogos…" />}

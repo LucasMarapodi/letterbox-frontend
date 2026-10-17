@@ -6,6 +6,9 @@ import type { ProfileCompletionRequest, ProfileCompletionResponse, ProfileUpdate
 import type { ReviewRequest, ReviewPatchRequest } from './dtos';
 import { decodeReviewLikeStatus } from './decoders';
 import type { ReviewLikeStatusResponse } from './dtos';
+import { decodeCommentLikeStatus } from './decoders';
+import type { CommentLikeStatusResponse } from './dtos';
+import type { CommentId } from '../../models';
 import { validSearchTerm, type SearchService } from '../searchContracts';
 import { decodeSearch } from './decoders';
 import { isLocalId, type User, type UserId, type GameId, type ReviewId } from '../../models';
@@ -48,6 +51,10 @@ export interface HttpAdapters {
     edit(id: ReviewId, input: ReviewPatchRequest, signal?: AbortSignal): Promise<ReviewResponse>;
     comments(id: ReviewId, signal?: AbortSignal): Promise<CommentResponse[]>;
     comment(id: ReviewId, input: TextRequest, signal?: AbortSignal): Promise<CommentResponse>;
+  };
+  comments: {
+    likeStatus(id: CommentId, signal?: AbortSignal): Promise<CommentLikeStatusResponse>;
+    setLiked(id: CommentId, selected: boolean, signal?: AbortSignal): Promise<void>;
   };
   profiles: {
     update(input: ProfilePatchRequest, signal?: AbortSignal): Promise<ProfileUpdateResponse>;
@@ -160,6 +167,10 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       edit: (id, input, signal) => call({ method: 'PATCH', path: ['reviews', localPathId(id)], body: { ...(input.rating === undefined ? {} : { rating: input.rating }), ...(input.text === undefined ? {} : { text: input.text }) }, signal }, decodeReview, true),
       comments: (id, signal) => call({ path: ['reviews', localPathId(id), 'comments'], signal }, list(decodeComment)),
       comment: (id, input, signal) => call({ method: 'POST', path: ['reviews', localPathId(id), 'comments'], body: { text: input.text }, signal }, decodeComment, true),
+    },
+    comments: {
+      likeStatus: (id, signal) => call({ path: ['comments', localPathId(id), 'like', 'me'], signal }, decodeCommentLikeStatus, true),
+      setLiked: (id, selected, signal) => call({ method: selected ? 'PUT' : 'DELETE', path: ['comments', localPathId(id), 'like'], signal }, decodeVoid, true),
     },
     profiles: {
       update: (input, signal) => call({ method: 'PATCH', path: ['users', 'me', 'profile'], signal, body: input }, decodeProfileUpdate, true),

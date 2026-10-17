@@ -31,8 +31,7 @@ test.each([false, true])('autenticado=%s: opções HTTP, rascunho sem consulta e
   await interaction.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
   await waitFor(() => expect(calls()).toHaveLength(2));
   expect(Object.fromEntries(new URL(calls()[1][0]).searchParams)).toEqual({ term: 'a & b', sort: 'name-desc', genreId: '31', platformId: '42', page: '1', pageSize: '20' });
-  expect(screen.getByLabelText('Filtros aplicados')).toHaveTextContent('Aventura da API');
-  expect(screen.getByLabelText('Filtros aplicados')).toHaveTextContent('Plataforma da API');
+  expect(screen.queryByLabelText('Filtros aplicados')).not.toBeInTheDocument();
   expect(filterCalls()).toHaveLength(1);
   expect(filterCalls()[0][1].headers).not.toHaveProperty('Authorization');
 });

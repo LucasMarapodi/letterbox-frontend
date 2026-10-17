@@ -11,6 +11,9 @@ test('configuração HTTP obrigatória e isolada de doubles da aplicação', () 
 });
 interface EndpointCase { name: string; method: string; path: string; run(adapters: HttpAdapters): Promise<unknown>; response: unknown; private?: boolean; body?: unknown; }
 const endpoints: EndpointCase[] = [
+  { name: 'comment-like-status', method: 'GET', path: '/comments/81/like/me', run: a => a.comments.likeStatus(81), response: { likedByMe: true }, private: true },
+  { name: 'comment-like', method: 'PUT', path: '/comments/81/like', run: a => a.comments.setLiked(81, true), response: undefined, private: true },
+  { name: 'comment-unlike', method: 'DELETE', path: '/comments/81/like', run: a => a.comments.setLiked(81, false), response: undefined, private: true },
   { name: 'register', method: 'POST', path: '/auth/register', run: (a) => a.auth.register({ name: 'Ana', email: 'test@example.com', password: 'test-only' }), response: wireUser, body: { name: 'Ana', email: 'test@example.com', password: 'test-only' } },
   { name: 'login', method: 'POST', path: '/auth/login', run: (a) => a.auth.login({ email: 'test@example.com', password: 'test-only' }), response: login, body: { email: 'test@example.com', password: 'test-only' } },
   { name: 'me', method: 'GET', path: '/auth/me', run: (a) => a.auth.me(), response: wireUser, private: true },
