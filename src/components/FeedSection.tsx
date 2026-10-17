@@ -1,7 +1,6 @@
 import { ReviewBody } from './ReviewBody';
 import { ReviewCardLink } from './ReviewCardLink';
 import { ReviewGame } from './ReviewGame';
-import { CatalogNotice } from './CatalogNotice';
 import { useEffect, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useServices } from '../services/ServiceProvider';
@@ -29,7 +28,6 @@ export function FeedSection(): ReactElement | null {
   }, [user, attempt]);
   if (!user) return null;
   return <section className="feed-section" aria-label="Feed de reviews" aria-busy={state.status === 'loading'}><h2>Feed de reviews</h2><p className="feed-description">As últimas reviews de quem você segue.</p>
-    {state.status === 'ready' && <CatalogNotice paths={[[ 'feed', 'following' ]]} />}
     <Button disabled={state.status === 'loading'} onClick={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }}>Atualizar feed</Button>
     {state.status === 'loading' && <LoadingState message="Carregando feed…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar o feed." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}

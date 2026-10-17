@@ -1,4 +1,3 @@
-import { CatalogNotice } from '../components/CatalogNotice';
 import { useEffect, useState, type ReactElement } from 'react';
 import { useServices } from '../services/ServiceProvider';
 import type { RankedReview, RankingPeriod } from '../services/communityContracts';
@@ -16,7 +15,6 @@ export function CommunityRankedReviews({ period }: { period: RankingPeriod }): R
     return () => { active = false; };
   }, [community, period, attempt]);
   return <section aria-label="Reviews mais comentadas" aria-busy={state.status === 'loading'}><h2>Reviews mais comentadas</h2>
-    {state.status === 'ready' && <CatalogNotice paths={[['community', 'reviews', 'most-commented']]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'loading' && <LoadingState message="Carregando reviews mais comentadas…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar as reviews mais comentadas." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'ready' && (state.items.length ? state.items.map((item) => <CommunityReviewCard key={item.review.id} review={item.review} commentCount={item.commentCount} lastCommentAt={item.lastCommentAt} />) : <EmptyState message="Nenhuma review com comentários neste período." />)}
