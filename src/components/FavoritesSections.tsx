@@ -4,9 +4,8 @@ import { ReviewCardLink } from './ReviewCardLink';
 import { ReviewAuthor } from './ReviewAuthor';
 import { ReviewGame } from './ReviewGame';
 import { useEffect, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import { GameTitle } from './GameTitle';
 import { useSession } from '../session/SessionProvider';
-import { encodeRouteId } from '../routing/encodeRouteId';
 import { GameCover } from './GameCover';
 import { EmptyState, ErrorState, LoadingState } from './Feedback';
 import { useFavorites } from './FavoritesProvider';
@@ -27,7 +26,7 @@ export function FavoritesSections(): ReactElement | null {
     <section className="favorite-games-section" aria-label="Jogos favoritos"><h2>Jogos favoritos</h2>
       {state.lists.games.length ? <ul className="favorite-games-list" aria-label="Jogos favoritos">{games.items.map((game) => <li className="favorite-game" key={game.id}>
         <GameCover title={game.title} src={game.coverUrl} />
-        <div className="favorite-game-copy"><h3><Link to={`/jogos/${encodeRouteId(game.id)}`}>{game.title}</Link></h3><p>{game.summary.trim() || 'Resumo não informado.'}</p></div>
+        <div className="favorite-game-copy"><GameTitle game={game} /><p>{game.summary.trim() || 'Resumo não informado.'}</p></div>
       </li>)}</ul> : <EmptyState message="Nenhum jogo favorito." />}
       <ProfilePagination label="jogos favoritos" {...games} />
     </section>

@@ -51,12 +51,13 @@ async function open(options: { dashboard: boolean; login?: boolean; empty?: bool
 }
 
 const cases = [true, false].flatMap(dashboard => [true, false].flatMap(login => [true, false].map(empty => ({ dashboard, login, empty }))));
-test.each(cases)('Início sem favoritos, feed ou consultas privadas; perfil disponível: %j', async options => {
+test.each(cases)('Início sem seções favoritas/feed; estrelas usam uma leitura compartilhada: %j', async options => {
  const {interaction,transport}=await open(options);expectNoFavorites();expect(screen.queryByRole('region',{name:'Feed de reviews'})).not.toBeInTheDocument();expect(screen.queryByText('Carregando seu dashboard…')).not.toBeInTheDocument();
- expect(transport.mock.calls.some(([url])=>/\/(dashboard|favorites|feed\/following)$/.test(url))).toBe(false);
+ expect(transport.mock.calls.some(([url])=>/\/(dashboard|feed\/following)$/.test(url))).toBe(false);
+ expect(transport.mock.calls.filter(([url])=>url.endsWith('/favorites'))).toHaveLength(1);
  await interaction.click(screen.getByRole('link',{name:'Meu perfil'}));const games=await screen.findByRole('region',{name:'Jogos favoritos'});
  if(options.empty)expect(within(games).getByText('Nenhum jogo favorito.')).toBeVisible();else expect(within(games).getByRole('link',{name:wireGame.title})).toBeVisible();
- expect(transport.mock.calls.filter(([url])=>url.endsWith('/favorites'))).toHaveLength(1);
+ expect(transport.mock.calls.filter(([url])=>url.endsWith('/favorites'))).toHaveLength(2);
 });
 test('falha ou lentidão do dashboard sem consumidor não afeta o Início',async()=>{
  const response=vi.fn<FetchTransport>().mockRejectedValue(new Error('offline'));await open({dashboard:true,dashboardResponse:response});expect(response).not.toHaveBeenCalled();expect(screen.queryByRole('region',{name:'Seu dashboard'})).not.toBeInTheDocument();expectNoFavorites();

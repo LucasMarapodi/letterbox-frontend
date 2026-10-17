@@ -7,7 +7,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
 import { GameOpinionsSection } from './GameOpinionsSection';
 import { GameCover } from '../components/GameCover';
 import { PublishReview } from './PublishReview';
-import { FavoriteButton } from '../components/FavoriteButton';
+import { GameTitle } from '../components/GameTitle';
 import { CatalogNotice } from '../components/CatalogNotice';
 
 type GameState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; game: Game | null };
@@ -55,7 +55,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
       <GameCover title={game.title} src={game.coverUrl} className="details-cover" />
     </aside>
     <div className="game-overview">
-    <h2 id="game-title">{game.title}</h2>
+    <GameTitle game={game} detail />
     <p>{game.summary.trim() || 'Descrição indisponível.'}</p>
     <dl>
       <dt>Gêneros</dt><dd>{game.genres.length ? game.genres.join(', ') : 'Gêneros não informados.'}</dd>
@@ -66,7 +66,6 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     </>}
     </div>
     <aside className="game-actions" aria-label="Avaliar e publicar">
-    <FavoriteButton kind="game" targetId={id} />
     <PublishReview gameId={id} onSaved={() => { setAttempt(value => value + 1); setOpinionsVersion(value => value + 1); }} />
     </aside>
     <div className="game-discussion">

@@ -352,3 +352,13 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .review-like-action button[aria-pressed="true"] svg { fill: currentColor; stroke: #173f30; }
 @media (hover: none) { .review-card .review-favorite-action { opacity: 1; pointer-events: auto; } }
 @media (prefers-reduced-motion: reduce) { .review-card .review-favorite-action { transition: none; } }
+
+.game-title-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: first baseline; gap: .75rem; min-width: 0; width: 100%; }
+.game-title-row > h3, .game-overview .game-title-row > h2 { margin: 0; padding: 0; min-width: 0; overflow-wrap: anywhere; }
+.game-card .game-title-row { padding: 1rem 1.15rem; }
+.game-overview > .game-title-row, .favorite-game-copy > .game-title-row { margin-bottom: 1rem; }
+.game-favorite-star { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; padding: .25rem; margin: 0; font-size: 1.5rem; line-height: 1; background: transparent; color: #bdd2c9; border-color: #405259; }
+.game-favorite-star[aria-pressed="true"] { color: #ffd478; border-color: #9b824a; background: #2b2b23; }
+.game-favorite-star:hover:not(:disabled) { color: #ffd478; background: #283c34; }
+.game-favorite-star:focus-visible { outline: 3px solid #90e8bb; outline-offset: 3px; }
+.game-favorite-error { grid-column: 1 / -1; color: #ffbcbc; font-size: .8rem; overflow-wrap: anywhere; }

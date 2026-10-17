@@ -9,11 +9,15 @@ interface FavoritesContextValue {
   selected: Set<number>;
   pending: Set<number>;
   errors: Record<number, string>;
+  selectedGames: Set<number>;
+  pendingGames: Set<number>;
+  gameErrors: Record<number, string>;
   enabled: boolean;
   authenticated: boolean;
   load(force?: boolean): Promise<void>;
   seed(lists: FavoriteLists): void;
   toggleReview(id: number): Promise<void>;
+  toggleGame(id: number): Promise<void>;
 }
 const Context = createContext<FavoritesContextValue | null>(null);
 export function useFavorites(): FavoritesContextValue | null { return useContext(Context); }
@@ -27,9 +31,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [selected, setSelected] = useState(new Set<number>());
   const [pending, setPending] = useState(new Set<number>());
   const [errors, setErrors] = useState<Record<number, string>>({});
+  const [selectedGames, setSelectedGames] = useState(new Set<number>());
+  const [pendingGames, setPendingGames] = useState(new Set<number>());
+  const [gameErrors, setGameErrors] = useState<Record<number, string>>({});
   const data = useRef<FavoriteLists | null>(null);
   const confirmed = useRef(new Set<number>());
-  const busy = useRef(new Set<number>());
+  const confirmedGames = useRef(new Set<number>());
+  const busy = useRef(new Set<string>());
   const alive = useRef(true);
   const revision = useRef(0);
   const request = useRef<{ revision: number; promise: Promise<void> } | null>(null);
@@ -40,6 +48,8 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     revision.current++;
     data.current = lists;
     confirmed.current = new Set(lists.reviews.map(review => review.id));
+    confirmedGames.current = new Set(lists.games.map(game => game.id));
+    setSelectedGames(confirmedGames.current);
     setSelected(confirmed.current); setState({ status: 'ready', lists });
   }, []);
 
@@ -57,22 +67,28 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     return promise;
   }, [community, user, enabled, seed]);
 
-  async function toggleReview(id: number): Promise<void> {
-    if (!user || !enabled || !data.current || busy.current.has(id)) return;
-    revision.current++; busy.current.add(id); setPending(new Set(busy.current));
-    setErrors(previous => ({ ...previous, [id]: '' }));
+  async function toggle(kind: 'game' | 'review', id: number): Promise<void> {
+    const key = `${kind}:${id}`;
+    if (!user || !enabled || !data.current || busy.current.has(key)) return;
+    const selection = kind === 'game' ? confirmedGames : confirmed;
+    const updateSelection = kind === 'game' ? setSelectedGames : setSelected;
+    const updatePending = kind === 'game' ? setPendingGames : setPending;
+    const updateErrors = kind === 'game' ? setGameErrors : setErrors;
+    const pendingIds = () => new Set([...busy.current].filter(value => value.startsWith(`${kind}:`)).map(value => Number(value.split(':')[1])));
+    revision.current++; busy.current.add(key); updatePending(pendingIds());
+    updateErrors(previous => ({ ...previous, [id]: '' }));
     try {
-      const result = await community.setFavorite('review', id, !confirmed.current.has(id), user);
+      const result = await community.setFavorite(kind, id, !selection.current.has(id), user);
       if (!alive.current) return;
-      const next = new Set(confirmed.current);
+      const next = new Set(selection.current);
       if (result) next.add(id); else next.delete(id);
-      confirmed.current = next; setSelected(next);
+      selection.current = next; updateSelection(next);
     } catch {
-      if (alive.current) setErrors(previous => ({ ...previous, [id]: 'Não foi possível atualizar o favorito. Tente novamente.' }));
+      if (alive.current) updateErrors(previous => ({ ...previous, [id]: 'Não foi possível atualizar o favorito. Tente novamente.' }));
     } finally {
-      busy.current.delete(id);
-      if (alive.current) { setPending(new Set(busy.current)); if (!busy.current.size) void load(true); }
+      busy.current.delete(key);
+      if (alive.current) { updatePending(pendingIds()); if (!busy.current.size) void load(true); }
     }
   }
-  return <Context.Provider value={{ state, selected, pending, errors, enabled, authenticated: Boolean(user), load, seed, toggleReview }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ state, selected, pending, errors, selectedGames, pendingGames, gameErrors, enabled, authenticated: Boolean(user), load, seed, toggleReview: id => toggle('review', id), toggleGame: id => toggle('game', id) }}>{children}</Context.Provider>;
 }
