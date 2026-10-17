@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter } from 'react-router-dom';
+import { StrictMode } from 'react';
 import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
 import { createDefaultApplicationServices } from '../src/services/runtime';
@@ -8,7 +9,7 @@ import type { FetchTransport } from '../src/services/http/client';
 import { wireComment, wireGame, wireReview, wireUser, withAuthentication } from './http-fixtures';
 import { deferred } from './fixtures';
 
-async function open(options: { path?: string; guest?: boolean; rating?: number | null; cover?: string | null; stale?: boolean; game?: (id: number) => Promise<Response>; invalid?: boolean } = {}) {
+async function open(options: { path?: string; guest?: boolean; rating?: number | null; cover?: string | null; stale?: boolean; game?: (id: number) => Promise<Response>; invalid?: boolean; strict?: boolean } = {}) {
   const review = { ...wireReview, userId: 2, author: { ...wireReview.author, id: 2, displayName: 'Leo' }, title: 'Minha aventura', text: 'Minha experiência', rating: options.rating === undefined ? 4.25 : options.rating, game: { ...wireReview.game, coverUrl: options.cover === undefined ? '/cover.jpg' : options.cover } };
   const transport = vi.fn<FetchTransport>().mockImplementation(withAuthentication(async url => {
     const path = new URL(url).pathname;
@@ -25,7 +26,8 @@ async function open(options: { path?: string; guest?: boolean; rating?: number |
   }));
   const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport });
   if (!options.guest) await services.auth.login({ email: 'context@example.test', password: 'test-only' });
-  render(<MemoryRouter initialEntries={[options.path ?? '/reviews/55']}><AppRoutes adapters={services} /><Link to="/reviews/56">Outra review</Link><Link to="/comunidade">Sair da review</Link></MemoryRouter>);
+  const app = <MemoryRouter initialEntries={[options.path ?? '/reviews/55']}><AppRoutes adapters={services} /><Link to="/reviews/56">Outra review</Link><Link to="/comunidade">Sair da review</Link></MemoryRouter>;
+  render(options.strict ? <StrictMode>{app}</StrictMode> : app);
   return { interaction: userEvent.setup(), transport, review };
 }
 
@@ -40,6 +42,11 @@ test('primeiro bloco identifica jogo com capa, link, resumo e nota do autor, sem
   expect(screen.queryByText(/ID da review/)).not.toBeInTheDocument(); expect(screen.queryByText('Nota: 4.25 de 5')).not.toBeInTheDocument();
   expect(screen.getAllByRole('img', { name: 'Capa de Jogo HTTP' })).toHaveLength(1); expect(screen.queryByText(/Nota.*1 de 5/)).not.toBeInTheDocument();
   expect(screen.getByText('Minha experiência')).toBeVisible(); expect(screen.getByRole('heading', { name: 'Minha aventura' })).toBeVisible();
+  expect(transport.mock.calls.filter(([url]) => url.endsWith('/games/12'))).toHaveLength(1);
+});
+
+test('StrictMode não duplica consulta de resumo na mesma tentativa', async () => {
+  const { transport } = await open({ strict: true }); await screen.findByText('Resumo do jogo');
   expect(transport.mock.calls.filter(([url]) => url.endsWith('/games/12'))).toHaveLength(1);
 });
 
