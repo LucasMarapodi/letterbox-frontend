@@ -11,6 +11,10 @@ import { ErrorState, LoadingState } from '../components/Feedback';
 
 type View = { key: string; people: SearchGroup<SearchPerson> | null; games: SearchGroup<SearchGame> | null };
 const failure = { status: 'unavailable' as const, items: [], page: null, pageSize: null, hasNextPage: null, error: { code: 'unavailable', message: 'Busca indisponível.' }, metadata: null };
+function summaryExcerpt(summary: string): string {
+  const text = summary.trim();
+  return text.length > 240 ? `${text.slice(0, 237).trimEnd()}...` : text || 'Resumo não informado.';
+}
 export function SearchResultsPage() {
   const { search } = useServices();
   const location = useLocation();
@@ -83,7 +87,7 @@ export function SearchResultsPage() {
             <Avatar name={person.displayName} src={person.avatarUrl} /><Link to={`/perfil/${encodeRouteId(person.id)}`}><strong>{person.displayName}</strong><span>@{person.username}</span></Link>
           </li>)}</ul>}
           {aba === 'jogos' && current?.games?.status === 'ready' && <ul className="search-result-list">{current.games.items.map(game => <li key={game.id}>
-            <GameCover title={game.title} src={game.coverUrl} className="search-result-cover" decorative /><div><Link to={`/jogos/${encodeRouteId(game.id)}`}><strong>{game.title}</strong></Link><p>{game.summary.trim() || 'Resumo não informado.'}</p></div>
+            <GameCover title={game.title} src={game.coverUrl} className="search-result-cover" decorative /><div><Link to={`/jogos/${encodeRouteId(game.id)}`}><strong>{game.title}</strong></Link><p>{summaryExcerpt(game.summary)}</p></div>
           </li>)}</ul>}
           <nav aria-label="Páginas da pesquisa" className="catalog-pagination">
             <Button disabled={page <= 1} onClick={() => navigate(searchUrl(q, aba, page - 1))}>Anterior</Button><span aria-live="polite">Página {page}</span>

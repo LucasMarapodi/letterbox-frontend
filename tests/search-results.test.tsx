@@ -134,3 +134,14 @@ test('resposta de termo anterior é abortada e não sobrescreve resultado novo',
   expect(screen.queryByText('Obsoleto')).not.toBeInTheDocument();
   expect(queries().at(-1)).toMatchObject({ q: 'novo', mode: 'results' });
 });
+test.each([239,240,241,1000])('resumo da pesquisa tem no máximo 240 caracteres e reticências somente acima do limite: %s', async length=>{
+ const summary='a'.repeat(length);
+ open('/pesquisa?q=mario&aba=jogos&page=1',async query=>{const data=body(query);data.games.items=[{...game,summary}];return Response.json(data);});
+ await screen.findByRole('link',{name:'Mario World'});
+ const expected=length>240?'a'.repeat(237)+'...':summary;
+ expect(screen.getByText(expected)).toBeVisible();if(length>240)expect(screen.queryByText(summary)).not.toBeInTheDocument();
+});
+test('resumo ausente mantém fallback na pesquisa',async()=>{
+ open('/pesquisa?q=mario&aba=jogos&page=1',async query=>{const data=body(query);data.games.items=[{...game,summary:'  '}];return Response.json(data);});
+ expect(await screen.findByText('Resumo não informado.')).toBeVisible();
+});
