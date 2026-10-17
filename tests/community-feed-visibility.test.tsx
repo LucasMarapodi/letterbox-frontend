@@ -13,13 +13,17 @@ test('visitante não vê aba Feed de reviews nem convite de acesso', async () =>
   expect(screen.queryByText('Entrar para ver o feed')).not.toBeInTheDocument(); expect(feed).not.toHaveBeenCalled();
 });
 
-test('autenticado vê o feed sob demanda; logout remove aba/conteúdo e volta a Recentes', async () => {
-  const services = createTestApplicationServices(); await services.auth.login({ email: 'ana@example.com', password: 'teste123' });
+test('autenticado vê o feed sob demanda; após logout Comunidade abre em Recentes sem Feed', async () => {
+  const services = createTestApplicationServices();
   const feed = vi.spyOn(services.community, 'getFeed'); const interaction = userEvent.setup();
-  render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes adapters={services} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={services} /></MemoryRouter>);
+  await interaction.type(screen.getByLabelText('E-mail'), 'ana@example.com'); await interaction.type(screen.getByLabelText('Senha'), 'teste123');
+  await interaction.click(screen.getByRole('button', { name: 'Entrar' })); await screen.findByLabelText('Usuário conectado');
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
   expect(feed).not.toHaveBeenCalled(); await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
   await screen.findByRole('region', { name: 'Feed de reviews' }); expect(feed).toHaveBeenCalledOnce();
   await interaction.click(screen.getByRole('button', { name: /Sair/ }));
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
   expect(screen.queryByRole('button', { name: 'Feed de reviews' })).not.toBeInTheDocument();
   expect(screen.queryByRole('region', { name: 'Feed de reviews' })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Recentes' })).toHaveAttribute('aria-pressed', 'true');
