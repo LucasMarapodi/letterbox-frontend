@@ -5,9 +5,9 @@ import { useSession } from '../session/SessionProvider';
 import { Button } from './Button';
 import { ErrorState, LoadingState } from './Feedback';
 
-interface FollowProps { targetId: number; name: string; onChanged?: () => void; }
+interface FollowProps { targetId: number; onChanged?: () => void; }
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; following: boolean };
-function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement {
+function FollowControl({ targetId, onChanged }: FollowProps): ReactElement {
   const { community } = useServices();
   const { user } = useSession();
   const [state, setState] = useState<State>({ status: 'loading' });
@@ -30,7 +30,7 @@ function FollowControl({ targetId, name, onChanged }: FollowProps): ReactElement
   }
   if (state.status === 'loading') return <LoadingState region="Relação pessoal" message="Consultando relação…" />;
   if (state.status === 'error') return <ErrorState region="Relação pessoal" message="Não foi possível consultar a relação." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />;
-  return <div className="follow-control" role="region" aria-label="Relação pessoal" aria-busy={false}><Button disabled={pending} aria-pressed={state.following} onClick={() => { void toggle(); }}>{pending ? 'Atualizando relação…' : `${state.following ? 'Deixar de seguir' : 'Seguir'} ${name}`}</Button>{error && <p role="alert">{error}</p>}</div>;
+  return <div className="follow-control" role="region" aria-label="Relação pessoal" aria-busy={false}><Button disabled={pending} aria-pressed={state.following} aria-busy={pending} onClick={() => { void toggle(); }}>{state.following ? 'Deixar de seguir' : 'Seguir'}</Button>{error && <p role="alert">{error}</p>}</div>;
 }
 export function FollowButton(props: FollowProps): ReactElement | null {
   const { user, version } = useSession();

@@ -53,9 +53,9 @@ test('seguir e deixar de seguir atualizam listas no perfil atual', async () => {
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByRole('link', { name: 'Meu perfil' });
   await interaction.click(screen.getByRole('link', { name: 'Perfil de Leo' }));
-  await interaction.click(await screen.findByRole('button', { name: 'Seguir Leo' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Seguir' }));
   const followers = await screen.findByRole('region', { name: 'Seguidores' });
   expect(await within(followers).findByRole('link', { name: 'Ana' })).toBeVisible();
-  await interaction.click(screen.getByRole('button', { name: 'Deixar de seguir Leo' }));
+  await interaction.click(screen.getByRole('button', { name: 'Deixar de seguir' }));
   expect(await screen.findByText('Nenhum seguidor.')).toBeVisible();
 });

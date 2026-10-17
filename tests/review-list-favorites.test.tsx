@@ -51,10 +51,11 @@ async function open(path = '/comunidade', options: { visitor?: boolean; read?: F
 }
 
 test.each(['/comunidade', '/', '/jogos/12', '/perfil/1', '/perfil/2'])('estrelas em %s compartilham estado confirmado sem GET por review', async path => {
-  const { transport, author } = await open(path);
+  const { transport, author, interaction } = await open(path);
+  if(path==='/'){await interaction.click(screen.getByRole('link',{name:'Comunidade'}));await interaction.click(screen.getByRole('button',{name:'Feed de reviews'}));}
   const stars = await screen.findAllByRole('button', { name: `Remover review de ${author.displayName} dos favoritos` });
   for (const star of stars) { expect(star).toHaveAttribute('aria-pressed', 'true'); expect(star).toHaveTextContent('★'); }
-  expect(transport.mock.calls.filter(([url]) => url.endsWith('/favorites'))).toHaveLength(path === '/' ? 0 : 1);
+  expect(transport.mock.calls.filter(([url]) => url.endsWith('/favorites'))).toHaveLength(1);
   expect(transport.mock.calls.some(([url]) => url.includes('/favorites/review/'))).toBe(false);
   if (path === '/') expect(screen.queryByRole('region', { name: 'Jogos favoritos' })).not.toBeInTheDocument();
 });
@@ -134,6 +135,8 @@ test('resposta de favorito de sessão antiga não altera estrelas de outro usuá
   await interaction.type(screen.getByLabelText('E-mail'), 'other@example.test');
   await interaction.type(screen.getByLabelText('Senha'), 'test-only');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
+  await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
   expect(await screen.findByRole('button', { name: 'Favoritar review de Bia' })).toHaveAttribute('aria-pressed', 'false');
   await act(async () => { pending.resolve(Response.json({ id: 92, userId: 1, targetType: 'review', targetId: 56 })); });
   expect(screen.getByLabelText('Usuário conectado')).toHaveTextContent('Outra conta');

@@ -56,9 +56,10 @@ test('busca review comentário seguir feed e notificações funcionam sem spies 
   await interaction.click(screen.getByRole('button', { name: 'Publicar comentário' }));
   expect(await screen.findByText('Comentário integrado')).toBeVisible();
   await interaction.click(screen.getByRole('link', { name: 'Leo' }));
-  await interaction.click(await screen.findByRole('button', { name: 'Seguir Leo' }));
-  await screen.findByRole('button', { name: 'Deixar de seguir Leo' });
-  await interaction.click(screen.getByRole('link', { name: 'Início' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Seguir' }));
+  await screen.findByRole('button', { name: 'Deixar de seguir' });
+  await interaction.click(screen.getByRole('link', { name: 'Comunidade' }));
+  await interaction.click(screen.getByRole('button', { name: 'Feed de reviews' }));
   const feed = await screen.findByRole('region', { name: 'Feed de reviews' });
   expect(await within(feed).findByText('Um mundo pequeno, mas cheio de detalhes para descobrir.')).toBeVisible();
   await interaction.click(screen.getByRole('button', { name: 'Notificações' }));

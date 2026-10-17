@@ -15,17 +15,37 @@ test('dashboard tipado e feed usam sessão compartilhada e payloads ausentes',as
  const session=createHttpSessionStore();session.establish({user:wireUser,token:'test-only',expiresAt:'2080-01-01T00:00:00Z'});const transport=vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(data)).mockResolvedValueOnce(Response.json([wireReview]));const services=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport),session});
  if(!services.dashboard)throw new Error('Dashboard HTTP ausente.');expect(await services.dashboard.get()).toEqual(data);expect(await services.community.getFeed({...wireUser,id: 999})).toEqual([wireReview]);expect(transport.mock.calls.map(([url])=>new URL(url).pathname)).toEqual(['/api/v1/dashboard','/api/v1/feed/following']);for(const [url,init]of transport.mock.calls){expect(url).not.toContain('test-only');expect(init.body).toBeUndefined();expect(init.headers).toHaveProperty('Authorization','Bearer test-only');}
 });
-async function open(options:{empty?:boolean;failure?:boolean;delayed?:Promise<Response>}={}){
- const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async(url)=>{if(new URL(url).pathname==='/api/v1/games')return Response.json(wirePage([]));if(url.endsWith('/dashboard')){if(options.failure)throw new Error('offline');return options.delayed??Response.json(options.empty?{favorites:{games:[],reviews:[]},feed:[]}:data);}if(url.endsWith('/auth/logout'))return new Response(null,{status:204});if(url.endsWith('/feed/following'))return Response.json([{...wireReview,id:56,text:'Feed atualizado'}]);throw new Error('Consulta redundante');},{isolateDashboard:false}));
- const interaction=userEvent.setup();render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));return {interaction,transport};
+async function open(options:{empty?:boolean;failure?:boolean;delayed?:Promise<Response>;guest?:boolean;disabled?:boolean}={}){
+ let feedReads=0;
+ const transport=vi.fn<FetchTransport>().mockImplementation(withAuthentication(async url=>{
+  if(new URL(url).pathname==='/api/v1/games')return Response.json(wirePage([]));
+  if(url.endsWith('/recent'))return Response.json([]);
+  if(url.endsWith('/favorites'))return Response.json({games:[],reviews:[]});
+  if(url.endsWith('/like/me'))return Response.json({likedByMe:false});
+  if(url.endsWith('/auth/logout'))return new Response(null,{status:204});
+  if(url.endsWith('/feed/following')){feedReads++;if(options.failure)throw new Error('offline');return options.delayed??Response.json(options.empty?[]:feedReads===1?[wireReview]:[{...wireReview,id:56,text:'Feed atualizado'}]);}
+  throw new Error('Consulta sem consumidor');
+ },{isolateDashboard:false}));
+ const services=createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{transport:withFilterOptions(transport)});if(options.disabled)services.privateFeatures={...services.privateFeatures,feed:false};
+ const interaction=userEvent.setup();render(<MemoryRouter initialEntries={[options.guest?'/comunidade':'/login']}><AppRoutes adapters={services}/></MemoryRouter>);
+ if(!options.guest){await interaction.type(screen.getByLabelText('E-mail'),'test@example.com');await interaction.type(screen.getByLabelText('Senha'),'test-only');await interaction.click(screen.getByRole('button',{name:'Entrar'}));await screen.findByLabelText('Usuário conectado');}
+ async function feed(){if(!options.guest)await interaction.click(screen.getByRole('link',{name:'Comunidade'}));await interaction.click(screen.getByRole('button',{name:'Feed de reviews'}));}
+ return{interaction,transport,feed};
 }
-test('consulta única inicial alimenta feed sem favoritos na Home; Atualizar feed usa somente feed/following',async()=>{
- const {interaction,transport}=await open();expect(await screen.findByRole('region',{name:'Feed de reviews'})).toBeVisible();expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument();expect(within(screen.getByRole('region',{name:'Feed de reviews'})).getByText('Review')).toBeVisible();expect(transport.mock.calls.filter(([url])=>url.endsWith('/dashboard'))).toHaveLength(1);expect(transport.mock.calls.some(([url])=>url.endsWith('/favorites')||url.endsWith('/feed/following'))).toBe(false);
- await interaction.click(screen.getByRole('button',{name:'Atualizar feed'}));expect(await within(screen.getByRole('region',{name:'Feed de reviews'})).findByText('Feed atualizado')).toBeVisible();expect(transport.mock.calls.filter(([url])=>url.endsWith('/feed/following'))).toHaveLength(1);expect(transport.mock.calls.filter(([url])=>url.endsWith('/dashboard'))).toHaveLength(1);
+test('feed só consulta após ativar aba, mantém atualização e não usa dashboard',async()=>{
+ const {interaction,transport,feed}=await open();expect(screen.queryByRole('region',{name:'Feed de reviews'})).not.toBeInTheDocument();expect(transport.mock.calls.some(([url])=>url.endsWith('/dashboard')||url.endsWith('/feed/following'))).toBe(false);
+ await interaction.click(screen.getByRole('link',{name:'Comunidade'}));expect(screen.getByRole('button',{name:'Recentes'})).toHaveAttribute('aria-pressed','true');expect(transport.mock.calls.some(([url])=>url.endsWith('/feed/following'))).toBe(false);await feed();
+ expect(await within(await screen.findByRole('region',{name:'Feed de reviews'})).findByText('Review')).toBeVisible();expect(screen.queryByLabelText('Período dos rankings')).not.toBeInTheDocument();
+ await interaction.click(screen.getByRole('button',{name:'Atualizar feed'}));expect(await within(screen.getByRole('region',{name:'Feed de reviews'})).findByText('Feed atualizado')).toBeVisible();expect(transport.mock.calls.filter(([url])=>url.endsWith('/feed/following'))).toHaveLength(2);expect(transport.mock.calls.some(([url])=>url.endsWith('/dashboard'))).toBe(false);
 });
-test('vazio válido não vira erro',async()=>{await open({empty:true});expect(await screen.findByText('Nenhuma review de pessoas seguidas.')).toBeVisible();expect(screen.queryByText('Nenhum jogo favorito.')).not.toBeInTheDocument();});
-test('rede mostra erro e não inventa favoritos/feed',async()=>{await open({failure:true});expect(await screen.findByText('Não foi possível carregar seu dashboard.')).toBeVisible();expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument();});
-test('logout ignora dashboard tardio e visitante não consulta privado',async()=>{
- const pending=deferred<Response>();const {interaction,transport}=await open({delayed:pending.promise});await screen.findByText('Carregando seu dashboard…');await interaction.click(screen.getByRole('button',{name:'Sair'}));await act(async()=>{pending.resolve(Response.json(data));await pending.promise;});expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument();expect(transport.mock.calls.filter(([url])=>url.endsWith('/dashboard'))).toHaveLength(1);
+test('vazio válido não vira erro',async()=>{const {feed}=await open({empty:true});await feed();expect(await screen.findByText('Nenhuma review de pessoas seguidas.')).toBeVisible();});
+test('rede mostra erro com retry e preserva navegação da comunidade',async()=>{const {feed}=await open({failure:true});await feed();expect(await screen.findByText('Não foi possível carregar o feed.')).toBeVisible();expect(screen.getByRole('button',{name:'Recentes'})).toBeVisible();expect(screen.getByRole('button',{name:'Tentar novamente'})).toBeVisible();});
+test('logout ignora feed tardio e visitante não consulta privado',async()=>{
+ const pending=deferred<Response>();const {interaction,transport,feed}=await open({delayed:pending.promise});await feed();await screen.findByText('Carregando feed…');await interaction.click(screen.getByRole('button',{name:'Sair'}));await act(async()=>{pending.resolve(Response.json([wireReview]));});expect(screen.queryByRole('region',{name:'Feed de reviews'})).not.toBeInTheDocument();expect(transport.mock.calls.filter(([url])=>url.endsWith('/feed/following'))).toHaveLength(1);
 });
-test('visitante carrega somente catálogo público',async()=>{const transport=vi.fn<FetchTransport>().mockResolvedValue(Response.json(wirePage()));render(<MemoryRouter><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5080'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);await screen.findByText('Nenhum jogo disponível.');expect(transport).toHaveBeenCalledTimes(1);expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');});
+test('visitante recebe convite na aba e disponibilidade desativada não monta feed',async()=>{
+ const {transport,feed}=await open({guest:true});await feed();expect(screen.getByRole('link',{name:'Entrar para ver o feed'})).toHaveAttribute('href','/login');expect(screen.queryByLabelText('Período dos rankings')).not.toBeInTheDocument();expect(transport.mock.calls.some(([url])=>url.endsWith('/feed/following'))).toBe(false);
+});
+test('feed desativado não aparece nas abas nem é consultado',async()=>{
+ const {interaction,transport}=await open({disabled:true});await interaction.click(screen.getByRole('link',{name:'Comunidade'}));expect(screen.queryByRole('button',{name:'Feed de reviews'})).not.toBeInTheDocument();expect(transport.mock.calls.some(([url])=>url.endsWith('/feed/following'))).toBe(false);
+});

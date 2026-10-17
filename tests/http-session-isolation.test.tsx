@@ -15,7 +15,7 @@ const userA = { ...wireUser, id: 1, displayName: 'Ana API' };
 const userB = { ...wireUser, id: 2, displayName: 'Bia API' };
 const loginA = { user: userA, token: 'test-a', expiresAt: '2080-01-01T00:00:00Z' };
 const loginB = { user: userB, token: 'test-b', expiresAt: loginA.expiresAt };
-test('autenticação usa dashboard e não consulta favoritos/feed/notificações separadamente', async () => {
+test('autenticação não consulta dashboard/favoritos/feed/notificações no Início', async () => {
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(loginA)).mockResolvedValueOnce(Response.json(userA));
   const adapters = createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{transport:withCatalog(transport)});
   const favorites = vi.spyOn(adapters.community,'getFavorites'); const feed = vi.spyOn(adapters.community,'getFeed'); const notifications = vi.spyOn(adapters.notifications,'list');
@@ -23,7 +23,7 @@ test('autenticação usa dashboard e não consulta favoritos/feed/notificações
   await interaction.type(screen.getByLabelText('E-mail'),'a@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   expect(await screen.findByLabelText('Usuário conectado')).toHaveTextContent('Ana API');
   expect(favorites).not.toHaveBeenCalled(); expect(feed).not.toHaveBeenCalled(); expect(notifications).not.toHaveBeenCalled();
-  expect(await screen.findByRole('region',{name:'Feed de reviews'})).toBeVisible(); expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument(); expect(screen.getByRole('button',{name:'Notificações'})).toBeVisible();
+  expect(screen.queryByRole('region',{name:'Feed de reviews'})).not.toBeInTheDocument(); expect(screen.queryByRole('region',{name:'Jogos favoritos'})).not.toBeInTheDocument(); expect(screen.getByRole('button',{name:'Notificações'})).toBeVisible();
   expect(adapters.privateFeatures?.opinions).toBe(false);
 });
 test('serviços privados não aceitam identidade de usuário sem sessão HTTP', async () => {

@@ -1,4 +1,4 @@
-import type { FormEvent, ReactElement, ReactNode } from 'react';
+import type { FormEvent, ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useServices } from '../services/ServiceProvider';
@@ -17,7 +17,7 @@ type CatalogState = { status: 'loading'; data: GamePage | null; blocking: boolea
 type Draft = Pick<GameQuery, 'genreId' | 'platformId'> & { term: string; sort: GameSort };
 const defaults: Draft = { term: '', sort: 'release-desc' };
 
-export function HomePage({ authenticated = false, feed }: { authenticated?: boolean; feed?: ReactNode }): ReactElement {
+export function HomePage({ authenticated = false }: { authenticated?: boolean }): ReactElement {
   const { games } = useServices();
   const [state, setState] = useState<CatalogState>({ status: 'loading', data: null, blocking: false });
   const blocking = useRef(false);
@@ -176,6 +176,6 @@ export function HomePage({ authenticated = false, feed }: { authenticated?: bool
           </div>
         </nav>
     </section>
-    {feed}
+
   </main>;
 }

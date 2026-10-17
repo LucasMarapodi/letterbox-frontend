@@ -35,7 +35,7 @@ const cases: MutationCase[] = [
   { name: 'editar review', endpoint: `/reviews/${encodeURIComponent(wireReview.id)}`, method: 'PATCH', render: saved => <EditReview review={wireReview} onSaved={saved} />, fields: [{ label: 'Descrição (opcional)', value: 'Rascunho' }], button: 'Salvar review', pending: 'Salvando…', result: { ...wireReview, text: 'Rascunho' } },
   { name: 'comentário', endpoint: '/reviews/55/comments', method: 'POST', render: saved => <CommentForm reviewId={55} authorId={2} onSaved={saved} />, fields: [{ label: 'Seu comentário', value: 'Rascunho' }], button: 'Publicar comentário', pending: 'Publicando…', result: wireComment },
   ...(['game', 'review'] as const).map(kind => ({ name: `favorito ${kind}`, endpoint: `/favorites/${kind}/${kind === 'game' ? 1 : 55}`, method: 'PUT', render: () => <FavoriteButton kind={kind} targetId={kind === 'game' ? 1 : 55} />, fields: [], button: `Favoritar ${kind === 'game' ? 'jogo' : 'review'}`, pending: 'Atualizando favorito…', result: { ...wireFavorite, targetType: kind, targetId: kind === 'game' ? 1 : 55 } })),
-  { name: 'seguir', endpoint: '/users/2/follow', method: 'PUT', render: saved => <FollowButton targetId={2} name="Outro" onChanged={saved} />, fields: [], button: 'Seguir Outro', pending: 'Atualizando relação…', result: { following: true } },
+  { name: 'seguir', endpoint: '/users/2/follow', method: 'PUT', render: saved => <FollowButton targetId={2} onChanged={saved} />, fields: [], button: 'Seguir', pending: 'Seguir', result: { following: true } },
 ];
 function readBody(path: string): unknown {
   if (path.endsWith('/auth/login')) return { user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' };

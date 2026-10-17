@@ -57,6 +57,8 @@ Sessão fica apenas em memória do navegador. Logout limpa usuário/dados e inva
 
 ## Entrega
 
+S-PR-35: Seguir/Deixar de seguir sem nome e com texto estável durante envio. Feed de reviews movido do Início para uma aba da Comunidade, carregada sob demanda; Início deixa de consultar dashboard/feed. [Comportamento e validações](docs/S-PR-35.md).
+
 Correção do layout dos detalhes quando o catálogo está desatualizado: aviso acima da grade, preservando capa/informações/ações ao entrar pela review ou pelo Início. [Regressão visual e evidências](docs/FIX-GAME-STALE-LAYOUT.md).
 
 S-PR-34: perfil com páginas independentes de 3 jogos, 2 reviews por lista e 6 pessoas por lista, usando as coleções completas recebidas da API. Convites textuais para favoritar/criar review removidos; Criar review de visitante abre login diretamente. [Implementação e verificações](docs/S-PR-34.md).

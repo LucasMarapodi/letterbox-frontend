@@ -35,6 +35,7 @@ test('login numérico confirma me, abre dashboard e mantém perfil próprio/edi�
     if (path.endsWith('/dashboard')) return Response.json({ favorites: { games: [], reviews: [] }, feed: [numericReview] });
     if (path === '/api/v1/games') return Response.json(wirePage());
     if (path.endsWith('/favorites')) return Response.json({ games: [], reviews: [] });
+    if (path.endsWith('/profile-completion')) return Response.json({ country: null, state: null, bio: '', avatarUrl: null, favoriteGameIds: [], favoriteGameCount: 0, isComplete: false });
     if (path.includes('/favorites/')) return Response.json({ favorite: null });
     if (path === `/api/v1/reviews/${encodeURIComponent(wireReview.id)}`) return Response.json(numericReview);
     if (path === '/api/v1/users/42/reviews') return Response.json([numericReview]);
@@ -52,9 +53,12 @@ test('login numérico confirma me, abre dashboard e mantém perfil próprio/edi�
   expect(adapters.auth.sessionUser?.()?.id).toBe(42);
   expect(transport.mock.calls.filter(([url]) => url.endsWith('/auth/me'))).toHaveLength(1);
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Editar perfil' }));
   expect(await screen.findByRole('form', { name: 'Editar perfil' })).toBeVisible();
-  expect(screen.queryByRole('button', { name: 'Seguir Ana' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Seguir' })).not.toBeInTheDocument();
+  await interaction.click(screen.getByRole('button', { name: 'Cancelar' }));
   await interaction.click(screen.getByRole('link', { name: `Ler review de ${wireGame.title}` }));
+  await interaction.click(await screen.findByRole('button', { name: 'Editar minha review' }));
   expect(await screen.findByRole('form', { name: 'Salvar review' })).toBeVisible();
   expect(screen.queryByLabelText('Seu comentário')).not.toBeInTheDocument();
 });

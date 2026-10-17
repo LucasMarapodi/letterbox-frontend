@@ -151,10 +151,12 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   await expect(b.getByRole('button', { name: 'Remover review dos favoritos', exact: true })).toBeVisible();
   await b.locator(`a[href="/perfil/${sessionA.userId}"]`).first().click();
   await expect(b.getByText('Perfil E2E atualizado pela API.', { exact: true })).toBeVisible();
-  await b.getByRole('button', { name: 'Seguir E2E Autora', exact: true }).click();
-  await expect(b.getByRole('button', { name: 'Deixar de seguir E2E Autora', exact: true })).toBeVisible();
+  await b.getByRole('button', { name: 'Seguir', exact: true }).click();
+  await expect(b.getByRole('button', { name: 'Deixar de seguir', exact: true })).toBeVisible();
   await publish(a, 2, 'Nova review E2E para o feed.');
   await home(b);
+  await b.getByRole('link', { name: 'Comunidade', exact: true }).click();
+  await b.getByRole('button', { name: 'Feed de reviews', exact: true }).click();
   await b.getByRole('button', { name: 'Atualizar feed', exact: true }).click();
   await expect(b.getByText('Nova review E2E para o feed.', { exact: true })).toBeVisible();
   await b.getByRole('button', { name: 'Notificações', exact: true }).click();
@@ -172,8 +174,8 @@ test('34 endpoints em ações de duas contas, CORS, isolamento e indisponibilida
   await b.getByRole('button', { name: 'Remover review dos favoritos', exact: true }).click();
   await expect(b.getByRole('button', { name: 'Favoritar review', exact: true })).toBeVisible();
   await b.locator(`a[href="/perfil/${sessionA.userId}"]`).first().click();
-  await b.getByRole('button', { name: 'Deixar de seguir E2E Autora', exact: true }).click();
-  await expect(b.getByRole('button', { name: 'Seguir E2E Autora', exact: true })).toBeVisible();
+  await b.getByRole('button', { name: 'Deixar de seguir', exact: true }).click();
+  await expect(b.getByRole('button', { name: 'Seguir', exact: true })).toBeVisible();
   await b.getByRole('link', { name: 'Comunidade', exact: true }).click();
   await b.getByRole('button', { name: 'Mais comentadas', exact: true }).click();
   for (const period of ['24h', '7d', '30d']) await b.getByLabel('Período dos rankings').selectOption(period);
