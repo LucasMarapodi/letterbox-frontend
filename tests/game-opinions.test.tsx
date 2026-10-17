@@ -53,7 +53,8 @@ test('o link da review navega até seu conteúdo com ID preservado', async () =>
   renderGame();
   await user.click(await screen.findByRole('link', { name: 'Review de Ana' }));
   expect(screen.getByRole('heading', { name: 'Review', level: 1 })).toBeVisible();
-  expect(screen.getByText('ID da review: 1')).toBeVisible();
+  expect(screen.queryByText(/ID da review/)).not.toBeInTheDocument();
+  expect(await screen.findByRole('region', { name: 'Contexto do jogo' })).toBeVisible();
 });
 
 test('o link do autor navega ao perfil público com ID preservado', async () => {

@@ -89,7 +89,7 @@ test('visitante recebe convite de login e outro autor não edita', async () => {
 });
 test('review de outro usuário não oferece edição', async () => {
   await open({ own: { ...wireReview, rating: 0, text: '' }, other: true, path: '/reviews/55' });
-  expect(await screen.findByText('Nota: 0 de 5')).toBeVisible(); expect(screen.queryByRole('button', { name: 'Editar minha review' })).not.toBeInTheDocument();
+  expect(await screen.findByText('Nota desta review: 0 de 5')).toBeVisible(); expect(screen.queryByRole('button', { name: 'Editar minha review' })).not.toBeInTheDocument();
 });
 test('falha mantém rascunho; submit duplo e resposta após logout não declaram sucesso', async () => {
   const pending = deferred<Response>(); let fail = true;
@@ -116,7 +116,7 @@ test.each([undefined, '4', -1, 5.1])('decoder não inventa/converte nota inváli
 test.each(['/jogos/12', '/reviews/55', `/perfil/${wireUser.id}`, '/comunidade', '/'])('review sem descrição e nota zero permanece visível em %s', async path => {
   const {interaction}=await open({ own: { ...wireReview, text: '', rating: 0 }, path });
   if(path==='/'){await interaction.click(screen.getByRole('link',{name:'Comunidade'}));await interaction.click(screen.getByRole('button',{name:'Feed de reviews'}));}
-  expect((await screen.findAllByText('Nota: 0 de 5')).length).toBeGreaterThan(0);
+  expect((await screen.findAllByText(path.startsWith('/reviews/') ? 'Nota desta review: 0 de 5' : 'Nota: 0 de 5')).length).toBeGreaterThan(0);
   expect(document.querySelectorAll('p.review-text')).toHaveLength(0);
 });
 test('limite de descrição é validado e cancelamento da edição não escreve', async () => {

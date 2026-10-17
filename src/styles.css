@@ -379,6 +379,15 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .comment-preview-author .avatar { width: 1.75rem; height: 1.75rem; font-size: .65rem; }
 .comment-preview-text { margin: .5rem 0 0; font-size: .85rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .comment-preview-more { display: inline-block; margin-top: .75rem; color: #79dcae; font-size: .85rem; }
+.review-game-context { display: grid; grid-template-columns: 8rem minmax(0, 1fr); align-items: start; gap: 1.5rem; padding-bottom: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid #405259; }
+.review-context-cover-link { display: block; min-width: 0; }
+.review-context-cover { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; border-radius: .65rem; }
+.review-context-copy { min-width: 0; }
+.review-context-copy h2 { margin: 0 0 .75rem; font-size: clamp(1.25rem, 2.5vw, 1.8rem); line-height: 1.3; overflow-wrap: anywhere; }
+.review-game-summary { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; color: #b8cbd0; }
+.review-context-copy .review-rating { margin-bottom: 0; font-weight: 600; }
+.review-details .catalog-notice { font-size: .8rem; padding: .65rem .85rem; }
+@media (max-width: 560px) { .review-game-context { grid-template-columns: 4.5rem minmax(0, 1fr); gap: 1rem; } }
 .profile-section-heading { display: flex; align-items: baseline; gap: .85rem; padding-bottom: .8rem; margin-bottom: 1.5rem; border-bottom: 1px solid #405259; }
 .profile-section-heading h2 { margin: 0; font-size: 1.5rem; }
 .profile-section-heading > span { color: #91aaa3; font-size: .85rem; }
