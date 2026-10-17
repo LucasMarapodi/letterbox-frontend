@@ -338,6 +338,8 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .review-card .feed-author > a, .review-card .visitor > a { font-weight: 700; color: #e6f3ee; text-decoration: none; }
 .review-author-heading { display: flex; align-items: center; gap: .75rem; }
 .review-author-heading a { text-decoration: none; }
+.review-card h3.review-title { font-size: clamp(1.15rem, 2vw, 1.5rem); line-height: 1.35; overflow-wrap: anywhere; margin: 1rem 0 .75rem; color: #f4f8f6; }
+.review-title-hint { font-size: .8rem; color: #a9bcb7; margin-top: -.5rem; }
 .review-game { display: flex; align-items: center; gap: 1rem; width: fit-content; max-width: 100%; font-weight: 700; }
 .review-game span { min-width: 0; overflow-wrap: anywhere; }
 .review-game .review-game-cover { flex: 0 0 3.75rem; width: 3.75rem; height: 5rem; object-fit: cover; border-radius: .4rem; font-size: .65rem; }

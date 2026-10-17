@@ -48,6 +48,8 @@ export interface Review {
   id: ReviewId;
   userId: UserId;
   gameId: GameId;
+  /** Ausente somente em objetos do contrato anterior; HTTP normaliza para null. */
+  title?: string | null;
   text: string;
   /** Null somente para o histórico sem avaliação; nunca converter para zero. */
   rating: number | null;

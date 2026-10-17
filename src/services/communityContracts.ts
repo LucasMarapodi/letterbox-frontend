@@ -1,7 +1,7 @@
 import type { ReviewId, UserId, GameId, Rating, User, Review, Comment, Favorite, Game } from '../models';
 import type { GameOpinions, PublicReview } from './contracts';
 export interface ReviewDetails extends PublicReview { game: { id: GameId; title: string; coverUrl?: string | null }; }
-export interface ReviewInput { rating: number; text: string; }
+export interface ReviewInput { rating: number; text: string; title?: string | null; }
 export interface PublicComment extends Comment { author: Pick<User, 'id' | 'displayName' | 'avatarUrl'>; }
 export interface PublicProfile { user: User; reviews: ReviewDetails[]; }
 export type FavoriteKind = 'game' | 'review';
@@ -21,7 +21,7 @@ export interface RankedCommentPage { items: RankedComment[]; page: number; pageS
 export function isRankingPeriod(value: unknown): value is RankingPeriod { return value === '24h' || value === '7d' || value === '30d'; }
 
 export class CommunityError extends Error {
-  constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found' | 'self-follow' | 'duplicate-follow') { super(code); }
+  constructor(public readonly code: 'session-required' | 'invalid-rating' | 'empty-text' | 'duplicate-review' | 'forbidden' | 'not-found' | 'self-follow' | 'duplicate-follow' | 'review-title-required' | 'review-title-too-long') { super(code); }
 }
 export interface CommunityService {
   getGameReviews(gameId: GameId): Promise<PublicReview[]>;

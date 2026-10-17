@@ -47,7 +47,7 @@ function PublishControl({ gameId, onSaved }: { gameId: number; onSaved(): void }
   return <QueryRegion label="Consulta da sua review" busy={false}><section className="review-card" aria-label="Sua review">
     {success && <p role="status">{success}</p>}
     {error && <p role="alert">{error}</p>}
-    {open ? <RatedReviewForm initialText={review?.text} initialRating={review?.rating} submitLabel={review ? 'Salvar review' : 'Publicar review'} pendingLabel={review ? 'Salvando…' : 'Publicando…'} failureMessage={review ? 'Não foi possível salvar a review. Tente novamente.' : 'Não foi possível publicar a review. Tente novamente.'} onSubmit={submit} onCancel={() => setOpen(false)} /> : <Button onClick={() => { setSuccess(''); setError(''); setOpen(true); }}>{review ? 'Editar minha review' : 'Criar review'}</Button>}
+    {open ? <RatedReviewForm initialTitle={review?.title} initialText={review?.text} initialRating={review?.rating} submitLabel={review ? 'Salvar review' : 'Publicar review'} pendingLabel={review ? 'Salvando…' : 'Publicando…'} failureMessage={review ? 'Não foi possível salvar a review. Tente novamente.' : 'Não foi possível publicar a review. Tente novamente.'} onSubmit={submit} onCancel={() => setOpen(false)} /> : <Button onClick={() => { setSuccess(''); setError(''); setOpen(true); }}>{review ? 'Editar minha review' : 'Criar review'}</Button>}
   </section></QueryRegion>;
 }
 export function PublishReview(props: { gameId: number; onSaved(): void }): ReactElement | null {

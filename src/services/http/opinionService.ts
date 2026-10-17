@@ -6,6 +6,8 @@ export async function communityRequest<T>(request: () => Promise<T>, invalid?: '
   try { return await request(); }
   catch (error: unknown) {
     if (error instanceof HttpFailure && error.kind === 'http') {
+      if (error.status === 400 && error.code === 'review_title_required') throw new CommunityError('review-title-required');
+      if (error.status === 400 && error.code === 'review_title_too_long') throw new CommunityError('review-title-too-long');
       if (error.status === 400 && invalid) throw new CommunityError(invalid);
       if (error.status === 401) throw new CommunityError('session-required');
       if (error.status === 403) throw new CommunityError('forbidden');
