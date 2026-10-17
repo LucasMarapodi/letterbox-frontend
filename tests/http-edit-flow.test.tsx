@@ -9,16 +9,16 @@ import { createDefaultApplicationServices } from '../src/services/runtime';
 import { createHttpSessionStore } from '../src/services/http/adapters';
 import type { FetchTransport } from '../src/services/http/client';
 import { wireUser, wireReview, withAuthentication } from './http-fixtures';
-const updated = { ...wireReview, text: 'Texto atualizado', updatedAt: '2026-10-13T14:00:00Z' };
+const updated = { ...wireReview, title: 'Título atualizado', text: 'Texto atualizado', updatedAt: '2026-10-13T14:00:00Z' };
 test('leitura pública e PATCH mínimo preservam projeção, ID e createdAt', async () => {
   const session = createHttpSessionStore(); session.establish({ user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' });
   const transport = vi.fn<FetchTransport>().mockResolvedValueOnce(Response.json(wireReview)).mockResolvedValueOnce(Response.json(updated));
   const service = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5207' }, { transport: withFilterOptions(transport), session }).community;
   expect(await service.getReview(wireReview.id)).toEqual(wireReview);
   expect(transport.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
-  expect(await service.editReview(wireReview.id, { rating: 4.5, text: updated.text }, { ...wireUser, id: 999 })).toEqual(updated);
+  expect(await service.editReview(wireReview.id, { rating: 4.5, title: updated.title, text: updated.text }, { ...wireUser, id: 999 })).toEqual(updated);
   expect(transport.mock.calls[1][0].endsWith('/reviews/55')).toBe(true);
-  expect(transport.mock.calls[1][1]).toMatchObject({ method: 'PATCH', body: '{"rating":4.5,"text":"Texto atualizado"}', headers: { Authorization: 'Bearer test-only' } });
+  expect(transport.mock.calls[1][1]).toMatchObject({ method: 'PATCH', body: '{"title":"Título atualizado","rating":4.5,"text":"Texto atualizado"}', headers: { Authorization: 'Bearer test-only' } });
 });
 test('404 público vira ausência, rede/contrato continuam erros; edição distingue 403 e 404', async () => {
   const session = createHttpSessionStore(); session.establish({ user: wireUser, token: 'test-only', expiresAt: '2080-01-01T00:00:00Z' });
@@ -48,7 +48,11 @@ async function open(failure?: number, other = false): Promise<ReturnType<typeof 
   await screen.findByLabelText('Usuário conectado');
   // Navegação pública pelo mesmo roteador, sem substituir o serviço da página.
   await interaction.click(await screen.findByRole('link',{name:'Review de exemplo'}));
-  if(!other) await interaction.click(await screen.findByRole('button',{name:'Editar minha review'})); return interaction;
+  if(!other) {
+    await interaction.click(await screen.findByRole('button',{name:'Editar minha review'}));
+    await interaction.type(screen.getByLabelText('Título'), updated.title);
+  }
+  return interaction;
 }
 test('autor edita a projeção da API e UI mantém a data original', async () => {
   const interaction = await open();

@@ -52,7 +52,7 @@ test.each(['game', 'review'] as const)('favoritar e remover %s com resposta num√
   await services.auth.login({ email: 'test@example.test', password: 'test-only' });
   render(<MemoryRouter initialEntries={[kind === 'game' ? '/jogos/12' : '/reviews/55']}><AppRoutes adapters={services} /></MemoryRouter>);
   const interaction = userEvent.setup();
-  const label = kind === 'game' ? 'jogo' : 'review';
+  const label = kind === 'game' ? `jogo ${wireGame.title}` : 'review';
   await interaction.click(await screen.findByRole('button', { name: `Favoritar ${label}` }));
   expect(await screen.findByRole('button', { name: `Remover ${label} dos favoritos` })).toHaveAttribute('aria-pressed', 'true');
   await interaction.click(screen.getByRole('link', { name: 'Meu perfil' }));

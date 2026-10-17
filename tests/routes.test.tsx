@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { AppRoutes } from '../src/App';
+import { createTestApplicationServices } from './doubles/applicationServices';
 
 interface NavigationCase { link: string; heading: string; }
 const navigationCases: NavigationCase[] = [
@@ -34,12 +35,20 @@ test('URL antiga de notificações é tratada como inexistente', () => {
 const parameterCases: ParameterCase[] = [
   { path: '/jogos/42', value: 'ID do jogo: 42' },
   { path: '/reviews/42', value: 'ID da review: 42' },
-  { path: '/perfil/42', value: 'ID do usuário: 42' },
 ];
 
 test.each(parameterCases)('disponibiliza o parâmetro de $path', ({ path, value }) => {
   render(<MemoryRouter initialEntries={[path]}><AppRoutes /></MemoryRouter>);
   expect(screen.getByText(value)).toBeVisible();
+});
+
+test('rota de perfil consulta o ID numérico sem exibi-lo no cabeçalho', async () => {
+  const services = createTestApplicationServices();
+  const getProfile = vi.spyOn(services.community, 'getProfile');
+  render(<MemoryRouter initialEntries={['/perfil/42']}><AppRoutes adapters={services} /></MemoryRouter>);
+  expect(await screen.findByText('Perfil não encontrado.')).toBeVisible();
+  expect(getProfile).toHaveBeenCalledWith(42, null);
+  expect(screen.queryByText('ID do usuário: 42')).not.toBeInTheDocument();
 });
 
 test('uma URL desconhecida apresenta mensagem e caminho de retorno', async () => {

@@ -18,12 +18,13 @@ test('cadastro login nota publicação edição favoritos e logout percorrem ser
   await interaction.type(screen.getByLabelText('Senha'), 'teste123');
   await interaction.click(screen.getByRole('button', { name: 'Entrar' }));
   await interaction.click(await screen.findByRole('link', { name: 'Jogo de exemplo' }));
+  await interaction.click(await screen.findByRole('button', { name: 'Favoritar jogo Ecos do Horizonte' }));
   await interaction.click(await screen.findByRole('button',{name:'Criar review'})); await interaction.click(await screen.findByRole('radio', { name: '5 estrelas' }));
-
-  await interaction.click(await screen.findByRole('button', { name: 'Favoritar jogo' }));
+  await interaction.type(screen.getByRole('textbox', { name: 'Título' }), 'Review da demonstração');
   await interaction.type(await screen.findByRole('textbox', { name: 'Descrição (opcional)' }), 'Primeira review da demonstração');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   await interaction.click(await screen.findByRole('button', { name: 'Editar minha review' }));
+  expect(screen.getByRole('textbox', { name: 'Título' })).toHaveValue('Review da demonstração');
   await interaction.clear(await screen.findByRole('textbox', { name: 'Descrição (opcional)' }));
   await interaction.type(screen.getByRole('textbox', { name: 'Descrição (opcional)' }), 'Review revisada da demonstração');
   await interaction.click(screen.getByRole('button', { name: 'Salvar review' }));
@@ -36,6 +37,7 @@ test('cadastro login nota publicação edição favoritos e logout percorrem ser
   await interaction.click(screen.getByRole('link', { name: 'Início' }));
   await interaction.click(screen.getByRole('link', { name: 'Jogo de exemplo' }));
   await interaction.click(await screen.findByRole('button',{name:'Editar minha review'})); expect(await screen.findByRole('radio', { name: '5 estrelas' })).toBeChecked();
+  await interaction.click(screen.getByRole('button', { name: 'Cancelar' }));
   await interaction.click(screen.getByRole('button', { name: 'Sair' }));
   expect(screen.queryByRole('button', { name: 'Notificações' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Salvar nota' })).not.toBeInTheDocument();

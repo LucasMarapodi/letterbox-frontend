@@ -135,6 +135,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       if (review.userId !== user.id) throw new CommunityError('forbidden');
       if (!Number.isFinite(input.rating) || input.rating < 0 || input.rating > 5) throw new CommunityError('invalid-rating');
       review.text = input.text.trim(); review.rating = input.rating;
+      if ('title' in input) review.title = input.title?.trim() || null;
       const note = ratings.find(item => item.gameId === review.gameId && item.userId === user.id);
       if (note) note.value = input.rating; else ratings.push({ id: ratings.length + 1, gameId: review.gameId, userId: user.id, value: input.rating });
       review.updatedAt = new Date().toISOString();
@@ -152,7 +153,7 @@ export function createMockCommunityService(options: { reviews?: Review[]; commen
       if (!Number.isFinite(input.rating) || input.rating < 0 || input.rating > 5) throw new CommunityError('invalid-rating');
       if (reviews.some((review) => review.gameId === gameId && review.userId === user.id)) throw new CommunityError('duplicate-review');
       while (reviews.some((review) => review.id === sequence)) sequence++;
-      const review: Review = { id: sequence++, gameId, userId: user.id, likeCount: 0, rating: input.rating, text: input.text.trim(), createdAt: new Date().toISOString(), updatedAt: null };
+      const review: Review = { id: sequence++, gameId, userId: user.id, likeCount: 0, rating: input.rating, title: input.title?.trim() || null, text: input.text.trim(), createdAt: new Date().toISOString(), updatedAt: null };
       reviews.push(review);
       const note = ratings.find(item => item.gameId === gameId && item.userId === user.id);
       if (note) note.value = input.rating; else ratings.push({ id: ratings.length + 1, gameId, userId: user.id, value: input.rating });

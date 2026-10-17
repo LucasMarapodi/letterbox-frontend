@@ -30,20 +30,21 @@ test('nota começa sem seleção e zero precisa ser escolhido', async () => {
   const save=open(); fireEvent.submit(screen.getByRole('form'));
   expect(save).not.toHaveBeenCalled();
   await userEvent.click(screen.getByRole('radio',{name:'0 estrelas'})); fireEvent.submit(screen.getByRole('form'));
-  expect(save).toHaveBeenCalledWith({rating:0,text:''});
+  expect(save).toHaveBeenCalledWith({rating:0,title:null,text:''});
 });
 test('estrelas permitem seleção por teclado no formulário único', async () => {
   const save=open(); const interaction=userEvent.setup();
   await interaction.click(screen.getByRole('radio',{name:'2 estrelas'})); await interaction.keyboard('{ArrowRight}');
   expect(screen.getByRole('radio',{name:'3 estrelas'})).toBeChecked();
-  fireEvent.submit(screen.getByRole('form')); expect(save).toHaveBeenCalledWith({rating:3,text:''});
+  fireEvent.submit(screen.getByRole('form')); expect(save).toHaveBeenCalledWith({rating:3,title:null,text:''});
 });
 test('falha preserva escolha e descrição', async () => {
   open(null,vi.fn(async()=>{throw new Error('offline')}));
   await userEvent.click(screen.getByRole('radio',{name:'5 estrelas'})); fireEvent.change(screen.getByLabelText('Descrição (opcional)'),{target:{value:'Rascunho'}});
+  fireEvent.change(screen.getByLabelText('Título'),{target:{value:'Título do rascunho'}});
   fireEvent.submit(screen.getByRole('form')); expect(await screen.findByRole('alert')).toHaveTextContent('Falha ao publicar.');
   expect(screen.getByRole('radio',{name:'5 estrelas'})).toBeChecked(); expect(screen.getByLabelText('Descrição (opcional)')).toHaveValue('Rascunho');
 });
 test.each([0,4.25,5])('reabrir com nota %s mantém a seleção ao reenviar', initialRating => {
-  const save=open(initialRating); fireEvent.submit(screen.getByRole('form')); expect(save).toHaveBeenCalledWith({rating:initialRating,text:''});
+  const save=open(initialRating); fireEvent.submit(screen.getByRole('form')); expect(save).toHaveBeenCalledWith({rating:initialRating,title:null,text:''});
 });

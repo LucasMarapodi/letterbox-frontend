@@ -9,7 +9,7 @@ import { decodeReview, decodeRating, decodeComment, decodeNotification, decodeFa
 import type { FetchTransport } from '../src/services/http/client';
 import { wireReview, wireRating, wireComment, wireNotification, wireFavorite, wireGame, wireUser, withAuthentication } from './http-fixtures';
 
-const review = { ...wireReview, id: 55 };
+const review = { ...wireReview, id: 55, title: 'Review numérica' };
 const rating = { ...wireRating, id: 77 };
 
 test('P-PR-03 decodifica reviews, notas, comentários, notificações e dashboard com referências numéricas', () => {
@@ -63,6 +63,7 @@ test('respostas numéricas de nota, publicação e edição são aceitas; favori
   const interaction = userEvent.setup();
   await interaction.click(await screen.findByRole('button',{name:'Criar review'})); await interaction.click(await screen.findByRole('radio', { name: '5 estrelas' }));
   await interaction.type(await screen.findByLabelText('Descrição (opcional)'), 'Review numérica');
+  await interaction.type(screen.getByLabelText('Título'), review.title);
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   expect(await screen.findByText('Review publicada.')).toBeVisible();
   await interaction.click(await screen.findByRole('link',{name:'Review de Ana'})); await interaction.click(await screen.findByRole('button',{name:'Editar minha review'}));
