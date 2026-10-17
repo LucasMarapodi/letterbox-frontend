@@ -21,7 +21,7 @@ test('publicação envia rating e text, usa token e distingue wrapper null de re
 });
 async function open(transport:FetchTransport):Promise<ReturnType<typeof userEvent.setup>>{
   const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);
-  await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'})); await interaction.click(await screen.findByRole('link',{name:wireGame.title})); const action=await screen.findByRole('button',{name:/^(Criar review|Editar minha review)$/}); if(action.textContent==='Criar review'){await interaction.click(action); await interaction.type(screen.getByLabelText('Nota (0 a 5)'),'4.5');} return interaction;
+  await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'})); await interaction.click(await screen.findByRole('link',{name:wireGame.title})); const action=await screen.findByRole('button',{name:/^(Criar review|Editar minha review)$/}); if(action.textContent==='Criar review'){await interaction.click(action); await interaction.click(screen.getByRole('radio',{name:'4 estrelas'})); await interaction.type(screen.getByLabelText('Título'),'Minha aventura');} return interaction;
 }
 function backend(options:{conflict?:boolean;failure?:boolean;own?:boolean}={}):ReturnType<typeof vi.fn<FetchTransport>>{
   let published=Boolean(options.own);

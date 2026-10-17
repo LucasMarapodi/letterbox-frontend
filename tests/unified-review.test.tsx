@@ -50,16 +50,16 @@ async function form(edit = false) {
 }
 test('uma ação e nota sem seleção; ausente não vira zero; cancelar não escreve', async () => {
   const { writes } = await open(); const editor = await form();
-  expect(within(editor).getByLabelText('Nota (0 a 5)')).toHaveValue(null);
+  expect(within(editor).getByText('Nenhuma nota selecionada.')).toBeVisible();
   fireEvent.submit(editor); expect(within(editor).getByText('Escolha uma nota de 0 a 5.')).toBeVisible();
   expect(writes()).toHaveLength(0);
   await userEvent.click(within(editor).getByRole('button', { name: 'Cancelar' }));
   expect(screen.queryByRole('form', { name: 'Publicar review' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Salvar nota' })).not.toBeInTheDocument();
 });
-test.each([0, 4.25, 5])('nota %s sem descrição gera uma única review e revalida própria/média', async rating => {
+test.each([0, 4, 5])('nota %s sem descrição gera uma única review e revalida própria/média', async rating => {
   const { writes, transport } = await open(); const editor = await form();
-  fireEvent.change(within(editor).getByLabelText('Nota (0 a 5)'), { target: { value: String(rating) } });
+  fireEvent.click(within(editor).getByRole('radio', { name: `${rating} estrelas` }));
   fireEvent.submit(editor); await screen.findByText('Review publicada.');
   expect(writes()).toHaveLength(1); expect(JSON.parse(String(writes()[0][1].body))).toEqual({ rating, title: null, text: '' });
   expect(writes()[0][1].headers).toHaveProperty('Authorization', 'Bearer test-only');
@@ -67,11 +67,11 @@ test.each([0, 4.25, 5])('nota %s sem descrição gera uma única review e revali
   await waitFor(() => expect(transport.mock.calls.filter(([url]) => url.endsWith('/reviews/me')).length).toBeGreaterThan(1));
   await waitFor(() => expect(transport.mock.calls.filter(([url]) => url.endsWith('/opinions')).length).toBeGreaterThan(1));
   expect(transport.mock.calls.some(([url]) => url.endsWith('/rating/me'))).toBe(false);
-  const reopened = await form(true); expect(within(reopened).getByLabelText('Nota (0 a 5)')).toHaveValue(rating);
+  const reopened = await form(true); expect(within(reopened).getByRole('radio', { name: `${rating} estrelas` })).toBeChecked();
 });
 test('edição de detalhe carrega nota fracionada e envia texto vazio com PATCH único', async () => {
   const { writes } = await open({ own: { ...wireReview, rating: 4.25 }, path: '/reviews/55' });
-  const editor = await form(true); expect(within(editor).getByLabelText('Nota (0 a 5)')).toHaveValue(4.25);
+  const editor = await form(true); expect(within(editor).getByText('Nota selecionada: 4.25 de 5')).toBeVisible();
   fireEvent.change(within(editor).getByLabelText('Descrição (opcional)'), { target: { value: '' } });
   fireEvent.submit(editor); await screen.findByText('Review atualizada.');
   expect(writes()).toHaveLength(1); expect(writes()[0][1].method).toBe('PATCH'); expect(JSON.parse(String(writes()[0][1].body))).toEqual({ rating: 4.25, title: null, text: '' });
@@ -94,7 +94,7 @@ test('review de outro usuário não oferece edição', async () => {
 test('falha mantém rascunho; submit duplo e resposta após logout não declaram sucesso', async () => {
   const pending = deferred<Response>(); let fail = true;
   const { writes, interaction } = await open({ write: async () => fail ? Response.json({ code: 'storage_unavailable', message: 'Falha' }, { status: 503 }) : pending.promise });
-  const editor = await form(); fireEvent.change(within(editor).getByLabelText('Nota (0 a 5)'), { target: { value: '3' } });
+  const editor = await form(); fireEvent.click(within(editor).getByRole('radio', { name: '3 estrelas' }));
   fireEvent.change(within(editor).getByLabelText('Descrição (opcional)'), { target: { value: 'Rascunho' } }); fireEvent.change(within(editor).getByLabelText('T\u00edtulo'), {target:{value:'Minha aventura'}}); fireEvent.submit(editor);
   expect(await within(editor).findByRole('alert')).toHaveTextContent('Não foi possível publicar');
   expect(within(editor).getByLabelText('Descrição (opcional)')).toHaveValue('Rascunho');
@@ -106,7 +106,7 @@ test('falha mantém rascunho; submit duplo e resposta após logout não declaram
 });
 test('conflito oferece edição após consultar a review existente sem sucesso falso', async () => {
   const { writes } = await open({ conflict: true }); const editor = await form();
-  fireEvent.change(within(editor).getByLabelText('Nota (0 a 5)'), { target: { value: '2' } }); fireEvent.submit(editor);
+  fireEvent.click(within(editor).getByRole('radio', { name: '2 estrelas' })); fireEvent.submit(editor);
   await screen.findByRole('button', { name: 'Editar minha review' }); expect(writes()).toHaveLength(1);
   expect(screen.queryByText('Review publicada.')).not.toBeInTheDocument();
 });
@@ -118,11 +118,6 @@ test.each(['/jogos/12', '/reviews/55', `/perfil/${wireUser.id}`, '/comunidade', 
   if(path==='/'){await interaction.click(screen.getByRole('link',{name:'Comunidade'}));await interaction.click(screen.getByRole('button',{name:'Feed de reviews'}));}
   expect((await screen.findAllByText('Nota: 0 de 5')).length).toBeGreaterThan(0);
   expect(document.querySelectorAll('p.review-text')).toHaveLength(0);
-});
-test.each([-1, 6])('formulário rejeita nota %s antes de escrever', async rating => {
-  const { writes } = await open(); const editor = await form();
-  fireEvent.change(within(editor).getByLabelText('Nota (0 a 5)'), { target: { value: String(rating) } }); fireEvent.submit(editor);
-  expect(within(editor).getByText('Escolha uma nota de 0 a 5.')).toBeVisible(); expect(writes()).toHaveLength(0);
 });
 test('limite de descrição é validado e cancelamento da edição não escreve', async () => {
   const { writes } = await open({ own: { ...wireReview, rating: 3 } }); const editor = await form(true);

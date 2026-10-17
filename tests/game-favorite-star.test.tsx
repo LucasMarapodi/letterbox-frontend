@@ -50,7 +50,7 @@ const unselectedLabel='Favoritar jogo Jogo HTTP';
 test.each(['/','/jogos/12','/perfil/1','/comunidade'])('estrela real junto ao título em %s sem GET por card',async path=>{
  const {calls,transport,interaction}=await open(path);if(path==='/comunidade')await interaction.click(screen.getByRole('button',{name:'Jogos em discussão'}));
  const star=await screen.findByRole('button',{name:selectedLabel});expect(star).toHaveAttribute('aria-pressed','true');expect(star).toHaveTextContent('★');expect(star.closest('a')).toBeNull();
- const row=star.parentElement!;expect(within(row).getByRole('heading',{name:'Jogo HTTP'})).toBeVisible();expect(star).toHaveAttribute('title',selectedLabel);
+ const row=star.closest<HTMLElement>('.game-detail-header') ?? star.parentElement!;expect(within(row).getByRole('heading',{name:'Jogo HTTP'})).toBeVisible();expect(star).toHaveAttribute('title',selectedLabel);
  expect(calls('/favorites','GET')).toHaveLength(1);expect(transport.mock.calls.some(([url,init])=>/\/favorites\/game\/\d+$/.test(url)&&init.method==='GET')).toBe(false);
  if(path==='/jogos/12'){expect(screen.queryByRole('button',{name:'Favoritar jogo'})).not.toBeInTheDocument();expect(within(screen.getByRole('region',{name:'Reviews do jogo'})).queryByRole('button',{name:/Favoritar jogo|Remover jogo/})).not.toBeInTheDocument();}
 });

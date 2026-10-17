@@ -202,7 +202,7 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .game-details-page { padding-top: 2.5rem; }
 .game-page-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.18em; color: #9fb8b0; margin-bottom: 0.3rem; }
 .game-id { font-size: 0.7rem; color: #82969b; margin: 0 0 2rem; }
-.game-information { display: grid; grid-template-columns: 12rem minmax(0, 1fr) 15rem; gap: 2rem; align-items: start; }
+.game-information { display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: 2rem; align-items: start; }
 .game-poster { grid-column: 1; grid-row: 1 / span 2; }
 .game-poster .details-cover { width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 1rem; border: 1px solid #405259; box-shadow: 0 16px 35px #0005; }
 .game-overview { min-width: 0; }
@@ -211,11 +211,14 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .game-overview dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.6rem 1rem; padding-top: 1rem; border-top: 1px solid #344248; font-size: 0.82rem; }
 .game-overview dt { color: #89b8a4; }
 .game-overview dd { margin: 0; overflow-wrap: anywhere; color: #c3ced1; }
-.game-actions { min-width: 0; }
-.game-actions .review-card { padding: 1rem; margin: 0 0 1rem; background: #1c272c; border-color: #344248; border-radius: 1rem; }
-.game-actions button { font-size: 0.8rem; }
-.game-actions p, .game-actions a { font-size: 0.8rem; }
-.game-discussion { grid-column: 2 / 4; min-width: 0; }
+.game-detail-header { display: flex; align-items: first baseline; justify-content: space-between; gap: 1.5rem; margin-bottom: 1rem; padding: 0; background: transparent; border: 0; }
+.game-detail-header > h2 { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.game-header-actions { display: flex; align-items: flex-start; gap: .75rem; flex-shrink: 0; }
+.game-header-actions .game-favorite-error { max-width: 12rem; }
+.game-review-control { display: flex; flex-direction: column-reverse; gap: .5rem; align-items: flex-end; }
+.game-review-control > p { margin: 0; font-size: .8rem; max-width: 14rem; }
+.game-review-control > button { min-height: 2.75rem; white-space: nowrap; }
+.game-discussion { grid-column: 2; min-width: 0; }
 .game-discussion .opinions { margin-top: 0; }
 .game-discussion h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; padding-bottom: 0.8rem; border-bottom: 1px solid #344248; color: #a4b9c0; }
 .game-discussion .review-card { background: transparent; border: 0; border-bottom: 1px solid #344248; border-radius: 0; padding: 1.2rem 0; }
@@ -236,7 +239,6 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .rating-selection { color: #91aaa3; font-size: 0.75rem; margin: 0.3rem 0 0; }
 @media (max-width: 960px) {
   .game-information { grid-template-columns: 10rem minmax(0, 1fr); gap: 1.5rem; }
-  .game-actions { grid-column: 2; }
   .game-discussion { grid-column: 2; }
 }
 @media (max-width: 560px) {
@@ -245,7 +247,10 @@ button:hover:not(:disabled) { background: #90e8bb; }
   .game-overview h2 { font-size: 1.6rem; }
   .game-overview dl { grid-template-columns: 1fr; gap: 0.2rem; }
   .game-overview dd { margin-bottom: 0.5rem; }
-  .game-actions, .game-discussion { grid-column: 1 / -1; }
+  .game-discussion { grid-column: 1 / -1; }
+  .game-overview { grid-column: 1 / -1; }
+  .game-detail-header { flex-direction: column; gap: 1rem; }
+  .game-header-actions { align-self: flex-end; max-width: 100%; }
   .star-option { width: 2.2rem; height: 2.5rem; }
 }
 
@@ -362,3 +367,5 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .game-favorite-star:hover:not(:disabled) { color: #ffd478; background: #283c34; }
 .game-favorite-star:focus-visible { outline: 3px solid #90e8bb; outline-offset: 3px; }
 .game-favorite-error { grid-column: 1 / -1; color: #ffbcbc; font-size: .8rem; overflow-wrap: anywhere; }
+.rated-review-form .completion-actions { justify-content: flex-end; flex-wrap: nowrap; }
+.rated-review-form .completion-actions > button { min-height: 2.75rem; }

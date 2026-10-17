@@ -114,3 +114,7 @@ Título no formulário e nas reviews, validação condicional/limite, contratos 
 ## Sexta fase — S-PR-24
 
 Estrela à direita da primeira linha do nome no catálogo, detalhe, perfil e Jogos em discussão. Estado compartilhado, sem GET por alvo, com retry, isolamento de sessão e navegação independente. Dois Chromium desktop/mobile, testes pertinentes, lint/tipos/build aprovados. [Entrega e capturas](docs/S-PR-24.md).
+
+## Sexta fase — S-PR-38
+
+Cabeçalho do jogo reúne nome, favorito e ação de review; resumo/divisor usam toda a largura textual. Criar/editar abre modal acessível; nota somente pelas estrelas, com zero explícito e frações antigas preservadas. 165 testes pertinentes, seis Chromium, lint/tipos/build aprovados. [Entrega, capturas e limites](docs/S-PR-38.md).

@@ -48,7 +48,7 @@ test('formulário exige nota e preserva descrição quando envio falha', async (
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   expect(screen.getByText('Escolha uma nota de 0 a 5.')).toBeVisible();
   expect(publish).not.toHaveBeenCalled();
-  await interaction.type(screen.getByLabelText('Nota (0 a 5)'),'4.5'); await interaction.clear(screen.getByLabelText('Descrição (opcional)'));
+  await interaction.click(screen.getByRole('radio',{name:'4 estrelas'})); await interaction.clear(screen.getByLabelText('Descrição (opcional)'));
   await interaction.type(screen.getByLabelText('Descrição (opcional)'), 'Minha opinião');
   await interaction.type(screen.getByLabelText('Título'), 'Minha aventura');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
@@ -59,7 +59,7 @@ test('publicação válida aparece e encaminha para edição', async () => {
   vi.spyOn(community, 'findOwnReview').mockResolvedValueOnce(null).mockResolvedValue({ id:99,gameId:1,userId:author.id,likeCount: 0, rating:4,text:'Opinião nova',createdAt:'2026-01-01',updatedAt:null });
   vi.spyOn(community, 'publish').mockResolvedValue({ id: 99, gameId: 1, userId: author.id, likeCount: 0, rating: 4, text: 'Opinião nova', createdAt: '2026-01-01', updatedAt: null });
   const interaction = await openGame();
-  await interaction.type(screen.getByLabelText('Nota (0 a 5)'),'4'); await interaction.type(await screen.findByLabelText('Descrição (opcional)'), 'Opinião nova');
+  await interaction.click(screen.getByRole('radio',{name:'4 estrelas'})); await interaction.type(await screen.findByLabelText('Descrição (opcional)'), 'Opinião nova');
   await interaction.type(screen.getByLabelText('Título'), 'Minha aventura');
   await interaction.click(screen.getByRole('button', { name: 'Publicar review' }));
   expect(await screen.findByText('Review publicada.')).toBeVisible();

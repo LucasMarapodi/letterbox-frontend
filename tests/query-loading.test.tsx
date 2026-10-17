@@ -44,7 +44,7 @@ const cases: QueryCase[] = [
   { route: '/comunidade', endpoint: '/community/games/in-discussion', region: 'Jogos em discussão', action: 'Jogos em discussão' },
   { route: '/', endpoint: '/notifications', region: 'Dados de notificações', authenticated: true, action: 'Notificações' },
   { route: gameRoute, endpoint: `/games/${encodeURIComponent(wireGame.id)}/reviews/me`, region: 'Consulta da sua review', authenticated: true },
-  { route: gameRoute, endpoint: `/favorites/game/${encodeURIComponent(wireGame.id)}`, region: 'Favorito pessoal', authenticated: true },
+  { route: '/reviews/55', endpoint: `/favorites/review/${wireReview.id}`, region: 'Favorito pessoal', authenticated: true },
   { route: '/perfil/2', endpoint: '/users/2/follow/me', region: 'Relação pessoal', authenticated: true },
 ];
 test.each(cases)('região $region anuncia pendência e não fica busy após resposta', async ({ route, endpoint, region, authenticated, action }) => {

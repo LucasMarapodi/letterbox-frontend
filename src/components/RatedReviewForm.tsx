@@ -1,12 +1,13 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent, type RefObject } from 'react';
 import type { ReviewInput } from '../services/communityContracts';
 import { CommunityError } from '../services/communityContracts';
 import { Button } from './Button';
 import { TextField } from './TextField';
 
-export function RatedReviewForm({ initialTitle = null, initialText = '', initialRating = null, submitLabel, pendingLabel, failureMessage, onSubmit, onCancel, errorMessage }: {
+export function RatedReviewForm({ initialTitle = null, initialText = '', initialRating = null, submitLabel, pendingLabel, failureMessage, onSubmit, onCancel, errorMessage, sendingRef }: {
   initialTitle?: string | null; initialText?: string; initialRating?: number | null; submitLabel: string; pendingLabel: string; failureMessage: string;
   onSubmit(input: ReviewInput): Promise<void>; onCancel(): void; errorMessage?(error: unknown): string;
+  sendingRef?: RefObject<boolean>;
 }) {
   const id = useId();
   const [text, setText] = useState(initialText);
@@ -15,7 +16,8 @@ export function RatedReviewForm({ initialTitle = null, initialText = '', initial
   const [errors, setErrors] = useState<{ rating?: string; text?: string; title?: string }>({});
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
-  const sending = useRef(false);
+  const localSending = useRef(false);
+  const sending = sendingRef ?? localSending;
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -40,12 +42,12 @@ export function RatedReviewForm({ initialTitle = null, initialText = '', initial
     finally { sending.current = false; if (alive.current) setPending(false); }
   }
   return <form aria-label={submitLabel} onSubmit={submit} noValidate className="rated-review-form">
-    <fieldset className="star-field" disabled={pending}>
+    <fieldset className="star-field" disabled={pending} aria-invalid={Boolean(errors.rating)} aria-describedby={errors.rating ? `${id}-rating-error` : undefined}>
       <legend>Sua nota</legend>
       <div className="star-options">{[0, 1, 2, 3, 4, 5].map(value => <label key={value} className={`star-option ${value > 0 && rating !== '' && value <= Number(rating) ? 'is-filled' : ''} ${value === 0 ? 'zero-option' : ''}`}>
         <input type="radio" name={id} checked={rating === String(value)} value={value} aria-label={`${value} ${value === 1 ? 'estrela' : 'estrelas'}`} onChange={event => setRating(event.target.value)} /><span aria-hidden="true">{value === 0 ? '0' : '★'}</span>
       </label>)}</div>
-      <TextField label="Nota (0 a 5)" type="number" min={0} max={5} step="any" value={rating} onChange={event => setRating(event.target.value)} aria-invalid={Boolean(errors.rating)} aria-describedby={errors.rating ? `${id}-rating-error` : undefined} />
+      <p className="rating-selection">{rating === '' ? 'Nenhuma nota selecionada.' : `Nota selecionada: ${rating} de 5`}</p>
       {errors.rating && <p id={`${id}-rating-error`} role="alert">{errors.rating}</p>}
     </fieldset>
     <TextField id={`${id}-title`} label="Título" value={title} disabled={pending} required={Boolean(text.trim())} aria-invalid={Boolean(errors.title)} aria-describedby={`${id}-title-hint${errors.title ? ` ${id}-title-error` : ''}`} onChange={event => setTitle(event.target.value)} />

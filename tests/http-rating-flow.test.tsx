@@ -38,7 +38,8 @@ test('estrelas recuperam decimal e gravação refresca jogo e média HTTP',async
   const interaction=userEvent.setup(); render(<MemoryRouter initialEntries={['/login']}><AppRoutes adapters={createDefaultApplicationServices({apiBaseUrl:'http://localhost:5207'},{ transport: withFilterOptions(transport)})}/></MemoryRouter>);
   await interaction.type(screen.getByLabelText('E-mail'),'test@example.com'); await interaction.type(screen.getByLabelText('Senha'),'test-only'); await interaction.click(screen.getByRole('button',{name:'Entrar'}));
   await interaction.click(await screen.findByRole('link',{name:wireGame.title}));
-  await interaction.click(await screen.findByRole('button',{name:'Editar minha review'})); expect(screen.getByLabelText('Nota (0 a 5)')).toHaveValue(4.5);
+  await interaction.click(await screen.findByRole('button',{name:'Editar minha review'})); expect(screen.getByText('Nota selecionada: 4.5 de 5')).toBeVisible();
+  await interaction.type(screen.getByLabelText('Título'), 'Minha aventura');
   await interaction.click(screen.getByRole('radio',{name:'5 estrelas'})); await interaction.click(screen.getByRole('button',{name:'Salvar review'}));
   expect(await screen.findByText('Review atualizada.')).toBeVisible(); expect(await screen.findByText('Nota média: 5 de 5')).toBeVisible();
   expect(transport.mock.calls.filter(([url,init])=>url.endsWith('/games/12')&&init.method==='GET')).toHaveLength(2);

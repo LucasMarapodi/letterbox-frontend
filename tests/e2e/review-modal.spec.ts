@@ -25,7 +25,7 @@ for (const [device, width] of [['desktop', 1280], ['mobile', 390]] as const) {
         if (fail) { fail = false; await route.fulfill({ status: 503, json: { code: 'storage_unavailable', message: 'Falha' } }); return; }
         review = { ...wireReview, ...input, game: { ...wireReview.game, title: game.title } }; body = review;
       }
-      await route.fulfill({ json: body, headers: path.endsWith('/games/12') ? { 'X-Catalog-Stale': 'true', 'X-Catalog-Fetched-At': '2026-10-16T12:00:00Z' } : {} });
+      await route.fulfill({ json: body, headers: path.endsWith('/games/12') ? { 'Access-Control-Expose-Headers': 'X-Catalog-Stale,X-Catalog-Fetched-At', 'X-Catalog-Stale': 'true', 'X-Catalog-Fetched-At': '2026-10-16T12:00:00Z' } : {} });
     });
     await page.setViewportSize({ width, height: 950 }); await page.goto('/login');
     await page.getByLabel('E-mail', { exact: true }).fill('modal@example.test'); await page.getByLabel('Senha', { exact: true }).fill('test-only'); await page.getByRole('button', { name: 'Entrar', exact: true }).click();
@@ -38,7 +38,9 @@ for (const [device, width] of [['desktop', 1280], ['mobile', 390]] as const) {
     });
     expect(Math.abs(geometry.text.right - geometry.grid.right)).toBeLessThan(2);
     expect(Math.abs(geometry.divider.left - geometry.text.left)).toBeLessThan(2); expect(Math.abs(geometry.divider.right - geometry.text.right)).toBeLessThan(2);
-    expect(geometry.heading.right).toBeLessThanOrEqual(geometry.star.left); expect(geometry.star.right).toBeLessThanOrEqual(geometry.action.left);
+    if (width > 560) expect(geometry.heading.right).toBeLessThanOrEqual(geometry.star.left);
+    else expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.star.top);
+    expect(geometry.star.right).toBeLessThanOrEqual(geometry.action.left);
     expect(Math.abs(geometry.star.top + geometry.star.height / 2 - geometry.action.top - geometry.action.height / 2)).toBeLessThan(2);
     expect(geometry.overflow).toBe(false); expect(await page.locator('.catalog-notice').evaluate(notice => notice.closest('.game-information') === null)).toBe(true);
     await mkdir('docs/evidence', { recursive: true }); await page.screenshot({ path: `docs/evidence/S-PR-38-${device}-game.png`, fullPage: true });
