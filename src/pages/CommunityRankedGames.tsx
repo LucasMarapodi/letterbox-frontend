@@ -1,4 +1,3 @@
-import { CatalogNotice } from '../components/CatalogNotice';
 import { useEffect, useState, type ReactElement } from 'react';
 import { useServices } from '../services/ServiceProvider';
 import type { RankedGame, RankingPeriod } from '../services/communityContracts';
@@ -16,7 +15,6 @@ export function CommunityRankedGames({ period }: { period: RankingPeriod }): Rea
     return () => { active = false; };
   }, [community, period, attempt]);
   return <section aria-label="Jogos em discussão" aria-busy={state.status === 'loading'}><h2>Jogos em discussão</h2>
-    {state.status === 'ready' && <CatalogNotice paths={[['community', 'games', 'in-discussion']]} onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'loading' && <LoadingState message="Carregando jogos em discussão…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar os jogos em discussão." onRetry={() => { setState({ status: 'loading' }); setAttempt((value) => value + 1); }} />}
     {state.status === 'ready' && (state.items.length ? <div className="game-grid">{state.items.map((item) => <GameCard key={item.game.id} game={item.game} commentCount={item.commentCount} lastCommentAt={item.lastCommentAt} />)}</div> : <EmptyState message="Nenhum jogo com comentários neste período." />)}
