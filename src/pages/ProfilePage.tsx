@@ -44,7 +44,9 @@ function ProfileContent({ id }: { id: number }): ReactElement {
       <FollowButton targetId={id} onChanged={() => setConnectionsVersion((value) => value + 1)} />
       </>}
     </section>
-    <section aria-label="Reviews do usuário" aria-busy={refreshing}><h2>Reviews</h2>
+    {user?.id === id && privateFeatures?.favorites !== false && <FavoritesSections key={`games-${version}-${user.id}`} section="games" />}
+    <section className="profile-reviews" aria-label="Reviews do usuário" aria-busy={refreshing}>
+      <div className="profile-section-heading"><h2>{user?.id === id ? 'Minhas reviews' : 'Reviews'}</h2><span>{profile.reviews.length} {profile.reviews.length === 1 ? 'review' : 'reviews'}</span></div>
       {refreshing ? <LoadingState message="Carregando reviews do perfil…" /> : profile.reviews.length ? reviews.items.map((review) => <article className="review-card review-preview" key={review.id}>
         <ReviewAuthor author={review.author} />
         <h3><ReviewGame game={review.game} /></h3>
@@ -54,7 +56,7 @@ function ProfileContent({ id }: { id: number }): ReactElement {
       </article>) : <EmptyState message="Nenhuma review publicada por este usuário." />}
       <ProfilePagination label="reviews do usuário" {...reviews} />
     </section>
-    {user?.id === id && privateFeatures?.favorites !== false && <FavoritesSections key={`${version}-${user.id}`} />}
+    {user?.id === id && privateFeatures?.favorites !== false && <FavoritesSections key={`reviews-${version}-${user.id}`} section="reviews" />}
     <ConnectionsSections key={id} profileId={id} revision={connectionsVersion} />
   </>;
 }
