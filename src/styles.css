@@ -420,4 +420,5 @@ button:hover:not(:disabled) { background: #90e8bb; }
 .forum-game-context { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; }
 .forum-game-context .game-cover { width: 64px; height: 90px; flex: 0 0 64px; border-radius: 8px; object-fit: cover; }
 .forum-topic-page { max-width: 960px; margin: 0 auto; }
+.forum-topic-page h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.3; }
 @media (max-width: 600px) { .forum-card { padding: 1rem; } .forum-byline time { margin-left: 0; width: 100%; } }

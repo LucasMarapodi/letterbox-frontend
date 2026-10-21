@@ -16,7 +16,9 @@ export function ForumForm({ topic = false, sending, onSubmit, onCancel }: {
 }) {
   const [title, setTitle] = useState(''), [text, setText] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('');
   const controller = useRef<AbortController | null>(null);
+  const message = useRef<HTMLTextAreaElement>(null);
   useEffect(() => () => { controller.current?.abort(); }, []);
+  useEffect(() => { if (error && !busy) message.current?.focus(); }, [error, busy]);
   async function submit(event: FormEvent) {
     event.preventDefault(); if (sending.current) return;
     if (!text.trim() || (topic && !title.trim())) { setError('Preencha os campos obrigatórios.'); return; }
@@ -28,7 +30,7 @@ export function ForumForm({ topic = false, sending, onSubmit, onCancel }: {
   }
   return <form className="forum-form" onSubmit={event => { void submit(event); }} aria-busy={busy}>
     {topic && <label>Título do tópico<input required maxLength={150} value={title} disabled={busy} onChange={event => setTitle(event.target.value)} /></label>}
-    <label>{topic ? 'Mensagem inicial' : 'Sua resposta'}<textarea required maxLength={10000} value={text} disabled={busy} onChange={event => setText(event.target.value)} /></label>
+    <label>{topic ? 'Mensagem inicial' : 'Sua resposta'}<textarea ref={message} required maxLength={10000} value={text} disabled={busy} onChange={event => setText(event.target.value)} /></label>
     <small>{text.length}/10000 caracteres</small>
     {error && <p role="alert">{error}</p>}
     <div className="forum-form-actions"><Button type="submit" disabled={busy}>{busy ? 'Publicando…' : topic ? 'Publicar tópico' : 'Publicar resposta'}</Button>{onCancel && <Button disabled={busy} onClick={onCancel}>Cancelar</Button>}</div>
