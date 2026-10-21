@@ -115,3 +115,41 @@ test('respostas falham isoladamente, permitem retry e renderizam HTML como texto
   expect(await screen.findByText('<script>alert(1)</script>')).toBeVisible();
   expect(document.querySelector('script')).toBeNull();
 });
+
+test('resposta confirmada com reconsulta falha oferece retry GET, sem novo POST nem rascunho duplicado', async () => {
+  let saved = false, failed = false, writes = 0;
+  await openForum('/jogos/12/forum/41', async (url, init) => {
+    if (url.includes('/replies') && init.method === 'POST') { saved = true; writes++; return Response.json(reply, { status: 201 }); }
+    if (url.endsWith('/forum/topics/41') && saved) {
+      if (!failed) { failed = true; return Response.json({ code: 'storage_unavailable', message: 'Falha' }, { status: 503 }); }
+      return Response.json({ ...topic, replyCount: 1 });
+    }
+    if (url.includes('/replies')) return Response.json(forumPage(saved ? [reply] : []));
+    return undefined;
+  }, true);
+  await userEvent.type(await screen.findByLabelText('Sua resposta'), reply.text);
+  await userEvent.click(screen.getByRole('button', { name: 'Publicar resposta' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Resposta publicada, mas não foi possível atualizar');
+  expect(screen.getByLabelText('Sua resposta')).toHaveValue('');
+  await userEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+  expect(await within(screen.getByRole('region', { name: 'Respostas do tópico' })).findByText(reply.text)).toBeVisible();
+  expect(writes).toBe(1);
+});
+
+test('concorrência pode empurrar última página; localiza a resposta publicada na página anterior', async () => {
+  let saved = false;
+  await openForum('/jogos/12/forum/41', async (url, init) => {
+    if (url.includes('/replies') && init.method === 'POST') { saved = true; return Response.json(reply, { status: 201 }); }
+    if (url.endsWith('/forum/topics/41')) return Response.json({ ...topic, replyCount: saved ? 41 : 39 });
+    if (url.includes('/replies')) {
+      const page = Number(new URL(url).searchParams.get('page'));
+      return Response.json(forumPage(page === 3 ? [{ ...reply, id: 72, text: 'Outra publicação concorrente' }] : page === 2 ? [reply] : [], page));
+    }
+    return undefined;
+  }, true);
+  await userEvent.type(await screen.findByLabelText('Sua resposta'), reply.text);
+  await userEvent.dblClick(screen.getByRole('button', { name: 'Publicar resposta' }));
+  expect(await screen.findByText('Página 2')).toBeVisible();
+  expect(await within(screen.getByRole('region', { name: 'Respostas do tópico' })).findByText(reply.text)).toBeVisible();
+  expect(screen.queryByText('Outra publicação concorrente')).not.toBeInTheDocument();
+});
