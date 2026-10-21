@@ -4,7 +4,7 @@ import type { Game, GameId } from '../models';
 import { useLocalRouteId } from '../routing/useLocalRouteId';
 import { useServices } from '../services/ServiceProvider';
 import { EmptyState, ErrorState, LoadingState } from '../components/Feedback';
-import { GameOpinionsSection } from './GameOpinionsSection';
+import { GameDiscussion } from './GameDiscussion';
 import { GameCover } from '../components/GameCover';
 import { PublishReview } from './PublishReview';
 import { GameFavoriteStar } from '../components/GameFavoriteStar';
@@ -70,7 +70,7 @@ function GameDetailsContent({ id }: GameDetailsContentProps): ReactElement {
     </div>
     </div>
     <div className="game-discussion">
-    <GameOpinionsSection key={`${id}-${opinionsVersion}`} gameId={id} />
+    <GameDiscussion gameId={id} opinionsVersion={opinionsVersion} />
     </div>
   </section></>;
 }

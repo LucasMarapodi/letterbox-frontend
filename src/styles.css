@@ -402,3 +402,22 @@ button:hover:not(:disabled) { background: #90e8bb; }
   .favorite-games-section .favorite-game { display: grid; grid-template-columns: 4rem minmax(0, 1fr); }
   .favorite-games-section .favorite-game .game-cover { width: 4rem; height: auto; }
 }
+/* Fórum por jogo */
+.game-discussion-tabs { display: flex; gap: .5rem; margin: 1.5rem 0; border-bottom: 1px solid #34474b; padding-bottom: .75rem; }
+.game-discussion-tabs button[aria-selected="true"] { background: #64d9ab; color: #10201e; }
+.forum-card { background: #1b262d; border: 1px solid #34474b; border-radius: 16px; padding: 1.25rem; margin: 1rem 0; overflow-wrap: anywhere; }
+.forum-card h3 { margin-top: 0; }
+.forum-byline { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; color: #aac0ca; font-size: .85rem; }
+.forum-byline .avatar { width: 32px; height: 32px; flex: 0 0 32px; }
+.forum-byline time { margin-left: auto; }
+.forum-activity { color: #aac0ca; font-size: .85rem; }
+.forum-message { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
+.forum-form { display: grid; gap: .75rem; }
+.forum-form label { display: grid; gap: .4rem; }
+.forum-form input, .forum-form textarea { width: 100%; box-sizing: border-box; }
+.forum-form textarea { min-height: 150px; resize: vertical; }
+.forum-form-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+.forum-game-context { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; }
+.forum-game-context .game-cover { width: 64px; height: 90px; flex: 0 0 64px; border-radius: 8px; object-fit: cover; }
+.forum-topic-page { max-width: 960px; margin: 0 auto; }
+@media (max-width: 600px) { .forum-card { padding: 1rem; } .forum-byline time { margin-left: 0; width: 100%; } }
