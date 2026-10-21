@@ -58,6 +58,7 @@ test('criação modal: cancelar, limite, erro mantém rascunho, trava duplo envi
   await user.click(screen.getByRole('button', { name: 'Publicar tópico' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Persistência temporariamente indisponível');
   expect(screen.getByLabelText('Mensagem inicial')).toHaveValue(topic.text);
+  expect(screen.getByLabelText('Mensagem inicial')).toHaveFocus();
   await user.dblClick(screen.getByRole('button', { name: 'Publicar tópico' }));
   expect(writes).toBe(2);
   await act(async () => { pending.resolve(Response.json(topic, { status: 201 })); });
