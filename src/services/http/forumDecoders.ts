@@ -1,5 +1,5 @@
 import { isLocalId } from '../../models';
-import type { ForumAuthor, ForumPage, ForumTopic } from '../forumContracts';
+import type { ForumAuthor, ForumPage, ForumTopic, ForumTopicDetail, ForumReply } from '../forumContracts';
 import { HttpFailure } from './client';
 
 function invalid(): never { throw new HttpFailure('contract'); }
@@ -27,4 +27,14 @@ export function decodeForumPage<T extends { id: number }>(value: unknown, page: 
   const items = item.items.map(decode);
   if (new Set(items.map(item => item.id)).size !== items.length || (!items.length && item.hasNextPage)) return invalid();
   return { items, page, pageSize: 20, hasNextPage: item.hasNextPage };
+}
+export function decodeForumDetail(value: unknown, topicId?: number, gameId?: number): ForumTopicDetail {
+  const item = forumRecord(value), topic = decodeForumTopic(value, gameId), game = forumRecord(item.game);
+  if ((topicId !== undefined && topic.id !== topicId) || game.id !== topic.gameId) return invalid();
+  return { ...topic, text: forumText(item.text), game: { id: forumId(game.id), title: forumText(game.title), coverUrl: game.coverUrl === null ? null : forumText(game.coverUrl) } };
+}
+export function decodeForumReply(value: unknown, topicId: number): ForumReply {
+  const item = forumRecord(value);
+  if (item.topicId !== topicId) return invalid();
+  return { id: forumId(item.id), topicId, text: forumText(item.text), author: forumAuthor(item.author), createdAt: forumDate(item.createdAt) };
 }

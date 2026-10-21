@@ -63,7 +63,7 @@ test('criação modal: cancelar, limite, erro mantém rascunho, trava duplo envi
   await act(async () => { pending.resolve(Response.json(topic, { status: 201 })); });
   await waitFor(() => expect(screen.getByLabelText('URL atual')).toHaveTextContent('/jogos/12/forum/41'));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  const request = transport.mock.calls.find(([, init]) => init.method === 'POST')!;
+  const request = transport.mock.calls.find(([url, init]) => url.includes('/forum/') && init.method === 'POST')!;
   expect(JSON.parse(String(request[1].body))).toEqual({ title: topic.title, text: topic.text });
   expect(request[1].headers).toHaveProperty('Authorization', 'Bearer test-only');
 });
@@ -85,10 +85,10 @@ test('resposta: erro preserva rascunho; sucesso reconsulta contagem e última p�
   await user.click(screen.getByRole('button', { name: 'Publicar resposta' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Revise os campos'); expect(input).toHaveValue(reply.text);
   await user.click(screen.getByRole('button', { name: 'Publicar resposta' }));
-  expect(await screen.findByText(reply.text)).toBeVisible();
-  expect(screen.getByText('Página 2')).toBeVisible(); expect(screen.getByLabelText('Sua resposta')).toHaveValue('');
+  expect(await screen.findByText('Página 2')).toBeVisible();
+  expect(await within(screen.getByRole('region', { name: 'Respostas do tópico' })).findByText(reply.text)).toBeVisible(); expect(screen.getByLabelText('Sua resposta')).toHaveValue('');
   expect(writes).toBe(2);
-  expect(transport.mock.calls.filter(([, init]) => init.method === 'POST').every(([, init]) => JSON.stringify(JSON.parse(String(init.body))) === JSON.stringify({ text: reply.text }))).toBe(true);
+  expect(transport.mock.calls.filter(([url, init]) => url.includes('/forum/') && init.method === 'POST').every(([, init]) => JSON.stringify(JSON.parse(String(init.body))) === JSON.stringify({ text: reply.text }))).toBe(true);
 });
 
 test('criação tardia após troca de sessão não navega e limpa rascunho privado', async () => {

@@ -1,5 +1,5 @@
-import type { ForumPage, ForumTopic } from '../forumContracts';
-import { decodeForumPage, decodeForumTopic } from './forumDecoders';
+import type { ForumPage, ForumTopic, ForumTopicDetail, ForumReply } from '../forumContracts';
+import { decodeForumPage, decodeForumTopic, decodeForumDetail, decodeForumReply } from './forumDecoders';
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import { isRankingPeriod, type CommentRankingQuery, type RankedCommentPage } from '../communityContracts';
 import { decodeRankedCommentPage } from './decoders';
@@ -81,7 +81,7 @@ export interface HttpAdapters {
     isFollowing(id: UserId, signal?: AbortSignal): Promise<boolean>;
     setFollowing(id: UserId, selected: boolean, signal?: AbortSignal): Promise<boolean>;
   };
-  forum: { topics(gameId: number, page: number, signal?: AbortSignal): Promise<ForumPage<ForumTopic>>; };
+  forum: { topics(gameId: number, page: number, signal?: AbortSignal): Promise<ForumPage<ForumTopic>>; topic(topicId: number, signal?: AbortSignal): Promise<ForumTopicDetail>; replies(topicId: number, page: number, signal?: AbortSignal): Promise<ForumPage<ForumReply>>; createTopic(gameId: number, input: { title: string; text: string }, signal?: AbortSignal): Promise<ForumTopicDetail>; reply(topicId: number, input: { text: string }, signal?: AbortSignal): Promise<ForumReply>; };
   community: {
     mostLikedComments(query: CommentRankingQuery, signal?: AbortSignal): Promise<RankedCommentPage>;
     mostLikedReviews(query: CommentRankingQuery, signal?: AbortSignal): Promise<LikedReviewPage>;
@@ -203,7 +203,12 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
         await call({ method: 'DELETE', path: ['users', localPathId(id), 'follow'], signal }, decodeVoid, true); return false;
       },
     },
-    forum: { topics: (gameId, page, signal) => call({ path: ['games', localPathId(gameId), 'forum', 'topics'], query: { page }, signal }, value => decodeForumPage(value, page, item => decodeForumTopic(item, gameId))) },
+    forum: {
+      topic: (id, signal) => call({ path: ['forum', 'topics', localPathId(id)], signal }, value => decodeForumDetail(value, id)),
+      replies: (id, page, signal) => call({ path: ['forum', 'topics', localPathId(id), 'replies'], query: { page }, signal }, value => decodeForumPage(value, page, item => decodeForumReply(item, id))),
+      createTopic: (id, input, signal) => call({ method: 'POST', path: ['games', localPathId(id), 'forum', 'topics'], body: { title: input.title, text: input.text }, signal }, value => decodeForumDetail(value, undefined, id), true),
+      reply: (id, input, signal) => call({ method: 'POST', path: ['forum', 'topics', localPathId(id), 'replies'], body: { text: input.text }, signal }, value => decodeForumReply(value, id), true),
+      topics: (gameId, page, signal) => call({ path: ['games', localPathId(gameId), 'forum', 'topics'], query: { page }, signal }, value => decodeForumPage(value, page, item => decodeForumTopic(item, gameId))) },
     community: {
       mostLikedReviews: (query, signal) => {
         if (!isRankingPeriod(query.period) || !isLocalId(query.page) || ![10, 20, 50].includes(query.pageSize) || (query.page - 1) * query.pageSize > 2_147_483_647) throw new HttpFailure('configuration');

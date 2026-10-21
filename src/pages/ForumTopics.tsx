@@ -1,3 +1,4 @@
+import { CreateForumTopic } from './CreateForumTopic';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useServices } from '../services/ServiceProvider';
@@ -22,7 +23,7 @@ export function ForumTopics({ gameId, page, onPage }: { gameId: number; page: nu
     return () => controller.abort();
   }, [gameId, page, http, attempt]);
   return <section className="forum-topics" aria-label="Tópicos do jogo" aria-busy={state.status === 'loading'}>
-    <h2>Fórum</h2>
+    <h2>Fórum</h2><CreateForumTopic gameId={gameId} />
     {state.status === 'loading' && <LoadingState message="Carregando tópicos…" />}
     {state.status === 'error' && <ErrorState message="Não foi possível carregar os tópicos." onRetry={() => setAttempt(value => value + 1)} />}
     {state.status === 'ready' && (state.data.items.length ? state.data.items.map(topic => <article className="forum-card" key={topic.id}>

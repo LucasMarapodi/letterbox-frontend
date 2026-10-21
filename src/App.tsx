@@ -1,3 +1,4 @@
+import { ForumTopicPage } from './pages/ForumTopicPage';
 import { useRef, type ReactElement } from 'react';
 import { HomePage } from './pages/HomePage';
 import { BrowserRouter, Link, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
@@ -58,6 +59,7 @@ function ApplicationRoutes(): ReactElement {
       <Route path="/" element={<HomePage authenticated={Boolean(user)} />} />
       <Route path="/comunidade" element={<CommunityPage />} />
       <Route path="/pesquisa" element={<SearchResultsPage />} />
+      <Route path="/jogos/:gameId/forum/:topicId" element={<ForumTopicPage />} />
       <Route path="/jogos/:gameId" element={<GameDetailsPage />} />
       <Route path="/reviews/:reviewId" element={<ReviewPage />} />
       <Route path="/perfil/:userId" element={<ProfilePage />} />
