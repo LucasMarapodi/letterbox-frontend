@@ -1,6 +1,8 @@
 import type { PublicProfile, Connections, FavoriteKind, RankingPeriod } from '../communityContracts';
 import { isRankingPeriod, type CommentRankingQuery, type RankedCommentPage } from '../communityContracts';
 import { decodeRankedCommentPage } from './decoders';
+import { decodeLikedReviewPage } from './decoders';
+import type { LikedReviewPage } from '../communityContracts';
 import type { GameQuery, CatalogFilters } from '../contracts';
 import { decodeCatalogFilters } from './decoders';
 import { decodeProfileCompletion, decodeProfileUpdate } from './decoders';
@@ -79,6 +81,7 @@ export interface HttpAdapters {
   };
   community: {
     mostLikedComments(query: CommentRankingQuery, signal?: AbortSignal): Promise<RankedCommentPage>;
+    mostLikedReviews(query: CommentRankingQuery, signal?: AbortSignal): Promise<LikedReviewPage>;
     recent(signal?: AbortSignal): Promise<ReviewResponse[]>;
     mostCommented(period: RankingPeriod, signal?: AbortSignal): Promise<RankedReviewResponse[]>;
     gamesInDiscussion(period: RankingPeriod, signal?: AbortSignal): Promise<RankedGameResponse[]>;
@@ -198,6 +201,10 @@ export function createHttpAdapters(config: HttpAdapterConfig, options: { transpo
       },
     },
     community: {
+      mostLikedReviews: (query, signal) => {
+        if (!isRankingPeriod(query.period) || !isLocalId(query.page) || ![10, 20, 50].includes(query.pageSize) || (query.page - 1) * query.pageSize > 2_147_483_647) throw new HttpFailure('configuration');
+        return call({ path: ['community', 'reviews', 'most-liked'], query: { ...query }, signal }, value => decodeLikedReviewPage(value, query));
+      },
       mostLikedComments: (query, signal) => {
         if (!isRankingPeriod(query.period) || !isLocalId(query.page) || ![10, 20, 50].includes(query.pageSize) || (query.page - 1) * query.pageSize > 2_147_483_647) throw new HttpFailure('configuration');
         return call({ path: ['community', 'comments', 'most-liked'], query: { ...query }, signal }, value => decodeRankedCommentPage(value, query));

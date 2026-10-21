@@ -33,7 +33,7 @@ async function open(options:Options={}) {
   if(options.authenticated)await adapters.auth.login({email:'ranking@example.test',password:'test-only'});
   render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes adapters={adapters}/></MemoryRouter>);
   const interaction=userEvent.setup();
-  await interaction.click(screen.getByRole('button',{name:'Mais curtidos'}));
+  await interaction.click(screen.getByRole('button',{name:'Comentários curtidos'}));
   const calls=()=>transport.mock.calls.filter(([url])=>url.includes('/comments/most-liked'));
   return {interaction,transport,calls};
 }
@@ -42,7 +42,8 @@ const region=()=>screen.getByRole('region',{name:'Comentários mais curtidos'});
 test('ranking público usa 7d/1/20, mantém seções e distingue total e período sem estado pessoal',async()=>{
   const {transport,calls}=await open();
   expect(await screen.findByText(first.text)).toBeVisible();
-  for(const label of ['Recentes','Mais comentadas','Jogos em discussão','Feed de reviews'])expect(screen.getByRole('button',{name:label})).toBeVisible();
+  for(const label of ['Recentes','Mais comentadas','Jogos em discussão','Mais curtidas'])expect(screen.getByRole('button',{name:label})).toBeVisible();
+  expect(screen.queryByRole('button',{name:'Feed de reviews'})).not.toBeInTheDocument();
   const [url,request]=calls()[0];expect(Object.fromEntries(new URL(url).searchParams)).toEqual({period:'7d',page:'1',pageSize:'20'});
   expect(request.headers).not.toHaveProperty('Authorization');expect(request.method).toBe('GET');
   expect(within(region()).getByText('4 curtidas no período')).toBeVisible();expect(within(region()).getByText('9 curtidas no total')).toBeVisible();

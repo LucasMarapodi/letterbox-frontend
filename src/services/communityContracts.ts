@@ -18,6 +18,8 @@ export interface RankedComment {
 export type CommentPageSize = 10 | 20 | 50;
 export interface CommentRankingQuery { period: RankingPeriod; page: number; pageSize: CommentPageSize; }
 export interface RankedCommentPage { items: RankedComment[]; page: number; pageSize: CommentPageSize; hasNextPage: boolean; }
+export interface LikedReview { review: ReviewDetails; periodLikeCount: number; lastLikeAt: string; }
+export interface LikedReviewPage { items: LikedReview[]; page: number; pageSize: CommentPageSize; hasNextPage: boolean; }
 export function isRankingPeriod(value: unknown): value is RankingPeriod { return value === '24h' || value === '7d' || value === '30d'; }
 
 export class CommunityError extends Error {

@@ -55,7 +55,7 @@ test.beforeEach(()=>{selected.clear();selected.add(81);queries.length=0;commands
 for(const [name,width] of [['desktop',1280],['mobile',390]] as const){
   test(`${name}: consulta pública, navegação ao comentário e unlike revalida ranking`,async({page})=>{
     await page.setViewportSize({width,height:900});
-    await page.goto('/comunidade');await page.getByRole('button',{name:'Mais curtidos',exact:true}).click();
+    await page.goto('/comunidade');await page.getByRole('button',{name:'Comentários curtidos',exact:true}).click();
     const section=page.getByRole('region',{name:'Comentários mais curtidos',exact:true});
     await expect(section.getByText(root.text)).toBeVisible();
     await expect(section.getByText('3 curtidas no período',{exact:true})).toBeVisible();
@@ -82,7 +82,7 @@ for(const [name,width] of [['desktop',1280],['mobile',390]] as const){
     await page.getByRole('button',{name:'Entrar',exact:true}).click();
     await expect(page.getByLabel('Usuário conectado')).toHaveText('Ana');
     await page.getByRole('link',{name:'Comunidade',exact:true}).click();
-    await page.getByRole('button',{name:'Mais curtidos',exact:true}).click();
+    await page.getByRole('button',{name:'Comentários curtidos',exact:true}).click();
     await section.getByRole('button',{name:'Retirar curtida do comentário de Ana'}).click();
     await expect(section.getByText(root.text)).toHaveCount(0);
     await expect(section.getByText(reply.text)).toBeVisible();
