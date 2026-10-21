@@ -43,8 +43,8 @@ test('rede mostra erro com retry e preserva navegação da comunidade',async()=>
 test('logout ignora feed tardio e visitante não consulta privado',async()=>{
  const pending=deferred<Response>();const {interaction,transport,feed}=await open({delayed:pending.promise});await feed();await screen.findByText('Carregando feed…');await interaction.click(screen.getByRole('button',{name:'Sair'}));await act(async()=>{pending.resolve(Response.json([wireReview]));});expect(screen.queryByRole('region',{name:'Feed de reviews'})).not.toBeInTheDocument();expect(transport.mock.calls.filter(([url])=>url.endsWith('/feed/following'))).toHaveLength(1);
 });
-test('visitante recebe convite na aba e disponibilidade desativada não monta feed',async()=>{
- const {transport,feed}=await open({guest:true});await feed();expect(screen.getByRole('link',{name:'Entrar para ver o feed'})).toHaveAttribute('href','/login');expect(screen.queryByLabelText('Período dos rankings')).not.toBeInTheDocument();expect(transport.mock.calls.some(([url])=>url.endsWith('/feed/following'))).toBe(false);
+test('visitante não recebe aba de feed nem consulta privada',async()=>{
+ const {transport}=await open({guest:true});expect(screen.queryByRole('button',{name:'Feed de reviews'})).not.toBeInTheDocument();expect(screen.queryByRole('link',{name:'Entrar para ver o feed'})).not.toBeInTheDocument();expect(screen.queryByLabelText('Período dos rankings')).not.toBeInTheDocument();expect(transport.mock.calls.some(([url])=>url.endsWith('/feed/following'))).toBe(false);
 });
 test('feed desativado não aparece nas abas nem é consultado',async()=>{
  const {interaction,transport}=await open({disabled:true});await interaction.click(screen.getByRole('link',{name:'Comunidade'}));expect(screen.queryByRole('button',{name:'Feed de reviews'})).not.toBeInTheDocument();expect(transport.mock.calls.some(([url])=>url.endsWith('/feed/following'))).toBe(false);

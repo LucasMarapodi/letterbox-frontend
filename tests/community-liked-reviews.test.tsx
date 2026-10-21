@@ -19,7 +19,7 @@ test('Mais curtidas consulta reviews publicamente, mostra conteúdo e pagina/res
   const services = createDefaultApplicationServices({ apiBaseUrl: 'http://localhost:5080' }, { transport: withFilterOptions(transport) });
   render(<MemoryRouter initialEntries={['/comunidade']}><AppRoutes adapters={services} /></MemoryRouter>);
   const user = userEvent.setup();
-  await user.click(screen.getByRole('button', { name: 'Mais curtidas', exact: true }));
+  await user.click(screen.getByRole('button', { name: 'Mais curtidas' }));
   expect(await screen.findByRole('heading', { name: 'Reviews mais curtidas' })).toBeVisible();
   expect(await screen.findByText('Review com duas curtidas')).toBeVisible();
   expect(screen.getByText('2 curtidas no período')).toBeVisible();
